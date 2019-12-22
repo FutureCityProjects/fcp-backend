@@ -1,0 +1,9 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+
+    # fix deprecation: The "twig.exception_controller" configuration key has
+    # been deprecated in Symfony 4.4, set it to "null" and use
+    # "framework.error_controller" configuration key instead.
+    exception_controller:

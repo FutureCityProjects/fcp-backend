@@ -1,0 +1,6 @@
+# route to generate the JWT
+# provided by the lexik/jwt-authentication-bundle
+# no controller required, handled by the SF security via matching 'check_path'
+authentication_token:
+  path: /authentication_token
+  methods: ['POST']

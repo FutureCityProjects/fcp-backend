@@ -1,0 +1,514 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Entity;
+
+
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Entity\Traits\AutoincrementId;
+use App\Entity\Traits\CreatedAtFunctions;
+use App\Entity\Traits\DeletedAtFunctions;
+use App\Validator\Constraints as AppAssert;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * User
+ *
+ * Only Admins and ProcessOwners can read users,
+ * only Admins can create/update/delete users.
+ *
+ * @ApiResource(
+ *     attributes={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_PROCESS_OWNER')"},
+ *     collectionOperations={
+ *         "get",
+ *         "post"={
+ *             "security"="is_granted('ROLE_ADMIN')",
+ *             "validation_groups"={"Default", "user:create"}
+ *         }
+ *     },
+ *     itemOperations={
+ *         "get",
+ *         "put"={
+ *             "security"="is_granted('ROLE_ADMIN')",
+ *             "validation_groups"={"Default", "user:update"}
+ *         },
+ *         "delete"={
+ *             "security"="is_granted('ROLE_ADMIN')"
+ *         }
+ *     },
+ *     input="App\Dto\UserInput",
+ *     normalizationContext={
+ *         "groups"={"default:read", "user:read"},
+ *         "swagger_definition_name"="Read"
+ *     },
+ *     denormalizationContext={
+ *         "allow_extra_attributes"=false,
+ *         "groups"={"default:write", "user:write"},
+ *         "swagger_definition_name"="Write"
+ *     }
+ * )
+ * @ApiFilter(SearchFilter::class, properties={"username": "exact"})
+ * @ApiFilter(BooleanFilter::class, properties={"isActive"})
+ * @ApiFilter(BooleanFilter::class, properties={"isValidated"})
+ * @ApiFilter(ExistsFilter::class, properties={"deletedAt"})
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ORM\Table(indexes={
+ *     @ORM\Index(name="deleted_idx", columns={"deleted_at"})
+ * }, uniqueConstraints={
+ *     @ORM\UniqueConstraint(name="email", columns={"email"})
+ * })
+ * @UniqueEntity(fields={"email"}, message="validate.user.emailExists")
+ * @UniqueEntity(fields={"username"}, message="validate.user.usernameExists")
+ */
+class User implements UserInterface
+{
+    public const ROLE_ADMIN         = 'ROLE_ADMIN';
+    public const ROLE_PROCESS_OWNER = 'ROLE_PROCESS_OWNER';
+    public const ROLE_USER          = 'ROLE_USER';
+
+    use AutoincrementId;
+
+    //region Username
+    /**
+     * @var DateTimeImmutable
+     *
+     * @Assert\NotBlank(allowNull=true)
+     * @Groups({"user:read"})
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    protected ?DateTimeImmutable $createdAt = null;
+    /**
+     * @var DateTimeImmutable
+     * @Groups({"user:admin-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    protected ?DateTimeImmutable $deletedAt = null;
+    /**
+     * User names must start with a letter may contain only letters, digits,
+     * dots, hyphens and underscores (first regex).
+     * They must contain at least two letters (second regex).
+     *
+     * @Assert\NotBlank
+     * @Assert\Regex(
+     *     pattern="/^[a-zA-Z]+[a-zA-Z0-9._-]*[a-zA-Z][a-zA-Z0-9._-]*$/",
+     *     message="Username is not valid."
+     * )
+     * @Groups({"user:read", "user:write", "project:read"})
+     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
+     */
+    private ?string $username = null;
+    //endregion
+
+    //region Password
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     * @Groups({"user:write"})
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $password;
+    /**
+     * @var string
+     *
+     * @Assert\Email
+     * @Assert\NotBlank
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
+     */
+    private $email;
+    /**
+     * @var array
+     *
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="small_json", length=255, nullable=true)
+     */
+    private $roles = [];
+    //endregion
+
+    //region Email
+    /**
+     * @var string
+     * @AppAssert\ValidPersonName
+     * @Groups({"user:read", "user:write", "project:read"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $firstName;
+    /**
+     * @var string
+     * @AppAssert\ValidPersonName
+     * @Groups({"user:read", "user:write", "project:read"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $lastName;
+    /**
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="boolean", options={"default":true})
+     */
+    private $isActive = true;
+    //endregion
+
+    //region Roles
+    /**
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="boolean", options={"default":false})
+     */
+    private $isValidated = false;
+    /**
+     * @Groups({"user:read"})
+     * @ORM\OneToMany(
+     *     targetEntity="UserObjectRole",
+     *     mappedBy="user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     */
+    private $objectRoles;
+    /**
+     * @var Collection|ProjectMembership[]
+     * @Groups({"user:read"})
+     * @ORM\OneToMany(
+     *     targetEntity="ProjectMembership",
+     *     mappedBy="user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     */
+    private $projectMemberships;
+    /**
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy")
+     */
+    private $createdProjects;
+    //endregion
+
+    //region FirstName
+    /**
+     * @ORM\OneToMany(targetEntity="Validation", mappedBy="user", orphanRemoval=true)
+     */
+    private $validations;
+
+    public function __construct()
+    {
+        $this->createdProjects = new ArrayCollection();
+        $this->objectRoles = new ArrayCollection();
+        $this->projectMemberships = new ArrayCollection();
+        $this->validations = new ArrayCollection();
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+    //endregion
+
+    //region LastName
+
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+    //endregion
+
+    //region IsActive
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * Returns true if the user has the given role, else false.
+     *
+     * @param string $role
+     * @return bool
+     */
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->getRoles());
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+
+        // guarantee every user at least has ROLE_USER
+        $roles[] = self::ROLE_USER;
+
+        return array_unique($roles);
+    }
+    //endregion
+
+    //region IsValidated
+
+    public function setRoles(array $roles = []): self
+    {
+        // make sure every role is stored only once, remove ROLE_USER
+        $this->roles = array_diff(array_unique($roles), [self::ROLE_USER]);
+
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): self
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+    //endregion
+
+    //region CreatedAt
+
+    public function setLastName(string $lastName): self
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    use CreatedAtFunctions;
+    //endregion
+
+    //region DeletedAt
+
+    public function getIsActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    use DeletedAtFunctions;
+    //endregion
+
+    //region ObjectRoles
+
+    public function isActive(): bool
+    {
+        return $this->getIsActive();
+    }
+
+    public function setIsActive(bool $isActive = true): self
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function isValidated(): bool
+    {
+        return $this->getIsValidated();
+    }
+
+    public function getIsValidated(): bool
+    {
+        return $this->isValidated;
+    }
+    //endregion
+
+    //region ProjectMemberships
+
+    public function setIsValidated(bool $isValidated = true): self
+    {
+        $this->isValidated = $isValidated;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UserObjectRole[]
+     */
+    public function getObjectRoles(): Collection
+    {
+        return $this->objectRoles;
+    }
+
+    public function addObjectRole(UserObjectRole $objectRole): self
+    {
+        if (!$this->objectRoles->contains($objectRole)) {
+            $this->objectRoles[] = $objectRole;
+            $objectRole->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeObjectRole(UserObjectRole $objectRole): self
+    {
+        if ($this->objectRoles->contains($objectRole)) {
+            $this->objectRoles->removeElement($objectRole);
+            // set the owning side to null (unless already changed)
+            if ($objectRole->getUser() === $this) {
+                $objectRole->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region CreatedProjects
+
+    /**
+     * @return Collection|ProjectMembership[]
+     */
+    public function getProjectMemberships(): Collection
+    {
+        return $this->projectMemberships;
+    }
+
+    public function addProjectMembership(ProjectMembership $member): self
+    {
+        if (!$this->projectMemberships->contains($member)) {
+            $this->projectMemberships[] = $member;
+            $member->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjectMembership(ProjectMembership $member): self
+    {
+        if ($this->projectMemberships->contains($member)) {
+            $this->projectMemberships->removeElement($member);
+            // set the owning side to null (unless already changed)
+            if ($member->getUser() === $this) {
+                $member->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Validation[]
+     */
+    public function getCreatedProjects(): Collection
+    {
+        return $this->createdProjects;
+    }
+    //endregion
+
+    //region Validations
+
+    public function addCreatedProject(Project $project): self
+    {
+        if (!$this->createdProjects->contains($project)) {
+            $this->createdProjects[] = $project;
+            $project->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCreatedProject(Project $project): self
+    {
+        if ($this->createdProjects->contains($project)) {
+            $this->createdProjects->removeElement($project);
+            // set the owning side to null (unless already changed)
+            if ($project->getCreatedBy() === $this) {
+                $project->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Validation[]
+     */
+    public function getValidations(): Collection
+    {
+        return $this->validations;
+    }
+
+    public function addValidation(Validation $validation): self
+    {
+        if (!$this->validations->contains($validation)) {
+            $this->validations[] = $validation;
+            $validation->setUser($this);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    public function removeValidation(Validation $validation): self
+    {
+        if ($this->validations->contains($validation)) {
+            $this->validations->removeElement($validation);
+            // set the owning side to null (unless already changed)
+            if ($validation->getUser() === $this) {
+                $validation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function getSalt()
+    {
+        // relict in UserInterface from times when the salt was stored
+        // separately from the password...
+        return null;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+}

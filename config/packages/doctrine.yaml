@@ -1,0 +1,43 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+
+        # configure these for your database server
+        driver: 'pdo_mysql'
+        server_version: 'mariadb-10.4.8'
+        charset: utf8mb4
+        default_table_options:
+            charset: utf8mb4
+            collate: utf8mb4_unicode_ci
+
+        types:
+            # force all dates/times to be stored in UTC
+            utcdatetime:
+                name: datetime_immutable
+                class: App\Doctrine\DBAL\Types\UTCDateTimeType
+
+            # MariaDB does not support the JSON type, so we do not benefit from
+            # validation/searching/path syntax etc. Also it uses a LONGTEXT
+            # instead, which has a performance hit because it is stored outside
+            # the row and causes possible temp tables to be written to disk
+            smalljson:
+                name: small_json
+                class: App\Doctrine\DBAL\Types\SmallJsonType
+
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+            gedmo_loggable:
+                type: annotation
+                prefix: Gedmo\Loggable\Entity
+                dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/lib/Gedmo/Loggable/Entity"
+                alias: GedmoLoggable # (optional) it will default to the name set for the mapping
+                is_bundle: false

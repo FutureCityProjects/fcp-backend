@@ -1,0 +1,105 @@
+# Anstehend
+* db less user provider https://github.com/lexik/LexikJWTAuthenticationBundle/blob/master/Resources/doc/8-jwt-user-provider.md
+* Entities
+    * https://www.slideshare.net/nkopliku/high-quality-ap-is-with-api-platform-120132764
+    * https://symfonycasts.com/screencast/api-platform/filters
+    * https://medium.com/@bpolaszek/expose-a-rest-api-to-different-kinds-of-users-with-api-platform-part-3-4-a259f338546f
+    * Unittests
+        * uploadable
+            * richtiger filename
+            * richtiger dirname
+            * entfernt beim Löschen
+    * User Pre/Post Delete events
+    * Process PostDelete: Delete ObjectROles
+    * Project PostDelete: Delete ObjectROles
+    * Filter implementieren
+* User-System
+    * https://symfonycasts.com/screencast/api-platform-security/service-decoration
+    * https://symfony.com/blog/new-in-symfony-4-4-password-migrations
+* Messenger aktivieren
+    * https://symfony.com/blog/new-in-symfony-4-4-messenger-middleware-to-clear-doctrine-entity-manager
+* Namespace ändern
+    * http://eresdev.com/how-to-change-namespace-of-symfony-4-project/
+    * namespace for make konfigurieren
+* ElasticSearch
+    * required features:
+        * read/write (FOSElastica can r/w, Api Platform can only r)
+        * support multiple indexes (one type each, forced for ES 7+)
+        * search over multiple indexes (not included in FOSElastica)
+        * support index aliases
+        * support dev/test config to separate indexes
+        * support index recreation for unit tests etc
+        * map Doctrine entities/documents to ES, asynchronously via messenger
+        * rebuild index via command
+        * map ES results back to Doctrine?
+* PHP 7.4 preload
+* SF 5.0
+# Postponed
+* document which endpoints are public and which require authentication,
+  currently swagger ui shows a lock on all actions
+* use the database-less user provider from lexik/jwt-authentication-bundle
+* enable Varnish http caching for better performance
+* enable Mercure for pushed updates to watched documents/entities
+* update ElasticSearch to 7.x+ including FosElasticaBundle,
+  current FosElastica (5.1.1, 2019-10-04) only supports ES 5 & 6
+* replace FosElastica Doctrine LifetimeEvents Listener with custom
+  implementation which pushes the updates to the message queue,
+  mimicking the behavior of enqueue/elastica-bundle (which we don't
+  use as we use symfonys own message bus, @see https://github.com/FriendsOfSymfony/FOSElasticaBundle/blob/master/doc/cookbook/doctrine-queue-listener.md)
+* enable versioning by adding an URL prefix like /api/v1
+* rename /authentication_token path?
+* Email signing: https://symfony.com/blog/new-in-symfony-4-4-signing-and-encrypting-email-messages
+# Designentscheidungen
+* Wir verwenden Symfony als Basis weil es seit einiger Zeit das populärste und
+  am aktivsten weiterentwicklte Framework mit einer extrem großen Menge an
+  Addons ist. ZendFramework ist seit einigen Jahren praktisch eingeschlafen.
+* Wir verwenden API Platform weil wir hier (bspw. gegenüber FOSRestBundle) fast
+  alle Features aus einer Hand bekommen (JSON-REST, Integration mit Doctrine,
+  automatische API-Doku, JWT-Auth via Addon, ...)
+* Vorerst verwenden wir nur MySQL/MariaDB um uns den Overhead zu sparen eine
+  zweite Datenbank zu managen und zu testen (hautelook/alicebundle kann nicht
+  ORM + ODM fixtures gleichzeitig managen, ODM fixtures werden von den
+  Unittest-Traits nicht unterstützt, DAMATestFixtureBundle funktioniert nur via
+  Transactions im ORM). Wir erwarten nicht extrem viele Daten (Millionen von
+  Zeilen), auch keine hohe Anzahl von Schreibzugriffen und nutzen lieber die
+  hohe Select-Performance der SQL-DBs.
+  Um nicht übermässig viele Joins verwenden zu müssen werden dynamische Felder
+  wie bspw. Angaben zum Förderantrag als JSON in einem Feld gespeichert, diese
+  müssen auch nicht für die Suche indiziert  werden. Die API gibt sowieso immer 
+  komplette Dokumente zurück, um die Verarbeitung der einzelnen Felder kümmert
+  sich der Client. Wir schauen einmal wie weit
+  wir damit kommen und können später noch MongoDB für solche Dokumente
+  hinzufügen.
+* Wir verwenden Next.js als Basis für den Client weil hier SSR und viele andere
+  Features out-of-the-box dabei sind und die Entwicklung weiterhin aktiv ist.
+  
+# Bugreports & PRs
+* Doctrine
+    * Doctrine\DBAL\Platforms\MariaDb1027Platform should not be final,
+      to allow extension, like the other classes 
+    * Doctrine\DBAL\Driver\AbstractMySQLDriver getMariaDbMysqlVersionNumber and
+      getOracleMysqlVersionNumber should not be private, to allow extension,
+      when private we cannot createDatabasePlatformForVersion without
+      re-implementing those two methods too
+    * Doctrine\Common\DataFixtures\Purger\ORMPurger does not quote table names
+      in purge() when using PURGE_MODE_DELETE, this causes errors with tables
+      using keywords as name
+    * Doctrine\Common\DataFixtures\Purger\ORMPurger does not seem to purge
+      tables in the correct order (leaf tables first), it still causes foreign
+      key errors:
+      https://github.com/doctrine/DoctrineFixturesBundle/issues/50
+      https://github.com/doctrine/data-fixtures/pull/127
+* Api Platform
+    * ApiPlatform\Core\Bridge\Doctrine\Common\DataPersister should not be final
+      to allow extension, e.g. for encoding user password as shown in https://symfonycasts.com/screencast/api-platform-security/encode-user-password
+    * For DTOs it should be possible to use PHP 7.4 typed properties without
+      @var annotation to determine the type of Relations for Denormalization
+      
+# Multi-process platform ToDo
+* DB
+    * project name only unique per process
+    * fund name only unique per process
+* Filters
+    * projects by process
+    * funds by process
+* Users assigned to a process? Username unique for process? 

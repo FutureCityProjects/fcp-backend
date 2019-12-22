@@ -1,0 +1,11 @@
+doctrine:
+    dbal:
+        # There is a bug in Doctrine\Common\DataFixtures\Purger\ORMPurger
+        # which causes tables that are target of a foreign key constraint to
+        # be deleted before the association table(s), which in turn causes
+        # "1701 Cannot truncate a table referenced in a foreign key constraint"
+        # So we use our custom driver to disable foreign key checks for TRUNCATE
+        # because only with TRUNCATE instead of DELETE FROM we ensure the same
+        # autoincrement IDs for fixtures in tests
+        driver:
+        driver_class: App\PHPUnit\Doctrine\TestDriver
