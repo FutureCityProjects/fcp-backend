@@ -5,7 +5,6 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Traits\NameSlug;
-use App\Entity\Traits\RequiredUniqueName;
 use App\Entity\UploadedFileTypes\FundLogo;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -43,16 +42,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(indexes={
  *     @ORM\Index(name="state_idx", columns={"state"})
  * }, uniqueConstraints={
- *     @ORM\UniqueConstraint(name="name", columns={"name"})
+ *     @ORM\UniqueConstraint(name="name_process", columns={"name", "process_id"})
  * })
- * @UniqueEntity(fields={"name"}, message="validate.fund.nameExists")
+ * @UniqueEntity(fields={"name", "process"}, message="Name already exists.")
  */
 class Fund
 {
     const STATE_INACTIVE = 'inactive';
     const STATE_ACTIVE   = 'active';
 
-    use RequiredUniqueName;
     use NameSlug;
 
     //region Applications
@@ -63,209 +61,6 @@ class Fund
      * @ORM\OneToMany(targetEntity="FundApplication", mappedBy="fund", orphanRemoval=true)
      */
     private $applications;
-    /**
-     * @var \DateTimeImmutable|null
-     *
-     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private $briefingDate;
-    /**
-     * @var float|null
-     *
-     * @Groups({"fund:read", "fund:write"})
-     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
-     */
-    private $budget;
-    /**
-     * @var Collection|FundConcretization[]
-     *
-     * @Groups({"fund:read"})
-     * @ORM\OneToMany(targetEntity="FundConcretization", mappedBy="fund", orphanRemoval=true)
-     */
-    private $concretizations;
-    //endregion
-
-    //region BriefingDate
-    /**
-     * @var array|null
-     *
-     * @Assert\All({
-     *     @Assert\NotBlank,
-     *     @Assert\Length(min=5, max=280, allowEmptyString=false,
-     *         minMessage="This value is too short.",
-     *         maxMessage="This value is too long."
-     *     )
-     * })
-     * @Groups({"elastica", "fund:read", "fund:write"})
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $criteria;
-    /**
-     * @var string
-     *
-     * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\Length(min=20, max=65535, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
-     * )
-     * @ORM\Column(type="text", length=65535, nullable=false)
-     */
-    private $description;
-    /**
-     * @var \DateTimeImmutable|null
-     *
-     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private $finalJuryDate;
-    //endregion
-
-    //region Budget
-    /**
-     * @var int
-     *
-     * @Groups({"fund:read"})
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-    /**
-     * @var string|null
-     *
-     * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(allowNull=true)
-     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
-     * )
-     * @ORM\Column(type="text", length=65535, nullable=true)
-     */
-    private $imprint;
-    /**
-     * @var Collection|JuryCriterion[]
-     *
-     * @Groups({"fund:po-read", "fund:juror-read"})
-     * @ORM\OneToMany(targetEntity="JuryCriterion", mappedBy="fund", orphanRemoval=true)
-     */
-    private $juryCriteria;
-    //endregion
-
-    //region Concretizations
-    /**
-     * @var int
-     *
-     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
-     * @ORM\Column(type="smallint", nullable=false, options={"default":2, "unsigned":true})
-     */
-    private $jurorsPerApplication = 2;
-    /**
-     * @var FundLogo
-     *
-     * @Groups({"fund:read", "fund:write"})
-     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\FundLogo")
-     * @ORM\JoinColumn(nullable=true)
-     */
-    private $logo;
-    /**
-     * @var float|null
-     *
-     * @Groups({"fund:read", "fund:write"})
-     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
-     */
-    private $maximumGrant;
-    /**
-     * @var float|null
-     *
-     * @Groups({"fund:read", "fund:write"})
-     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
-     */
-    private $minimumGrant;
-    //endregion
-
-    //region Criteria
-    /**
-     * @var Process
-     *
-     * @Groups({"fund:read", "fund:create"})
-     * @ORM\ManyToOne(targetEntity="Process", inversedBy="funds")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $process;
-    /**
-     * @var \DateTimeImmutable|null
-     *
-     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private $ratingBegin;
-    /**
-     * @var \DateTimeImmutable|null
-     *
-     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private $ratingEnd;
-    //endregion
-
-    //region Description
-    /**
-     * @var string
-     *
-     * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\Length(min=5, max=255, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
-     * )
-     * @ORM\Column(type="string", length=255, nullable=false)
-     */
-    private $region;
-    /**
-     * @var string
-     *
-     * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\Length(min=10, max=255, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
-     * )
-     * @ORM\Column(type="string", length=255, nullable=false)
-     */
-    private $sponsor;
-    /**
-     * @var string
-     *
-     * @Groups({"fund:read", "fund:update"})
-     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"inactive"})
-     */
-    private $state = self::STATE_INACTIVE;
-    //endregion
-
-    //region FinalJuryDate
-    /**
-     * @var \DateTimeImmutable|null
-     *
-     * @Groups({"fund:read", "fund:write"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private $submissionBegin;
-    /**
-     * @var \DateTimeImmutable|null
-     *
-     * @Groups({"fund:read", "fund:write"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    private $submissionEnd;
-
-    public function __construct()
-    {
-        $this->applications = new ArrayCollection();
-        $this->concretizations = new ArrayCollection();
-        $this->juryCriteria = new ArrayCollection();
-    }
-    //endregion
-
-    //region Id
 
     /**
      * @return Collection|FundApplication[]
@@ -284,9 +79,6 @@ class Fund
 
         return $this;
     }
-    //endregion
-
-    //region Imprint
 
     public function removeApplication(FundApplication $application): self
     {
@@ -300,6 +92,16 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region BriefingDate
+    /**
+     * @var \DateTimeImmutable|null
+     *
+     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $briefingDate;
 
     public function getBriefingDate(): ?\DateTimeImmutable
     {
@@ -314,7 +116,14 @@ class Fund
     }
     //endregion
 
-    //region JuryCriteria
+    //region Budget
+    /**
+     * @var float|null
+     *
+     * @Groups({"fund:read", "fund:write"})
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
+     */
+    private $budget;
 
     public function getBudget(): ?float
     {
@@ -327,6 +136,16 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region Concretizations
+    /**
+     * @var Collection|FundConcretization[]
+     *
+     * @Groups({"fund:read"})
+     * @ORM\OneToMany(targetEntity="FundConcretization", mappedBy="fund", orphanRemoval=true)
+     */
+    private $concretizations;
 
     /**
      * @return Collection|FundConcretization[]
@@ -345,9 +164,6 @@ class Fund
 
         return $this;
     }
-    //endregion
-
-    //region JurorsPerApplication
 
     public function removeConcretization(FundConcretization $concretization): self
     {
@@ -361,6 +177,23 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region Criteria
+    /**
+     * @var array|null
+     *
+     * @Assert\All({
+     *     @Assert\NotBlank,
+     *     @Assert\Length(min=5, max=280, allowEmptyString=false,
+     *         minMessage="This value is too short.",
+     *         maxMessage="This value is too long."
+     *     )
+     * })
+     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $criteria;
 
     public function getCriteria(): ?array
     {
@@ -375,7 +208,18 @@ class Fund
     }
     //endregion
 
-    //region Logo
+    //region Description
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @Assert\Length(min=20, max=65535, allowEmptyString=false,
+     *     minMessage="This value is too short.",
+     *     maxMessage="This value is too long."
+     * )
+     * @ORM\Column(type="text", length=65535, nullable=false)
+     */
+    private $description;
 
     public function getDescription(): ?string
     {
@@ -388,14 +232,21 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region FinalJuryDate
+    /**
+     * @var \DateTimeImmutable|null
+     *
+     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $finalJuryDate;
 
     public function getFinalJuryDate(): ?\DateTimeImmutable
     {
         return $this->finalJuryDate;
     }
-    //endregion
-
-    //region MaximumGrant
 
     public function setFinalJuryDate(?\DateTimeImmutable $finalJuryDate): self
     {
@@ -403,19 +254,44 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region Id
+    /**
+     * @var int
+     *
+     * @Groups({"fund:read"})
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
+    //endregion
+
+    //region Imprint
+    /**
+     * @var string|null
+     *
+     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @Assert\NotBlank(allowNull=true)
+     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
+     *     minMessage="This value is too short.",
+     *     maxMessage="This value is too long."
+     * )
+     * @ORM\Column(type="text", length=65535, nullable=true)
+     */
+    private $imprint;
 
     public function getImprint(): ?string
     {
         return $this->imprint;
     }
-    //endregion
-
-    //region MinimumGrant
 
     public function setImprint(?string $imprint): self
     {
@@ -423,6 +299,38 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region JurorsPerApplication
+    /**
+     * @var int
+     *
+     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
+     * @ORM\Column(type="smallint", nullable=false, options={"default":2, "unsigned":true})
+     */
+    private $jurorsPerApplication = 2;
+
+    public function getJurorsPerApplication(): int
+    {
+        return $this->jurorsPerApplication;
+    }
+
+    public function setJurorsPerApplication(int $jurorsPerApplication): self
+    {
+        $this->jurorsPerApplication = $jurorsPerApplication;
+
+        return $this;
+    }
+    //endregion
+
+    //region JuryCriteria
+    /**
+     * @var Collection|JuryCriterion[]
+     *
+     * @Groups({"fund:po-read", "fund:juror-read"})
+     * @ORM\OneToMany(targetEntity="JuryCriterion", mappedBy="fund", orphanRemoval=true)
+     */
+    private $juryCriteria;
 
     /**
      * @return Collection|JuryCriterion[]
@@ -441,9 +349,6 @@ class Fund
 
         return $this;
     }
-    //endregion
-
-    //region Process
 
     public function removeJuryCriterion(JuryCriterion $criterion): self
     {
@@ -457,21 +362,17 @@ class Fund
 
         return $this;
     }
-
-    public function getJurorsPerApplication(): int
-    {
-        return $this->jurorsPerApplication;
-    }
-
-    public function setJurorsPerApplication(int $jurorsPerApplication): self
-    {
-        $this->jurorsPerApplication = $jurorsPerApplication;
-
-        return $this;
-    }
     //endregion
 
-    //region RatingBegin
+    //region Logo
+    /**
+     * @var FundLogo
+     *
+     * @Groups({"fund:read", "fund:write"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\FundLogo")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $logo;
 
     public function getLogo(): ?FundLogo
     {
@@ -484,14 +385,21 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region MaximumGrant
+    /**
+     * @var float|null
+     *
+     * @Groups({"fund:read", "fund:write"})
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
+     */
+    private $maximumGrant;
 
     public function getMaximumGrant(): ?float
     {
         return $this->maximumGrant;
     }
-    //endregion
-
-    //region RatingEnd
 
     public function setMaximumGrant(?float $maximumGrant): self
     {
@@ -499,6 +407,16 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region MinimumGrant
+    /**
+     * @var float|null
+     *
+     * @Groups({"fund:read", "fund:write"})
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
+     */
+    private $minimumGrant;
 
     public function getMinimumGrant(): ?float
     {
@@ -513,7 +431,36 @@ class Fund
     }
     //endregion
 
-    //region Region
+    //region Name
+    /**
+     * @var string
+     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private ?string $name = null;
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+    //endregion
+
+    //region Process
+    /**
+     * @var Process
+     *
+     * @Groups({"fund:read", "fund:create"})
+     * @ORM\ManyToOne(targetEntity="Process", inversedBy="funds")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $process;
 
     public function getProcess(): ?Process
     {
@@ -526,14 +473,21 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region RatingBegin
+    /**
+     * @var \DateTimeImmutable|null
+     *
+     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $ratingBegin;
 
     public function getRatingBegin(): ?\DateTimeImmutable
     {
         return $this->ratingBegin;
     }
-    //endregion
-
-    //region Sponsor
 
     public function setRatingBegin(?\DateTimeImmutable $ratingBegin): self
     {
@@ -541,6 +495,16 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region RatingEnd
+    /**
+     * @var \DateTimeImmutable|null
+     *
+     * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $ratingEnd;
 
     public function getRatingEnd(): ?\DateTimeImmutable
     {
@@ -555,7 +519,18 @@ class Fund
     }
     //endregion
 
-    //region State
+    //region Region
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @Assert\Length(min=5, max=255, allowEmptyString=false,
+     *     minMessage="This value is too short.",
+     *     maxMessage="This value is too long."
+     * )
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $region;
 
     public function getRegion(): ?string
     {
@@ -568,14 +543,25 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region Sponsor
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @Assert\Length(min=10, max=255, allowEmptyString=false,
+     *     minMessage="This value is too short.",
+     *     maxMessage="This value is too long."
+     * )
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $sponsor;
 
     public function getSponsor(): ?string
     {
         return $this->sponsor;
     }
-    //endregion
-
-    //region SubmissionBegin
 
     public function setSponsor(string $sponsor): self
     {
@@ -583,6 +569,17 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    // @todo assert choice
+    //region State
+    /**
+     * @var string
+     *
+     * @Groups({"fund:read", "fund:update"})
+     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"inactive"})
+     */
+    private $state = self::STATE_INACTIVE;
 
     public function getState(): ?string
     {
@@ -597,7 +594,14 @@ class Fund
     }
     //endregion
 
-    //region SubmissionEnd
+    //region SubmissionBegin
+    /**
+     * @var \DateTimeImmutable|null
+     *
+     * @Groups({"fund:read", "fund:write"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $submissionBegin;
 
     public function getSubmissionBegin(): ?\DateTimeImmutable
     {
@@ -610,17 +614,34 @@ class Fund
 
         return $this;
     }
+    //endregion
+
+    //region SubmissionEnd
+    /**
+     * @var \DateTimeImmutable|null
+     *
+     * @Groups({"fund:read", "fund:write"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private $submissionEnd;
 
     public function getSubmissionEnd(): ?\DateTimeImmutable
     {
         return $this->submissionEnd;
     }
-    //endregion
 
     public function setSubmissionEnd(?\DateTimeImmutable $submissionEnd): self
     {
         $this->submissionEnd = $submissionEnd;
 
         return $this;
+    }
+    //endregion
+
+    public function __construct()
+    {
+        $this->applications = new ArrayCollection();
+        $this->concretizations = new ArrayCollection();
+        $this->juryCriteria = new ArrayCollection();
     }
 }

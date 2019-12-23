@@ -18,14 +18,6 @@ class FundApiTest extends ApiTestCase
     use AuthenticatedClientTrait;
     use RefreshDatabaseTrait;
 
-    /**
-     ** empty crit
-     ** fail update process
-     ** fail aktivieren wenn felder unvollständig
-     ** fail wenn aktiv
-     * delete?
-     */
-
     public function testGetCollection(): void
     {
         $response = static::createClient()
@@ -639,7 +631,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: validate.fund.nameExists',
+            'hydra:description' => 'name: Name already exists.',
         ]);
     }
 
@@ -845,7 +837,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: validate.fund.nameExists',
+            'hydra:description' => 'name: Name already exists.',
         ]);
     }
 
@@ -874,6 +866,35 @@ class FundApiTest extends ApiTestCase
             'hydra:description' => 'name: This value should not be blank.',
         ]);
     }
+
+    public function testUpdateWithProcessFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'description' => 'description with 20 characters',
+            'name'        => 'New Name!',
+            'process'     => $processIri,
+            'region'      => 'Berlin-Hohenschönhausen',
+            'sponsor'     => 'Bundesministerium',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("process" are unknown).',
+        ]);
+    }
+
 
     public function testUpdateWithoutDescriptionFails(): void
     {
@@ -1038,4 +1059,12 @@ class FundApiTest extends ApiTestCase
             'hydra:description' => 'Access Denied.',
         ]);
     }
+
+    /**
+     * @todo
+     * * updating state to "active" fails when not alle required fields are set
+     * * updating relevant fields fails when state is active
+     * * delete should be possible for PO under some conditions
+     * * delete should not be possible (even for admin) under some conditions
+     */
 }

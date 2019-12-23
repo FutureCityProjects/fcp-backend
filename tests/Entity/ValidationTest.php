@@ -22,6 +22,20 @@ class ValidationTest extends KernelTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getValidationRepository(): EntityRepository
+    {
+        return $this->entityManager->getRepository(Validation::class);
+    }
+
     /**
      * Tests the defaults for new validations.
      */
@@ -64,11 +78,6 @@ class ValidationTest extends KernelTestCase
         $this->assertTrue($found->isExpired());
     }
 
-    protected function getValidationRepository(): EntityRepository
-    {
-        return $this->entityManager->getRepository(Validation::class);
-    }
-
     /**
      * Tests that pending validations are deleted when the user is deleted
      */
@@ -96,14 +105,5 @@ class ValidationTest extends KernelTestCase
 
         $none = $this->getValidationRepository()->findAll();
         $this->assertCount(0, $none);
-    }
-
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
     }
 }

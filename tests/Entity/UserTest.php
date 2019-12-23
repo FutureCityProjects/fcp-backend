@@ -55,6 +55,20 @@ class UserTest extends KernelTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getUserRepository(): UserRepository
+    {
+        return $this->entityManager->getRepository(User::class);
+    }
+
     /**
      * Tests the repository functions, checking for soft-deleted users.
      */
@@ -91,11 +105,6 @@ class UserTest extends KernelTestCase
             ->findNonDeletedBy(['isActive' => true]);
         $this->assertCount(5, $nonDeleted);
         $this->assertSame(1, $nonDeleted[0]->getId());
-    }
-
-    protected function getUserRepository(): UserRepository
-    {
-        return $this->entityManager->getRepository(User::class);
     }
 
     /**
@@ -320,14 +329,5 @@ class UserTest extends KernelTestCase
         $user->setLastName('Hans-Peter D´Artagòn');
         $valid = $validator->validate($user);
         $this->assertCount(0, $valid);
-    }
-
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
     }
 }

@@ -24,6 +24,45 @@ class ProjectMembershipApiTest extends ApiTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getOwner()
+    {
+        return $this->entityManager->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_OWNER['id']);
+    }
+
+    protected function getMember()
+    {
+        return $this->entityManager->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_MEMBER['id']);
+    }
+
+    protected function getProject()
+    {
+        return $this->entityManager->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+    }
+
+    protected function getLockedProject()
+    {
+        return $this->entityManager->getRepository(Project::class)
+            ->find(TestFixtures::LOCKED_PROJECT['id']);
+    }
+
+    protected function getDeletedProject()
+    {
+        return $this->entityManager->getRepository(Project::class)
+            ->find(TestFixtures::DELETED_PROJECT['id']);
+    }
+
     /**
      * Test that no collection of memberships is available, not even for admins.
      */
@@ -62,34 +101,22 @@ class ProjectMembershipApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(ProjectMembership::class);
 
         self::assertJsonContains([
-            '@id' => $iri,
+            '@id'        => $iri,
             'motivation' => 'member motivation',
-            'project' => [
-                '@id' => '/projects/2',
+            'role'       => ProjectMembership::ROLE_MEMBER,
+            'skills'     => 'member skills',
+            'tasks'      => 'member tasks',
+            'project'    => [
+                '@id'   => '/projects/2',
                 '@type' => 'Project',
-                'id' => 2,
+                'id'    => 2,
             ],
-            'role' => ProjectMembership::ROLE_MEMBER,
-            'skills' => 'member skills',
-            'tasks' => 'member tasks',
-            'user' => [
-                '@id' => '/users/6',
+            'user'       => [
+                '@id'   => '/users/6',
                 '@type' => 'User',
-                'id' => 6,
+                'id'    => 6,
             ],
         ]);
-    }
-
-    protected function getMember()
-    {
-        return $this->entityManager->getRepository(User::class)
-            ->find(TestFixtures::PROJECT_MEMBER['id']);
-    }
-
-    protected function getProject()
-    {
-        return $this->entityManager->getRepository(Project::class)
-            ->find(TestFixtures::PROJECT['id']);
     }
 
     /**
@@ -100,7 +127,7 @@ class ProjectMembershipApiTest extends ApiTestCase
         $client = static::createClient();
 
         $iri = $this->findIriBy(ProjectMembership::class, [
-            'user' => TestFixtures::PROJECT_MEMBER['id'],
+            'user'    => TestFixtures::PROJECT_MEMBER['id'],
             'project' => TestFixtures::PROJECT['id']
         ]);
         $client->request('GET', $iri);
@@ -110,7 +137,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             'application/json');
 
         self::assertJsonContains([
-            'code' => 401,
+            'code'    => 401,
             'message' => 'JWT Token not found',
         ]);
     }
@@ -125,7 +152,7 @@ class ProjectMembershipApiTest extends ApiTestCase
         ]);
 
         $iri = $this->findIriBy(ProjectMembership::class, [
-            'user' => TestFixtures::PROJECT_MEMBER['id'],
+            'user'    => TestFixtures::PROJECT_MEMBER['id'],
             'project' => TestFixtures::PROJECT['id']
         ]);
         $client->request('GET', $iri);
@@ -1201,32 +1228,5 @@ class ProjectMembershipApiTest extends ApiTestCase
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'Access Denied.',
         ]);
-    }
-
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
-    }
-
-    protected function getOwner()
-    {
-        return $this->entityManager->getRepository(User::class)
-            ->find(TestFixtures::PROJECT_OWNER['id']);
-    }
-
-    protected function getLockedProject()
-    {
-        return $this->entityManager->getRepository(Project::class)
-            ->find(TestFixtures::LOCKED_PROJECT['id']);
-    }
-
-    protected function getDeletedProject()
-    {
-        return $this->entityManager->getRepository(Project::class)
-            ->find(TestFixtures::DELETED_PROJECT['id']);
     }
 }

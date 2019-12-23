@@ -32,36 +32,11 @@ abstract class AbstractUploadedFile
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     protected $name;
-    /**
-     * @ORM\Column(nullable=false)
-     */
-    protected $originalName;
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=false)
-     */
-    protected $mimeType;
-    //endregion
-
-    //region OriginalName
-    /**
-     * @ORM\Column(type="integer", nullable=false, options={"unsigned": true})
-     */
-    protected $size;
-    /**
-     * @var array|null
-     * @ORM\Column(type="small_json", length=50, nullable=true)
-     */
-    protected $dimensions;
 
     public function getName(): ?string
     {
         return $this->name;
     }
-    //endregion
-
-    //region MimeType
 
     public function setName(string $name): self
     {
@@ -69,6 +44,13 @@ abstract class AbstractUploadedFile
 
         return $this;
     }
+    //endregion
+
+    //region OriginalName
+    /**
+     * @ORM\Column(nullable=false)
+     */
+    protected $originalName;
 
     public function getOriginalName(): ?string
     {
@@ -83,7 +65,13 @@ abstract class AbstractUploadedFile
     }
     //endregion
 
-    //region Size
+    //region MimeType
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    protected $mimeType;
 
     public function getMimeType(): ?string
     {
@@ -96,14 +84,18 @@ abstract class AbstractUploadedFile
 
         return $this;
     }
+    //endregion
+
+    //region Size
+    /**
+     * @ORM\Column(type="integer", nullable=false, options={"unsigned": true})
+     */
+    protected $size;
 
     public function getSize(): ?int
     {
         return $this->size;
     }
-    //endregion
-
-    //region Dimensions
 
     public function setSize(int $size): self
     {
@@ -111,6 +103,14 @@ abstract class AbstractUploadedFile
 
         return $this;
     }
+    //endregion
+
+    //region Dimensions
+    /**
+     * @var array|null
+     * @ORM\Column(type="small_json", length=50, nullable=true)
+     */
+    protected $dimensions;
 
     public function getDimensions(): ?array
     {

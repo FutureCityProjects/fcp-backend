@@ -40,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     }
  * )
  * @ORM\Entity
- * @UniqueEntity(fields={"name"}, message="validate.process.nameExists")
+ * @UniqueEntity(fields={"name"}, message="Name already exists.")
  */
 class Process
 {
@@ -64,19 +64,18 @@ class Process
      * @ORM\Column(type="json", nullable=true)
      */
     private $criteria;
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank
-     * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\Column(type="text", length=65535, nullable=false)
-     */
-    private $description;
-    /**
-     * @Groups({"process:read"})
-     * @ORM\OneToMany(targetEntity="Fund", mappedBy="process", orphanRemoval=true)
-     */
-    private $funds;
+
+    public function getCriteria(): ?array
+    {
+        return $this->criteria;
+    }
+
+    public function setCriteria(?array $criteria): self
+    {
+        $this->criteria = $criteria;
+
+        return $this;
+    }
     //endregion
 
     //region Description
@@ -87,67 +86,7 @@ class Process
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="text", length=65535, nullable=false)
      */
-    private $imprint;
-    /**
-     * @var ProcessLogo
-     *
-     * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\ProcessLogo")
-     * @ORM\JoinColumn(nullable=true)
-     */
-    private $logo;
-    /**
-     * @Groups({"process:read"})
-     * @ORM\OneToMany(targetEntity="Project", mappedBy="process", orphanRemoval=true)
-     */
-    private $projects;
-    //endregion
-
-    //region Funds
-    /**
-     * @var string
-     *
-     * @Assert\NotBlank
-     * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\Column(type="string", length=255, nullable=false)
-     */
-    private $region;
-    /**
-     * @var array
-     *
-     * @Assert\All({
-     *     @Assert\NotBlank,
-     *     @Assert\Length(min=5, max=1000, allowEmptyString=false,
-     *         minMessage="This value is too short.",
-     *         maxMessage="This value is too long."
-     *     )
-     * })
-     * @Assert\NotBlank
-     * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\Column(type="json", nullable=false)
-     */
-    private $targets;
-
-    public function __construct()
-    {
-        $this->funds = new ArrayCollection();
-        $this->projects = new ArrayCollection();
-    }
-
-    public function getCriteria(): ?array
-    {
-        return $this->criteria;
-    }
-    //endregion
-
-    //region Imprint
-
-    public function setCriteria(?array $criteria): self
-    {
-        $this->criteria = $criteria;
-
-        return $this;
-    }
+    private $description;
 
     public function getDescription(): ?string
     {
@@ -162,7 +101,12 @@ class Process
     }
     //endregion
 
-    //region Logo
+    //region Funds
+    /**
+     * @Groups({"process:read"})
+     * @ORM\OneToMany(targetEntity="Fund", mappedBy="process", orphanRemoval=true)
+     */
+    private $funds;
 
     /**
      * @return Collection|Fund[]
@@ -196,7 +140,15 @@ class Process
     }
     //endregion
 
-    //region Projects
+    //region Imprint
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     * @Groups({"elastica", "process:read", "process:write"})
+     * @ORM\Column(type="text", length=65535, nullable=false)
+     */
+    private $imprint;
 
     public function getImprint(): ?string
     {
@@ -209,6 +161,17 @@ class Process
 
         return $this;
     }
+    //endregion
+
+    //region Logo
+    /**
+     * @var ProcessLogo
+     *
+     * @Groups({"elastica", "process:read", "process:write"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\ProcessLogo")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $logo;
 
     public function getLogo(): ?ProcessLogo
     {
@@ -223,7 +186,12 @@ class Process
     }
     //endregion
 
-    //region Region
+    //region Projects
+    /**
+     * @Groups({"process:read"})
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="process", orphanRemoval=true)
+     */
+    private $projects;
 
     /**
      * @return Collection|Project[]
@@ -257,7 +225,15 @@ class Process
     }
     //endregion
 
-    //region Targets
+    //region Region
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     * @Groups({"elastica", "process:read", "process:write"})
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $region;
 
     public function getRegion(): ?string
     {
@@ -270,17 +246,41 @@ class Process
 
         return $this;
     }
+    //endregion
+
+    //region Targets
+    /**
+     * @var array
+     *
+     * @Assert\All({
+     *     @Assert\NotBlank,
+     *     @Assert\Length(min=5, max=1000, allowEmptyString=false,
+     *         minMessage="This value is too short.",
+     *         maxMessage="This value is too long."
+     *     )
+     * })
+     * @Assert\NotBlank
+     * @Groups({"elastica", "process:read", "process:write"})
+     * @ORM\Column(type="json", nullable=false)
+     */
+    private $targets;
 
     public function getTargets(): ?array
     {
         return $this->targets;
     }
-    //endregion
 
     public function setTargets(array $targets): self
     {
         $this->targets = $targets;
 
         return $this;
+    }
+    //endregion
+
+    public function __construct()
+    {
+        $this->funds = new ArrayCollection();
+        $this->projects = new ArrayCollection();
     }
 }

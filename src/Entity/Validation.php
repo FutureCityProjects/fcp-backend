@@ -28,49 +28,11 @@ class Validation
 
     //region Content
     /**
-     * @var DateTimeImmutable
-     *
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime_immutable")
-     */
-    protected ?DateTimeImmutable $createdAt = null;
-    /**
      * @var array|null
      *
      * @ORM\Column(type="small_json", length=512, nullable=true)
      */
     private $content;
-    /**
-     * @var DateTimeImmutable
-     *
-     * @ORM\Column(type="datetime_immutable", nullable=false)
-     */
-    private $expiresAt;
-    //endregion
-
-    //region CreatedAt
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=false)
-     */
-    private $token;
-
-    use CreatedAtFunctions;
-    //endregion
-
-    //region ExpiresAt
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=false)
-     */
-    private $type;
-    /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="validations")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user;
 
     public function getContent(): ?array
     {
@@ -85,7 +47,25 @@ class Validation
     }
     //endregion
 
-    //region Token
+    //region CreatedAt
+    /**
+     * @var DateTimeImmutable
+     *
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    protected ?DateTimeImmutable $createdAt = null;
+
+    use CreatedAtFunctions;
+    //endregion
+
+    //region ExpiresAt
+    /**
+     * @var DateTimeImmutable
+     *
+     * @ORM\Column(type="datetime_immutable", nullable=false)
+     */
+    private $expiresAt;
 
     public function isExpired(): bool
     {
@@ -103,20 +83,19 @@ class Validation
 
         return $this;
     }
+    //endregion
+
+    //region Token
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=false)
+     */
+    private $token;
 
     public function getToken(): ?string
     {
         return $this->token;
-    }
-    //endregion
-
-    //region Type
-
-    public function setToken(string $token): self
-    {
-        $this->token = $token;
-
-        return $this;
     }
 
     /**
@@ -129,13 +108,27 @@ class Validation
         $this->setToken(hash('sha256', random_bytes(32)));
     }
 
+    public function setToken(string $token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+    //endregion
+
+    // @todo assert choice
+    //region Type
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private $type;
+
     public function getType(): ?string
     {
         return $this->type;
     }
-    //endregion
-
-    //region User
 
     public function setType(string $type): self
     {
@@ -143,6 +136,14 @@ class Validation
 
         return $this;
     }
+    //endregion
+
+    //region User
+    /**
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="validations")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     public function getUser(): User
     {

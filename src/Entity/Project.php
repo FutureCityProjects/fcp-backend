@@ -11,8 +11,6 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\CreatedAtFunctions;
 use App\Entity\Traits\DeletedAtFunctions;
-use App\Entity\Traits\NameSlug;
-use App\Entity\Traits\RequiredName;
 use App\Entity\UploadedFileTypes\ProjectPicture;
 use App\Entity\UploadedFileTypes\ProjectVisualization;
 use App\Validator\Constraints as AppAssert;
@@ -99,25 +97,8 @@ class Project
     public const SELF_ASSESSMENT_100_PERCENT = 100;
 
     use AutoincrementId;
-    use RequiredName;
-    use NameSlug;
 
     //region Applications
-    /**
-     * @var DateTimeImmutable
-     *
-     * @Assert\NotBlank(allowNull=true)
-     * @Groups({"project:read"})
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime_immutable")
-     */
-    protected ?DateTimeImmutable $createdAt = null;
-    /**
-     * @var DateTimeImmutable
-     * @Groups({"project:admin-read"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    protected ?DateTimeImmutable $deletedAt = null;
     /**
      * @Groups({
      *     "project:owner-read",
@@ -128,198 +109,6 @@ class Project
      * @ORM\OneToMany(targetEntity="FundApplication", mappedBy="project", orphanRemoval=true)
      */
     private $applications;
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
-     */
-    private ?string $challenges = null;
-    //endregion
-
-    //region Challenges
-    /**
-     * @var User
-     * @Groups({
-     *     "project:create",
-     *     "project:admin-read",
-     *     "project:po-read",
-     *     "project:owner-read"
-     * })
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="createdProjects")
-     * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
-     */
-    private ?User $createdBy = null;
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
-     */
-    private ?string $delimitation = null;
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
-     */
-    private ?string $description = null;
-    //endregion
-
-    //region CreatedAt
-    /**
-     * @var Project
-     * @Groups({"project:read", "project:create"})
-     * @ORM\ManyToOne(targetEntity="Project", fetch="EXTRA_LAZY")
-     * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
-     */
-    private ?self $inspiration = null;
-
-    use CreatedAtFunctions;
-    //endregion
-
-    //region CreatedBy
-    /**
-     * @Groups({
-     *     "project:po-read",
-     *     "project:admin-read",
-     *     "project:po-write",
-     *     "project:admin-write"
-     * })
-     * @ORM\Column(type="boolean", options={"default":false})
-     */
-    private $isLocked = false;
-    /**
-     * @var Collection|ProjectMembership[]
-     * @Groups({
-     *     "project:owner-read",
-     *     "project:member-read",
-     *     "project:po-read",
-     *     "project:admin-read"
-     * })
-     * @ORM\OneToMany(
-     *     targetEntity="ProjectMembership",
-     *     mappedBy="project",
-     *     cascade={"persist", "remove"},
-     *     orphanRemoval=true
-     * )
-     */
-    private $memberships;
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private ?string $name = null;
-    //endregion
-
-    //region DeletedAt
-    /**
-     * @var ProjectPicture
-     * @Groups({"project:read", "project:write"})
-     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\ProjectPicture")
-     * @ORM\JoinColumn(nullable=true)
-     */
-    private $picture;
-
-    use DeletedAtFunctions;
-    //endregion
-
-    //region Delimitation
-    /**
-     * @var Process
-     * @Groups({"project:read", "project:create"})
-     * @ORM\ManyToOne(targetEntity="Process", inversedBy="projects", fetch="EXTRA_LAZY")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Process $process = null;
-    /**
-     * @var string
-     * @Assert\Choice(
-     *     choices={Project::PROGRESS_IDEA, Project::PROGRESS_CREATING_PROFILE},
-     *     groups={"project:create"}
-     * )
-     * @Groups({"project:read"})
-     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"idea"})
-     */
-    private ?string $progress = null;
-    /**
-     * @var int
-     * @Assert\Choice(
-     *     choices={
-     *         Project::SELF_ASSESSMENT_0_PERCENT,
-     *         Project::SELF_ASSESSMENT_25_PERCENT,
-     *         Project::SELF_ASSESSMENT_50_PERCENT,
-     *         Project::SELF_ASSESSMENT_75_PERCENT,
-     *         Project::SELF_ASSESSMENT_100_PERCENT
-     *     }
-     * )
-     * @Groups({"project:read", "project:write"})
-     * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
-     */
-    private int $profileSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
-    //endregion
-
-    //region Description
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="string", length=280, nullable=false)
-     */
-    private ?string $shortDescription = null;
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read"})
-     * @ORM\Column(type="string", length=255, nullable=true)
-     * @Gedmo\Slug(fields={"name"})
-     */
-    private ?string $slug = null;
-    /**
-     * @var string
-     * @Assert\Choice(
-     *     choices={
-     *         Project::STATE_ACTIVE,
-     *         Project::STATE_DEACTIVATED,
-     *         Project::STATE_INACTIVE,
-     *     }
-     * )
-     * @Groups({
-     *     "project:read",
-     *     "project:owner-write",
-     *     "project:po-write",
-     *     "project:admin-write"
-     * })
-     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"active"})
-     */
-    private string $state = self::STATE_ACTIVE;
-    //endregion
-
-    //region Inspiration
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
-     */
-    private ?string $target = null;
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
-     */
-    private ?string $vision = null;
-    /**
-     * @var ProjectVisualization
-     * @Groups({"project:read", "project:write"})
-     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\ProjectVisualization")
-     * @ORM\JoinColumn(nullable=true)
-     */
-    private $visualization;
-    //endregion
-
-    //region IsLocked
-
-    public function __construct()
-    {
-        $this->applications = new ArrayCollection();
-        $this->memberships = new ArrayCollection();
-    }
 
     /**
      * @return Collection|FundApplication[]
@@ -353,7 +142,13 @@ class Project
     }
     //endregion
 
-    //region Memberships
+    //region Challenges
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $challenges = null;
 
     public function getChallenges(): ?string
     {
@@ -366,6 +161,35 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region CreatedAt
+    /**
+     * @var DateTimeImmutable
+     *
+     * @Assert\NotBlank(allowNull=true)
+     * @Groups({"project:read"})
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    protected ?DateTimeImmutable $createdAt = null;
+
+    use CreatedAtFunctions;
+    //endregion
+
+    //region CreatedBy
+    /**
+     * @var User
+     * @Groups({
+     *     "project:create",
+     *     "project:admin-read",
+     *     "project:po-read",
+     *     "project:owner-read"
+     * })
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="createdProjects")
+     * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
+     */
+    private ?User $createdBy = null;
 
     public function getCreatedBy(): ?User
     {
@@ -380,7 +204,24 @@ class Project
     }
     //endregion
 
-    //region Name
+    //region DeletedAt
+    /**
+     * @var DateTimeImmutable
+     * @Groups({"project:admin-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    protected ?DateTimeImmutable $deletedAt = null;
+
+    use DeletedAtFunctions;
+    //endregion
+
+    //region Delimitation
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $delimitation = null;
 
     public function getDelimitation(): ?string
     {
@@ -393,14 +234,20 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Description
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $description = null;
 
     public function getDescription(): ?string
     {
         return $this->description;
     }
-    //endregion
-
-    //region Picture
 
     public function setDescription(?string $description): self
     {
@@ -408,6 +255,16 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Inspiration
+    /**
+     * @var Project
+     * @Groups({"project:read", "project:create"})
+     * @ORM\ManyToOne(targetEntity="Project", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
+     */
+    private ?self $inspiration = null;
 
     public function getInspiration(): ?self
     {
@@ -422,7 +279,17 @@ class Project
     }
     //endregion
 
-    //region Process
+    //region IsLocked
+    /**
+     * @Groups({
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:po-write",
+     *     "project:admin-write"
+     * })
+     * @ORM\Column(type="boolean", options={"default":false})
+     */
+    private $isLocked = false;
 
     public function isLocked(): bool
     {
@@ -442,7 +309,31 @@ class Project
     }
     //endregion
 
-    //region Progress
+    //region Memberships
+    /**
+     * @var Collection|ProjectMembership[]
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read"
+     * })
+     * @ORM\OneToMany(
+     *     targetEntity="ProjectMembership",
+     *     mappedBy="project",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     */
+    private $memberships;
+
+    /**
+     * @return Collection|ProjectMembership[]
+     */
+    public function getMemberships(): Collection
+    {
+        return $this->memberships;
+    }
 
     public function addMembership(ProjectMembership $membership): self
     {
@@ -466,14 +357,20 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Name
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private ?string $name = null;
 
     public function getName(): ?string
     {
         return $this->name;
     }
-    //endregion
-
-    //region ProfileSelfAssessment
 
     public function setName(?string $name): self
     {
@@ -481,6 +378,16 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Picture
+    /**
+     * @var ProjectPicture
+     * @Groups({"project:read", "project:write"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\ProjectPicture")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $picture;
 
     public function getPicture(): ?ProjectPicture
     {
@@ -495,7 +402,14 @@ class Project
     }
     //endregion
 
-    //region ShortDescription
+    //region Process
+    /**
+     * @var Process
+     * @Groups({"project:read", "project:create"})
+     * @ORM\ManyToOne(targetEntity="Process", inversedBy="projects", fetch="EXTRA_LAZY")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Process $process = null;
 
     public function getProcess(): ?Process
     {
@@ -508,14 +422,24 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Progress
+    /**
+     * @var string
+     * @Assert\Choice(
+     *     choices={Project::PROGRESS_IDEA, Project::PROGRESS_CREATING_PROFILE},
+     *     groups={"project:create"}
+     * )
+     * @Groups({"project:read"})
+     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"idea"})
+     */
+    private ?string $progress = null;
 
     public function getProgress(): ?string
     {
         return $this->progress;
     }
-    //endregion
-
-    //region Slug
 
     public function setProgress(string $progress): self
     {
@@ -523,6 +447,24 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region ProfileSelfAssessment
+    /**
+     * @var int
+     * @Assert\Choice(
+     *     choices={
+     *         Project::SELF_ASSESSMENT_0_PERCENT,
+     *         Project::SELF_ASSESSMENT_25_PERCENT,
+     *         Project::SELF_ASSESSMENT_50_PERCENT,
+     *         Project::SELF_ASSESSMENT_75_PERCENT,
+     *         Project::SELF_ASSESSMENT_100_PERCENT
+     *     }
+     * )
+     * @Groups({"project:read", "project:write"})
+     * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
+     */
+    private int $profileSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
 
     public function getProfileSelfAssessment(): int
     {
@@ -537,7 +479,13 @@ class Project
     }
     //endregion
 
-    //region State
+    //region ShortDescription
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="string", length=280, nullable=false)
+     */
+    private ?string $shortDescription = null;
 
     public function getShortDescription(): ?string
     {
@@ -550,14 +498,21 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Slug
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Gedmo\Slug(fields={"name"})
+     */
+    private ?string $slug = null;
 
     public function getSlug(): ?string
     {
         return $this->slug;
     }
-    //endregion
-
-    //region Target
 
     public function setSlug(?string $slug): self
     {
@@ -565,6 +520,27 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region State
+    /**
+     * @var string
+     * @Assert\Choice(
+     *     choices={
+     *         Project::STATE_ACTIVE,
+     *         Project::STATE_DEACTIVATED,
+     *         Project::STATE_INACTIVE,
+     *     }
+     * )
+     * @Groups({
+     *     "project:read",
+     *     "project:owner-write",
+     *     "project:po-write",
+     *     "project:admin-write"
+     * })
+     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"active"})
+     */
+    private string $state = self::STATE_ACTIVE;
 
     public function getState(): string
     {
@@ -579,7 +555,13 @@ class Project
     }
     //endregion
 
-    //region Vision
+    //region Target
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $target = null;
 
     public function getTarget(): ?string
     {
@@ -592,14 +574,20 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Vision
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $vision = null;
 
     public function getVision(): ?string
     {
         return $this->vision;
     }
-    //endregion
-
-    //region Visualization
 
     public function setVision(?string $vision): self
     {
@@ -607,6 +595,16 @@ class Project
 
         return $this;
     }
+    //endregion
+
+    //region Visualization
+    /**
+     * @var ProjectVisualization
+     * @Groups({"project:read", "project:write"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\UploadedFileTypes\ProjectVisualization")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $visualization;
 
     public function getVisualization(): ?ProjectVisualization
     {
@@ -621,10 +619,18 @@ class Project
     }
     //endregion
 
-    public function userIsOwner(UserInterface $user)
+    public function __construct()
+    {
+        $this->applications = new ArrayCollection();
+        $this->memberships = new ArrayCollection();
+    }
+
+    public function userIsMember(UserInterface $user)
     {
         foreach($this->getMemberships() as $membership) {
-            if ($membership->getRole() !== ProjectMembership::ROLE_OWNER) {
+            if ($membership->getRole() !== ProjectMembership::ROLE_OWNER
+                && $membership->getRole() !== ProjectMembership::ROLE_MEMBER
+            ) {
                 continue;
             }
 
@@ -636,20 +642,10 @@ class Project
         return false;
     }
 
-    /**
-     * @return Collection|ProjectMembership[]
-     */
-    public function getMemberships(): Collection
-    {
-        return $this->memberships;
-    }
-
-    public function userIsMember(UserInterface $user)
+    public function userIsOwner(UserInterface $user)
     {
         foreach($this->getMemberships() as $membership) {
-            if ($membership->getRole() !== ProjectMembership::ROLE_OWNER
-                && $membership->getRole() !== ProjectMembership::ROLE_MEMBER
-            ) {
+            if ($membership->getRole() !== ProjectMembership::ROLE_OWNER) {
                 continue;
             }
 

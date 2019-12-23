@@ -69,8 +69,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * }, uniqueConstraints={
  *     @ORM\UniqueConstraint(name="email", columns={"email"})
  * })
- * @UniqueEntity(fields={"email"}, message="validate.user.emailExists")
- * @UniqueEntity(fields={"username"}, message="validate.user.usernameExists")
+ * @UniqueEntity(fields={"email"}, message="Email already exists.")
+ * @UniqueEntity(fields={"username"}, message="Username already exists.")
  */
 class User implements UserInterface
 {
@@ -81,21 +81,6 @@ class User implements UserInterface
     use AutoincrementId;
 
     //region Username
-    /**
-     * @var DateTimeImmutable
-     *
-     * @Assert\NotBlank(allowNull=true)
-     * @Groups({"user:read"})
-     * @Gedmo\Timestampable(on="create")
-     * @ORM\Column(type="datetime_immutable")
-     */
-    protected ?DateTimeImmutable $createdAt = null;
-    /**
-     * @var DateTimeImmutable
-     * @Groups({"user:admin-read"})
-     * @ORM\Column(type="datetime_immutable", nullable=true)
-     */
-    protected ?DateTimeImmutable $deletedAt = null;
     /**
      * User names must start with a letter may contain only letters, digits,
      * dots, hyphens and underscores (first regex).
@@ -110,6 +95,18 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, nullable=false, unique=true)
      */
     private ?string $username = null;
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
+
+        return $this;
+    }
     //endregion
 
     //region Password
@@ -121,107 +118,6 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $password;
-    /**
-     * @var string
-     *
-     * @Assert\Email
-     * @Assert\NotBlank
-     * @Groups({"user:read", "user:write"})
-     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
-     */
-    private $email;
-    /**
-     * @var array
-     *
-     * @Groups({"user:read", "user:write"})
-     * @ORM\Column(type="small_json", length=255, nullable=true)
-     */
-    private $roles = [];
-    //endregion
-
-    //region Email
-    /**
-     * @var string
-     * @AppAssert\ValidPersonName
-     * @Groups({"user:read", "user:write", "project:read"})
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $firstName;
-    /**
-     * @var string
-     * @AppAssert\ValidPersonName
-     * @Groups({"user:read", "user:write", "project:read"})
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $lastName;
-    /**
-     * @Groups({"user:read", "user:write"})
-     * @ORM\Column(type="boolean", options={"default":true})
-     */
-    private $isActive = true;
-    //endregion
-
-    //region Roles
-    /**
-     * @Groups({"user:read", "user:write"})
-     * @ORM\Column(type="boolean", options={"default":false})
-     */
-    private $isValidated = false;
-    /**
-     * @Groups({"user:read"})
-     * @ORM\OneToMany(
-     *     targetEntity="UserObjectRole",
-     *     mappedBy="user",
-     *     cascade={"persist", "remove"},
-     *     orphanRemoval=true
-     * )
-     */
-    private $objectRoles;
-    /**
-     * @var Collection|ProjectMembership[]
-     * @Groups({"user:read"})
-     * @ORM\OneToMany(
-     *     targetEntity="ProjectMembership",
-     *     mappedBy="user",
-     *     cascade={"persist", "remove"},
-     *     orphanRemoval=true
-     * )
-     */
-    private $projectMemberships;
-    /**
-     * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy")
-     */
-    private $createdProjects;
-    //endregion
-
-    //region FirstName
-    /**
-     * @ORM\OneToMany(targetEntity="Validation", mappedBy="user", orphanRemoval=true)
-     */
-    private $validations;
-
-    public function __construct()
-    {
-        $this->createdProjects = new ArrayCollection();
-        $this->objectRoles = new ArrayCollection();
-        $this->projectMemberships = new ArrayCollection();
-        $this->validations = new ArrayCollection();
-    }
-
-    public function getUsername(): ?string
-    {
-        return $this->username;
-    }
-    //endregion
-
-    //region LastName
-
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-
-        return $this;
-    }
 
     /**
      * @see UserInterface
@@ -239,7 +135,16 @@ class User implements UserInterface
     }
     //endregion
 
-    //region IsActive
+    //region Email
+    /**
+     * @var string
+     *
+     * @Assert\Email
+     * @Assert\NotBlank
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
+     */
+    private $email;
 
     public function getEmail(): ?string
     {
@@ -252,6 +157,17 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    // @todo assert choice
+    //region Roles
+    /**
+     * @var array
+     *
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="small_json", length=255, nullable=true)
+     */
+    private $roles = [];
 
     /**
      * Returns true if the user has the given role, else false.
@@ -276,9 +192,6 @@ class User implements UserInterface
 
         return array_unique($roles);
     }
-    //endregion
-
-    //region IsValidated
 
     public function setRoles(array $roles = []): self
     {
@@ -287,6 +200,16 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    //region FirstName
+    /**
+     * @var string
+     * @AppAssert\ValidPersonName
+     * @Groups({"user:read", "user:write", "project:read"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $firstName;
 
     public function getFirstName(): ?string
     {
@@ -299,14 +222,21 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    //region LastName
+    /**
+     * @var string
+     * @AppAssert\ValidPersonName
+     * @Groups({"user:read", "user:write", "project:read"})
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $lastName;
 
     public function getLastName(): ?string
     {
         return $this->lastName;
     }
-    //endregion
-
-    //region CreatedAt
 
     public function setLastName(string $lastName): self
     {
@@ -314,21 +244,19 @@ class User implements UserInterface
 
         return $this;
     }
-
-    use CreatedAtFunctions;
     //endregion
 
-    //region DeletedAt
+    //region IsActive
+    /**
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="boolean", options={"default":true})
+     */
+    private $isActive = true;
 
     public function getIsActive(): bool
     {
         return $this->isActive;
     }
-
-    use DeletedAtFunctions;
-    //endregion
-
-    //region ObjectRoles
 
     public function isActive(): bool
     {
@@ -341,6 +269,14 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    //region IsValidated
+    /**
+     * @Groups({"user:read", "user:write"})
+     * @ORM\Column(type="boolean", options={"default":false})
+     */
+    private $isValidated = false;
 
     public function isValidated(): bool
     {
@@ -351,9 +287,6 @@ class User implements UserInterface
     {
         return $this->isValidated;
     }
-    //endregion
-
-    //region ProjectMemberships
 
     public function setIsValidated(bool $isValidated = true): self
     {
@@ -361,6 +294,44 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    //region CreatedAt
+    /**
+     * @var DateTimeImmutable
+     *
+     * @Assert\NotBlank(allowNull=true)
+     * @Groups({"user:read"})
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    protected ?DateTimeImmutable $createdAt = null;
+
+    use CreatedAtFunctions;
+    //endregion
+
+    //region DeletedAt
+    /**
+     * @var DateTimeImmutable
+     * @Groups({"user:admin-read"})
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    protected ?DateTimeImmutable $deletedAt = null;
+
+    use DeletedAtFunctions;
+    //endregion
+
+    //region ObjectRoles
+    /**
+     * @Groups({"user:read"})
+     * @ORM\OneToMany(
+     *     targetEntity="UserObjectRole",
+     *     mappedBy="user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     */
+    private $objectRoles;
 
     /**
      * @return Collection|UserObjectRole[]
@@ -394,7 +365,18 @@ class User implements UserInterface
     }
     //endregion
 
-    //region CreatedProjects
+    //region ProjectMemberships
+    /**
+     * @var Collection|ProjectMembership[]
+     * @Groups({"user:read"})
+     * @ORM\OneToMany(
+     *     targetEntity="ProjectMembership",
+     *     mappedBy="user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     */
+    private $projectMemberships;
 
     /**
      * @return Collection|ProjectMembership[]
@@ -426,6 +408,13 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    //region CreatedProjects
+    /**
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy")
+     */
+    private $createdProjects;
 
     /**
      * @return Collection|Validation[]
@@ -434,9 +423,6 @@ class User implements UserInterface
     {
         return $this->createdProjects;
     }
-    //endregion
-
-    //region Validations
 
     public function addCreatedProject(Project $project): self
     {
@@ -460,6 +446,13 @@ class User implements UserInterface
 
         return $this;
     }
+    //endregion
+
+    //region Validations
+    /**
+     * @ORM\OneToMany(targetEntity="Validation", mappedBy="user", orphanRemoval=true)
+     */
+    private $validations;
 
     /**
      * @return Collection|Validation[]
@@ -478,7 +471,6 @@ class User implements UserInterface
 
         return $this;
     }
-    //endregion
 
     public function removeValidation(Validation $validation): self
     {
@@ -491,6 +483,15 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+    //endregion
+
+    public function __construct()
+    {
+        $this->createdProjects = new ArrayCollection();
+        $this->objectRoles = new ArrayCollection();
+        $this->projectMemberships = new ArrayCollection();
+        $this->validations = new ArrayCollection();
     }
 
     /**

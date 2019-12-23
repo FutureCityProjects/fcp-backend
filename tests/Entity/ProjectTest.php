@@ -25,6 +25,20 @@ class ProjectTest extends KernelTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getProjectRepository(): EntityRepository
+    {
+        return $this->entityManager->getRepository(Project::class);
+    }
+
     /**
      * Tests the defaults for new processes.
      */
@@ -96,11 +110,6 @@ class ProjectTest extends KernelTestCase
         $this->assertSame(5, $found->getId());
     }
 
-    protected function getProjectRepository(): EntityRepository
-    {
-        return $this->entityManager->getRepository(Project::class);
-    }
-
     public function testSlugIsUpdatedAutomatically(): void
     {
         /* @var $project Project */
@@ -133,12 +142,5 @@ class ProjectTest extends KernelTestCase
         $this->assertInstanceOf(User::class, $project->getCreatedBy());
     }
 
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
-    }
+    // @todo name is unique per process
 }

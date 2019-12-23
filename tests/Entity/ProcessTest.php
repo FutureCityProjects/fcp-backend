@@ -23,6 +23,20 @@ class ProcessTest extends KernelTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getProcessRepository(): EntityRepository
+    {
+        return $this->entityManager->getRepository(Process::class);
+    }
+
     /**
      * Tests the defaults for new processes.
      */
@@ -61,11 +75,6 @@ class ProcessTest extends KernelTestCase
 
         // ID 1 is created by the fixtures
         $this->assertSame(2, $found->getId());
-    }
-
-    protected function getProcessRepository(): EntityRepository
-    {
-        return $this->entityManager->getRepository(Process::class);
     }
 
     /**
@@ -111,14 +120,5 @@ class ProcessTest extends KernelTestCase
 
         $this->assertCount(4, $process->getProjects());
         $this->assertInstanceOf(Project::class, $process->getProjects()[0]);
-    }
-
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
     }
 }

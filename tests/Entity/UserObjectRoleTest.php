@@ -24,6 +24,20 @@ class UserObjectRoleTest extends KernelTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getObjectRoleRepository(): EntityRepository
+    {
+        return $this->entityManager->getRepository(UserObjectRole::class);
+    }
+
     /**
      * Tests the defaults for new roles.
      */
@@ -54,11 +68,6 @@ class UserObjectRoleTest extends KernelTestCase
             'objectId'   => 1,
         ]);
         $this->assertCount(2, $byProcess);
-    }
-
-    protected function getObjectRoleRepository(): EntityRepository
-    {
-        return $this->entityManager->getRepository(UserObjectRole::class);
     }
 
     /**
@@ -108,14 +117,5 @@ class UserObjectRoleTest extends KernelTestCase
         ]);
 
         $this->assertCount(0, $after);
-    }
-
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
     }
 }

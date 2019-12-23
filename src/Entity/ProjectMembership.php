@@ -58,8 +58,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ProjectMembership
 {
     const ROLE_APPLICANT = 'applicant';
-    const ROLE_MEMBER = 'member';
-    const ROLE_OWNER  = 'owner';
+    const ROLE_MEMBER    = 'member';
+    const ROLE_OWNER     = 'owner';
 
     //region Motivation
     /**
@@ -76,74 +76,6 @@ class ProjectMembership
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
     private ?string $motivation = null;
-    /**
-     * @var Project
-     * @Groups({
-     *     "projectMembership:read",
-     *     "projectMembership:create",
-     *     "user:read"
-     * })
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Project", inversedBy="memberships")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?Project $project = null;
-    /**
-     * @var string
-     * @Groups({
-     *     "project:read",
-     *     "projectMembership:read",
-     *     "projectMembership:write",
-     *     "user:read"
-     * })
-     * @ORM\Column(type="string", length=50, nullable=false)
-     */
-    private ?string $role = null;
-    //endregion
-
-    //region Project
-    /**
-     * @var string
-     * @Groups({
-     *     "project:read",
-     *     "projectMembership:read",
-     *     "projectMembership:write",
-     *     "user:read"
-     * })
-     * @Assert\Length(min=20, max=1000, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long.")
-     * @ORM\Column(type="text", length=1000, nullable=false)
-     */
-    private ?string $skills = null;
-    /**
-     * @var string
-     * @Groups({
-     *     "project:read",
-     *     "projectMembership:read",
-     *     "projectMembership:write",
-     *     "user:read"
-     * })
-     * @ORM\Column(type="text", length=1000, nullable=true)
-     */
-    private ?string $tasks = null;
-    /**
-     * @var User
-     *
-     * @Groups({
-     *     "project:read",
-     *     "projectMembership:create",
-     *     "projectMembership:read"
-     * })
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="projectMemberships")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private ?User $user = null;
-    //endregion
-
-    //region Role
 
     public function getMotivation(): ?string
     {
@@ -156,14 +88,26 @@ class ProjectMembership
 
         return $this;
     }
+    //endregion
+
+    //region Project
+    /**
+     * @var Project
+     * @Groups({
+     *     "projectMembership:read",
+     *     "projectMembership:create",
+     *     "user:read"
+     * })
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="memberships")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?Project $project = null;
 
     public function getProject(): ?Project
     {
         return $this->project;
     }
-    //endregion
-
-    //region Skills
 
     public function setProject(Project $project): self
     {
@@ -171,6 +115,21 @@ class ProjectMembership
 
         return $this;
     }
+    //endregion
+
+    // @todo assert choice
+    //region Role
+    /**
+     * @var string
+     * @Groups({
+     *     "project:read",
+     *     "projectMembership:read",
+     *     "projectMembership:write",
+     *     "user:read"
+     * })
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private ?string $role = null;
 
     public function getRole(): ?string
     {
@@ -185,7 +144,21 @@ class ProjectMembership
     }
     //endregion
 
-    //region Tasks
+    //region Skills
+    /**
+     * @var string
+     * @Groups({
+     *     "project:read",
+     *     "projectMembership:read",
+     *     "projectMembership:write",
+     *     "user:read"
+     * })
+     * @Assert\Length(min=20, max=1000, allowEmptyString=false,
+     *     minMessage="This value is too short.",
+     *     maxMessage="This value is too long.")
+     * @ORM\Column(type="text", length=1000, nullable=false)
+     */
+    private ?string $skills = null;
 
     public function getSkills(): ?string
     {
@@ -198,14 +171,25 @@ class ProjectMembership
 
         return $this;
     }
+    //endregion
+
+    //region Tasks
+    /**
+     * @var string
+     * @Groups({
+     *     "project:read",
+     *     "projectMembership:read",
+     *     "projectMembership:write",
+     *     "user:read"
+     * })
+     * @ORM\Column(type="text", length=1000, nullable=true)
+     */
+    private ?string $tasks = null;
 
     public function getTasks(): ?string
     {
         return $this->tasks;
     }
-    //endregion
-
-    //region User
 
     public function setTasks(?string $tasks): self
     {
@@ -213,6 +197,23 @@ class ProjectMembership
 
         return $this;
     }
+    //endregion
+
+    //region User
+    /**
+     * @var User
+     *
+     * @Groups({
+     *     "project:read",
+     *     "projectMembership:create",
+     *     "projectMembership:read"
+     * })
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="projectMemberships")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private ?User $user = null;
 
     public function getUser(): ?User
     {

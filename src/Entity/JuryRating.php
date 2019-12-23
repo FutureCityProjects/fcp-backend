@@ -24,30 +24,6 @@ class JuryRating
      * @ORM\JoinColumn(nullable=false)
      */
     private $application;
-    /**
-     * @var User
-     *
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $juror;
-    /**
-     * @var array|null
-     *
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $ratings;
-    //endregion
-
-    //region Juror
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=false)
-     */
-    private $state = self::STATE_OPEN;
 
     public function getApplication(): FundApplication
     {
@@ -62,7 +38,16 @@ class JuryRating
     }
     //endregion
 
-    //region Ratings
+    //region Juror
+    /**
+     * @var User
+     *
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $juror;
 
     public function getJuror(): User
     {
@@ -75,14 +60,20 @@ class JuryRating
 
         return $this;
     }
+    //endregion
+
+    //region Ratings
+    /**
+     * @var array|null
+     *
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $ratings;
 
     public function getRatings(): ?array
     {
         return $this->ratings;
     }
-    //endregion
-
-    //region State
 
     public function setRatings(?array $ratings): self
     {
@@ -90,6 +81,15 @@ class JuryRating
 
         return $this;
     }
+    //endregion
+
+    //region State
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private $state = self::STATE_OPEN;
 
     public function getState(): ?string
     {

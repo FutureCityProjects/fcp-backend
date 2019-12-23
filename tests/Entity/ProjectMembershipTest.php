@@ -85,6 +85,8 @@ class ProjectMembershipTest extends KernelTestCase
 
         $membership = new ProjectMembership();
         $membership->setRole(ProjectMembership::ROLE_MEMBER);
+        $membership->setMotivation('member motivation');
+        $membership->setSkills('member skills');
         $project->addMembership($membership);
         $user->addProjectMembership($membership);
 

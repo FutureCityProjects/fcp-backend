@@ -25,6 +25,20 @@ class FundTest extends KernelTestCase
      */
     private $entityManager;
 
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
+
+    protected function getFundRepository(): EntityRepository
+    {
+        return $this->entityManager->getRepository(Fund::class);
+    }
+
     /**
      * Tests the defaults for new fund.
      */
@@ -79,11 +93,6 @@ class FundTest extends KernelTestCase
         $this->assertSame(2, $found->getId());
     }
 
-    protected function getFundRepository(): EntityRepository
-    {
-        return $this->entityManager->getRepository(Fund::class);
-    }
-
     /**
      * Tests that no duplicate names can be created
      */
@@ -136,14 +145,5 @@ class FundTest extends KernelTestCase
 
         $this->assertCount(1, $fund->getJuryCriteria());
         $this->assertInstanceOf(JuryCriterion::class, $fund->getJuryCriteria()[0]);
-    }
-
-    protected function setUp(): void
-    {
-        $kernel = self::bootKernel();
-
-        $this->entityManager = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
     }
 }

@@ -190,7 +190,7 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: validate.process.nameExists',
+            'hydra:description' => 'name: Name already exists.',
         ]);
     }
 
@@ -450,7 +450,7 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: validate.process.nameExists',
+            'hydra:description' => 'name: Name already exists.',
         ]);
     }
 
@@ -506,4 +506,7 @@ class ProcessApiTest extends ApiTestCase
             'hydra:description' => 'Access Denied.',
         ]);
     }
+
+    // @todo
+    // * update w/ empty name fails
 }

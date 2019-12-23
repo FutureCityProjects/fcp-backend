@@ -474,7 +474,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'username: validate.user.usernameExists',
+            'hydra:description' => 'username: Username already exists.',
         ]);
     }
 
@@ -496,7 +496,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'email: validate.user.emailExists',
+            'hydra:description' => 'email: Email already exists.',
         ]);
     }
 
@@ -723,7 +723,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'email: validate.user.emailExists',
+            'hydra:description' => 'email: Email already exists.',
         ]);
     }
 
@@ -838,5 +838,8 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
-    // @todo normal users cannot filter by deletedat
+    // @todo
+    // * create w/o username fails
+    // * update w/ empty username fails
+    // * todo normal users cannot filter by deletedat
 }

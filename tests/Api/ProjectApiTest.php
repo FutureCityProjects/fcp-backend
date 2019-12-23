@@ -1068,3 +1068,4 @@ class ProjectApiTest extends ApiTestCase
     //   creation
 }   // * reading a project as member should not show the memberships/applications etc
     //   of its inspiration
+    // * name is unique per process

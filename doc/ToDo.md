@@ -102,4 +102,8 @@
 * Filters
     * projects by process
     * funds by process
+* Security
+    * adapt Voters to check not for general ROLE_PROCESS_OWNER but check
+      for privilege for the concrete process/fund/...
+    * add new Voters for Process/Fund/FundConcretization 
 * Users assigned to a process? Username unique for process? 

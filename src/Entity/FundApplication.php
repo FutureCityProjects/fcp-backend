@@ -79,6 +79,47 @@ class FundApplication
      * @ORM\Column(type="json", nullable=true)
      */
     private ?array $concretizations = null;
+
+    public function getConcretizations(): ?array
+    {
+        return $this->concretizations;
+    }
+
+    public function setConcretizations(?array $concretizations): self
+    {
+        $this->concretizations = $concretizations;
+
+        return $this;
+    }
+    //endregion
+
+    //region ConcretizationSelfAssessment
+    /**
+     * @var int
+     *
+     * @Groups({
+     *     "project:read",
+     *     "fundApplication:read",
+     *     "fundApplication:write",
+     * })
+     * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
+     */
+    private int $concretizationSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
+
+    public function getConcretizationSelfAssessment(): int
+    {
+        return $this->concretizationSelfAssessment;
+    }
+
+    public function setConcretizationSelfAssessment(int $selfAssessment): self
+    {
+        $this->concretizationSelfAssessment = $selfAssessment;
+
+        return $this;
+    }
+    //endregion
+
+    //region Fund
     /**
      * @var Fund
      *
@@ -91,120 +132,6 @@ class FundApplication
      * @Gedmo\SortableGroup
      */
     private $fund;
-    /**
-     * @var int
-     *
-     * @Groups({
-     *     "project:read",
-     *     "fundApplication:read",
-     * })
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
-    //endregion
-    
-    //region Fund
-    /**
-     * @var string|null
-     *
-     * @Groups({
-     *     "project:po-read",
-     *     "fundApplication:po-read",
-     *     "fundApplication:po-write",
-     * })
-     * @ORM\Column(type="text", length=65535, nullable=true)
-     */
-    private $juryComment;
-    /**
-     * @var int|null
-     *
-     * @Groups({
-     *     "project:po-read",
-     *     "fundApplication:po-read",
-     *     "fundApplication:po-write",
-     * })
-     * @ORM\Column(type="smallint", nullable=true)
-     * @Gedmo\SortablePosition
-     */
-    private $juryOrder;
-    /**
-     * @var Project
-     *
-     * @Groups({
-     *     "fund:read",
-     *     "fundApplication:read",
-     *     "fundApplication:create",
-     * })
-     * @ORM\ManyToOne(targetEntity="Project", inversedBy="applications")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $project;
-    //endregion
-
-    //region Id
-    /**
-     * @var JuryRating[]|Collection
-     *
-     * @Groups({
-     *     "project:po-read",
-     *     "fundApplication:po-read",
-     *     "fundApplication:po-write",
-     *     "fundApplication:juror-read",
-     *     "fundApplication:juror-write",
-     * })
-     * @ORM\OneToMany(targetEntity="JuryRating", mappedBy="application", orphanRemoval=true)
-     */
-    private $ratings;
-    /**
-     * @var int
-     *
-     * @Groups({
-     *     "project:read",
-     *     "fundApplication:read",
-     *     "fundApplication:write",
-     * })
-     * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
-     */
-    private int $concretizationSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
-    //endregion
-
-    //region JuryComment
-    /**
-     * @var string
-     *
-     * @Groups({
-     *     "project:read",
-     *     "fundApplication:read",
-     *     "fundApplication:write",
-     * })
-     * @ORM\Column(type="string", length=50, nullable=false)
-     */
-    private $state = self::STATE_OPEN;
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->ratings = new ArrayCollection();
-    }
-
-    public function getConcretizations(): ?array
-    {
-        return $this->concretizations;
-    }
-    //endregion
-
-    //region JuryOrder
-
-    public function setConcretizations(?array $concretizations): self
-    {
-        $this->concretizations = $concretizations;
-
-        return $this;
-    }
 
     public function getFund(): ?Fund
     {
@@ -219,12 +146,38 @@ class FundApplication
     }
     //endregion
 
-    //region Project
+    //region Id
+    /**
+     * @var int
+     *
+     * @Groups({
+     *     "project:read",
+     *     "fundApplication:read",
+     * })
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
+    private $id;
 
     public function getId(): ?int
     {
         return $this->id;
     }
+    //endregion
+
+    //region JuryComment
+    /**
+     * @var string|null
+     *
+     * @Groups({
+     *     "project:po-read",
+     *     "fundApplication:po-read",
+     *     "fundApplication:po-write",
+     * })
+     * @ORM\Column(type="text", length=65535, nullable=true)
+     */
+    private $juryComment;
 
     public function getJuryComment(): ?string
     {
@@ -239,7 +192,19 @@ class FundApplication
     }
     //endregion
 
-    //region Ratings
+    //region JuryOrder
+    /**
+     * @var int|null
+     *
+     * @Groups({
+     *     "project:po-read",
+     *     "fundApplication:po-read",
+     *     "fundApplication:po-write",
+     * })
+     * @ORM\Column(type="smallint", nullable=true)
+     * @Gedmo\SortablePosition
+     */
+    private $juryOrder;
 
     public function getJuryOrder(): ?int
     {
@@ -252,6 +217,21 @@ class FundApplication
 
         return $this;
     }
+    //endregion
+
+    //region Project
+    /**
+     * @var Project
+     *
+     * @Groups({
+     *     "fund:read",
+     *     "fundApplication:read",
+     *     "fundApplication:create",
+     * })
+     * @ORM\ManyToOne(targetEntity="Project", inversedBy="applications")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $project;
 
     public function getProject(): ?Project
     {
@@ -266,7 +246,20 @@ class FundApplication
     }
     //endregion
 
-    //region ConcretizationSelfAssessment
+    //region Ratings
+    /**
+     * @var JuryRating[]|Collection
+     *
+     * @Groups({
+     *     "project:po-read",
+     *     "fundApplication:po-read",
+     *     "fundApplication:po-write",
+     *     "fundApplication:juror-read",
+     *     "fundApplication:juror-write",
+     * })
+     * @ORM\OneToMany(targetEntity="JuryRating", mappedBy="application", orphanRemoval=true)
+     */
+    private $ratings;
 
     /**
      * @return Collection|JuryRating[]
@@ -301,29 +294,36 @@ class FundApplication
     //endregion
 
     //region State
-
-    public function getConcretizationSelfAssessment(): int
-    {
-        return $this->concretizationSelfAssessment;
-    }
-
-    public function setConcretizationSelfAssessment(int $selfAssessment): self
-    {
-        $this->concretizationSelfAssessment = $selfAssessment;
-
-        return $this;
-    }
+    /**
+     * @var string
+     *
+     * @Groups({
+     *     "project:read",
+     *     "fundApplication:read",
+     *     "fundApplication:write",
+     * })
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private $state = self::STATE_OPEN;
 
     public function getState(): ?string
     {
         return $this->state;
     }
-    //endregion
 
     public function setState(string $state): self
     {
         $this->state = $state;
 
         return $this;
+    }
+    //endregion
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->ratings = new ArrayCollection();
     }
 }

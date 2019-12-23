@@ -27,32 +27,6 @@ class UserObjectRole
      * @ORM\GeneratedValue(strategy="NONE")
      */
     private $objectId;
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     */
-    private $objectType;
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=50, nullable=false)
-     */
-    private $role;
-    //endregion
-
-    //region ObjectType
-    /**
-     * @var User
-     *
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="NONE")
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="objectRoles")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user;
 
     public function getObjectId(): ?int
     {
@@ -67,7 +41,15 @@ class UserObjectRole
     }
     //endregion
 
-    //region Role
+    //region ObjectType
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="NONE")
+     */
+    private $objectType;
 
     public function getObjectType(): ?string
     {
@@ -80,14 +62,21 @@ class UserObjectRole
 
         return $this;
     }
+    //endregion
+
+    // @todo assert choice
+    //region Role
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private $role;
 
     public function getRole(): ?string
     {
         return $this->role;
     }
-    //endregion
-
-    //region User
 
     public function setRole(string $role): self
     {
@@ -95,6 +84,18 @@ class UserObjectRole
 
         return $this;
     }
+    //endregion
+
+    //region User
+    /**
+     * @var User
+     *
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="objectRoles")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     public function getUser(): User
     {
