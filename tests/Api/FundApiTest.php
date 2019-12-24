@@ -1042,8 +1042,35 @@ class FundApiTest extends ApiTestCase
     public function testDeleteFailsWithoutPrivilege(): void
     {
         $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+
+        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testDeleteFailsWhenFundIsActive(): void
+    {
+        $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        /* @var $fund Fund */
+        $fund = $em->getRepository(Fund::class)->find(1);
+        $fund->setState(Fund::STATE_ACTIVE);
+        $em->flush();
 
         $iri = $this->findIriBy(Fund::class, ['id' => 1]);
         $client->request('DELETE', $iri);
@@ -1062,9 +1089,9 @@ class FundApiTest extends ApiTestCase
 
     /**
      * @todo
-     * * updating state to "active" fails when not alle required fields are set
+     * * updating state to "active" fails when not all required fields are set
      * * updating relevant fields fails when state is active
-     * * delete should be possible for PO under some conditions
+     * * delete should be possible for PO under some conditions (active9
      * * delete should not be possible (even for admin) under some conditions
      */
 }

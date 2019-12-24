@@ -9,6 +9,7 @@ use App\Entity\UploadedFileTypes\ConcretizationImage;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * FundConcretization
@@ -34,7 +35,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "validation_groups"={"Default", "fundConcretization:write"}
  *         },
  *         "delete"={
- *             "security"="is_granted('ROLE_PROCESS_OWNER')"
+ *             "security"="is_granted('DELETE', object)"
  *         }
  *     },
  *     input="App\Dto\ProjectInput",
@@ -147,6 +148,11 @@ class FundConcretization
      *     "fundConcretization:read",
      *     "fundConcretization:write",
      * })
+     * @Assert\Range(
+     *      min = 1,
+     *      max = 2000,
+     *      notInRangeMessage="maxLength is out of range."
+     * )
      * @ORM\Column(type="smallint", nullable=false, options={"unsigned": true})
      */
     private int $maxLength = 280;
@@ -173,9 +179,10 @@ class FundConcretization
      *     "fundConcretization:read",
      *     "fundConcretization:write",
      * })
+     * @Assert\NotBlank(allowNull=false)
      * @ORM\Column(type="string", length=255, nullable=false)
      */
-    private $question;
+    private ?string $question = null;
 
     public function getQuestion(): ?string
     {

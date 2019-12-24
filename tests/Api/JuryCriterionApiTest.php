@@ -207,7 +207,7 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be null.',
+            'hydra:description' => 'question: This value should not be blank.',
         ]);
     }
 
@@ -343,7 +343,7 @@ class JuryCriterionApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateWithoutNameFails(): void
+    public function testUpdateWithEmptyNameFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -351,8 +351,7 @@ class JuryCriterionApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'name'     => '', // @todo warum geht null nicht?
-            'question' => 'New question',
+            'name'     => '',
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -367,7 +366,7 @@ class JuryCriterionApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateWithoutQuestionFails(): void
+    public function testUpdateWithEmptyQuestionFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -375,8 +374,7 @@ class JuryCriterionApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'name'     => 'New name',
-            'question' => '', // @todo warum geht null nicht?
+            'question' => '',
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -387,14 +385,111 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be null.',
+            'hydra:description' => 'question: This value should not be blank.',
         ]);
     }
 
-// @todo:
-// * update missing required fields
-// * update w/ fund fails
-// * delete as PO
-// * delete unauth
-// * delete w/o priv
+    public function testUpdateFundFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'question' => 'new question',
+            'fund'     => $fundIri,
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("fund" are unknown).',
+        ]);
+    }
+
+    public function testDelete(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        static::assertResponseStatusCodeSame(204);
+
+        $deleted = static::$container->get('doctrine')
+            ->getRepository(JuryCriterion::class)
+            ->find(1);
+        $this->assertNull($deleted);
+    }
+
+    public function testDeleteFailsUnauthenticated(): void
+    {
+        $client = static::createClient();
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type',
+            'application/json');
+
+        self::assertJsonContains([
+            'code'    => 401,
+            'message' => 'JWT Token not found',
+        ]);
+    }
+
+    public function testDeleteFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testDeleteFailsWhenFundIsActive(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        /* @var $fund Fund */
+        $fund = $em->getRepository(Fund::class)->find(1);
+        $fund->setState(Fund::STATE_ACTIVE);
+        $em->flush();
+
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
 }

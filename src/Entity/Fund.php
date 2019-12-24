@@ -24,8 +24,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     },
  *     itemOperations={
  *         "get",
- *         "put"={"security"="is_granted('ROLE_PROCESS_OWNER')"},
- *         "delete"={"security"="is_granted('ROLE_ADMIN')"}
+ *         "put"={
+ *             "security"="is_granted('ROLE_PROCESS_OWNER')"
+ *         },
+ *         "delete"={
+ *             "security"="is_granted('DELETE', object)"
+ *         }
  *     },
  *     normalizationContext={
  *         "groups"={"default:read", "fund:read"},
@@ -435,6 +439,7 @@ class Fund
     /**
      * @var string
      * @Groups({"elastica", "fund:read", "fund:write"})
+     * @Assert\NotBlank
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $name = null;

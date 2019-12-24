@@ -7,7 +7,6 @@ use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
 use App\Entity\Fund;
 use App\Entity\FundConcretization;
-use App\Entity\JuryCriterion;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
 
@@ -214,7 +213,7 @@ class FundConcretizationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be null.',
+            'hydra:description' => 'question: This value should not be blank.',
         ]);
     }
 
@@ -357,7 +356,7 @@ class FundConcretizationApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
             'question'  => 'Test',
             'maxLength' => null,
@@ -368,22 +367,23 @@ class FundConcretizationApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'The type of the "maxLength" attribute must be "int", "NULL" given.',
         ]);
     }
 
-    public function testUpdateWithoutQuestionFails(): void
+    public function testUpdateWithInvalidMaxLengthFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'question' => null,
+            'question'  => 'Test',
+            'maxLength' => -1,
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -394,14 +394,134 @@ class FundConcretizationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be null.',
+            'hydra:description' => 'maxLength: maxLength is out of range.',
         ]);
     }
 
-// @todo:
-// * update missing required fields
-// * update w/ fund fails
-// * delete as PO
-// * delete unauth
-// * delete w/o priv
+    public function testUpdateWithoutQuestionFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'question' => '',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'question: This value should not be blank.',
+        ]);
+    }
+
+    public function testUpdateFundFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'question' => 'new question',
+            'fund'     => $fundIri,
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("fund" are unknown).',
+        ]);
+    }
+
+    public function testDelete(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        static::assertResponseStatusCodeSame(204);
+
+        $deleted = static::$container->get('doctrine')
+            ->getRepository(FundConcretization::class)
+            ->find(1);
+        $this->assertNull($deleted);
+    }
+
+    public function testDeleteFailsUnauthenticated(): void
+    {
+        $client = static::createClient();
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type',
+            'application/json');
+
+        self::assertJsonContains([
+            'code'    => 401,
+            'message' => 'JWT Token not found',
+        ]);
+    }
+
+    public function testDeleteFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testDeleteFailsWhenFundIsActive(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        /* @var $fund Fund */
+        $fund = $em->getRepository(Fund::class)->find(1);
+        $fund->setState(Fund::STATE_ACTIVE);
+        $em->flush();
+
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
 }

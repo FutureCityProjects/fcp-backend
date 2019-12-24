@@ -9,6 +9,7 @@ use App\Entity\Traits\RequiredName;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * JuryCriteria
@@ -34,7 +35,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "validation_groups"={"Default", "juryCriterion:write"}
  *         },
  *         "delete"={
- *             "security"="is_granted('ROLE_PROCESS_OWNER')"
+ *             "security"="is_granted('DELETE', object)"
  *         }
  *     },
  *     input="App\Dto\ProjectInput",
@@ -95,9 +96,10 @@ class JuryCriterion
      *     "juryCriterion:read",
      *     "juryCriterion:write",
      * })
+     * @Assert\NotBlank
      * @ORM\Column(type="string", length=5000, nullable=false)
      */
-    private $question;
+    private ?string $question = null;
 
     public function getQuestion(): ?string
     {
