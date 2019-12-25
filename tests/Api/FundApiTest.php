@@ -1007,6 +1007,33 @@ class FundApiTest extends ApiTestCase
         ]);
     }
 
+    public function testUpdateWithUnknownStateFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'description' => 'description with 20 characters',
+            'name'        => 'Test',
+            'region'      => 'Berlin-Hohenschönhausen',
+            'sponsor'     => 'Bundesministerium',
+            'state'       => 'unknown',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'state: The value you selected is not a valid choice.',
+        ]);
+    }
+
     public function testDeleteFund(): void
     {
         $client = static::createAuthenticatedClient([
@@ -1087,11 +1114,10 @@ class FundApiTest extends ApiTestCase
         ]);
     }
 
-    /**
-     * @todo
-     * * updating state to "active" fails when not all required fields are set
-     * * updating relevant fields fails when state is active
-     * * delete should be possible for PO under some conditions (active9
-     * * delete should not be possible (even for admin) under some conditions
-     */
+    // @todo
+    // * only active funds are public item|coll
+    // * updating state to "active" fails when not all required fields are set
+    // * updating relevant fields fails when state is active
+    // * delete should be possible for PO under some conditions
+    // * delete should not be possible (even for admin) under some conditions
 }

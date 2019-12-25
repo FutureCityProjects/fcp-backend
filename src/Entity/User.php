@@ -29,6 +29,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Only Admins and ProcessOwners can read users,
  * only Admins can create/update/delete users.
  *
+ * @todo
+ * * new endpoint for user profile (dont use item:PUT, we maybe want to allow
+ *   setting of other properties, trigger events etc)
+ * * new endpoint for changing email (create validation)
+ * * new endpoint for PW reset (create validation)
+ *
  * @ApiResource(
  *     attributes={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_PROCESS_OWNER')"},
  *     collectionOperations={
@@ -91,7 +97,7 @@ class User implements UserInterface
      *     pattern="/^[a-zA-Z]+[a-zA-Z0-9._-]*[a-zA-Z][a-zA-Z0-9._-]*$/",
      *     message="Username is not valid."
      * )
-     * @Groups({"user:read", "user:write", "project:read"})
+     * @Groups({"user:read", "user:create", "user:admin-write", "project:read"})
      * @ORM\Column(type="string", length=255, nullable=false, unique=true)
      */
     private ?string $username = null;
@@ -159,12 +165,22 @@ class User implements UserInterface
     }
     //endregion
 
-    // @todo assert choice
     //region Roles
     /**
      * @var array
      *
      * @Groups({"user:read", "user:write"})
+     * @Assert\All({
+     *     @Assert\NotBlank,
+     *     @Assert\Choice(
+     *         choices={
+     *             User::ROLE_ADMIN,
+     *             User::ROLE_PROCESS_OWNER,
+     *             User::ROLE_USER
+     *         },
+     *     )
+     * })
+     *
      * @ORM\Column(type="small_json", length=255, nullable=true)
      */
     private $roles = [];

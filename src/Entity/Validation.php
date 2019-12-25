@@ -8,6 +8,7 @@ use App\Entity\Traits\CreatedAtFunctions;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Validation
@@ -121,6 +122,14 @@ class Validation
     /**
      * @var string
      *
+     * @Assert\Choice(
+     *     choices={
+     *         Validation::TYPE_ACCOUNT,
+     *         Validation::TYPE_RESET_PASSWORD,
+     *         Validation::TYPE_CHANGE_EMAIL,
+     *         Validation::TYPE_JURY_INVITE
+     *     }
+     * )
      * @ORM\Column(type="string", length=50, nullable=false)
      */
     private $type;

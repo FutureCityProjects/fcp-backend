@@ -194,9 +194,10 @@ class AuthApiTest extends ApiTestCase
 
     public function testRefreshTokenWorks(): void
     {
-        $response = static::createAuthenticatedClient([
+        $client = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
-        ])->request('GET', '/refresh_token');
+        ]);
+        $response = $client->request('GET', '/refresh_token');
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type', 'application/json');
@@ -214,6 +215,28 @@ class AuthApiTest extends ApiTestCase
         $this->assertSame([User::ROLE_ADMIN, User::ROLE_USER], $decoded['roles']);
     }
 
+    /**
+     * requires zalas/phpunit-globals:
+     * @env JWT_TOKEN_TTL=3
+     */
+    public function testRefreshFailsWithExpiredToken(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+        sleep(5);
+        $client->request('GET', '/refresh_token');
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type',
+            'application/json');
+
+        self::assertJsonContains([
+            'code'    => 401,
+            'message' => 'Expired JWT Token',
+        ]);
+    }
+
     public function testRefreshTokenFailsUnauthenticated(): void
     {
         $client = static::createClient();
@@ -228,6 +251,4 @@ class AuthApiTest extends ApiTestCase
             'message' => 'JWT Token not found',
         ]);
     }
-
-    // @todo refresh fails with expired token
 }

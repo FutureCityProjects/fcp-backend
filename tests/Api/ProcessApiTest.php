@@ -454,6 +454,33 @@ class ProcessApiTest extends ApiTestCase
         ]);
     }
 
+    public function testUpdateWithEmptyNameFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Process::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'description' => 'something',
+            'imprint'     => 'The Processor',
+            'name'        => '',
+            'region'      => 'Paris',
+            'targets'     => ['some target', 'others'],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'name: This value should not be blank.',
+        ]);
+    }
+
     public function testDeleteProcess(): void
     {
         $client = static::createAuthenticatedClient([
@@ -506,7 +533,4 @@ class ProcessApiTest extends ApiTestCase
             'hydra:description' => 'Access Denied.',
         ]);
     }
-
-    // @todo
-    // * update w/ empty name fails
 }

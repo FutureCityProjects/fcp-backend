@@ -243,6 +243,38 @@ class ProjectMembershipApiTest extends ApiTestCase
         ]);
     }
 
+    public function testCreateWithUnknownRoleFails()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $projectIRI = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
+        $userIri = $this->findIriBy(User::class,
+            ['id' => TestFixtures::JUROR['id']]);
+
+        $client->request('POST', '/project_memberships', ['json' => [
+            'motivation' => 'juror motivation with 20 characters',
+            'project'    => $projectIRI,
+            'role'       => 'SUPER_USER',
+            'skills'     => 'juror skills with 20 characters',
+            'tasks'      => 'juror tasks',
+            'user'       => $userIri,
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'role: The value you selected is not a valid choice.',
+        ]);
+    }
+
     public function testCreateWithoutUserFails()
     {
         $client = static::createAuthenticatedClient([
@@ -1038,6 +1070,35 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'skills: This value is too short.',
+        ]);
+    }
+
+    public function testUpdateWithUnknownRoleFails()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $membershipIRI = $this->findIriBy(ProjectMembership::class, [
+            'project' => TestFixtures::PROJECT['id'],
+            'user'    => TestFixtures::PROJECT_MEMBER['id'],
+        ]);
+
+        $client->request('PUT', $membershipIRI, ['json' => [
+            'role'       => 'SUPER_USER',
+            'skills'     => 'my super good super-hero skills',
+            'motivation' => 'writing 20 characters motivation is cool',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'role: The value you selected is not a valid choice.',
         ]);
     }
 

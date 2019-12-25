@@ -36,4 +36,8 @@
     <listeners>
         <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
     </listeners>
+
+    <extensions>
+        <extension class="Zalas\PHPUnit\Globals\AnnotationExtension" />
+    </extensions>
 </phpunit>

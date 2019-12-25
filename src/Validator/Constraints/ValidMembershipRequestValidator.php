@@ -42,6 +42,13 @@ class ValidMembershipRequestValidator extends ConstraintValidator
             return;
         }
 
+        if (!in_array($object->getRole(), [ProjectMembership::ROLE_APPLICANT,
+                ProjectMembership::ROLE_MEMBER, ProjectMembership::ROLE_OWNER])
+        ) {
+            // should be handled by a choice constraint
+            return;
+        }
+
         if ($project->getProgress() === Project::PROGRESS_IDEA) {
             $this->context
                 ->buildViolation($constraint->message)

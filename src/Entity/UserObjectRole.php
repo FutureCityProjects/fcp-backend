@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * UserObjectRole
@@ -64,11 +65,15 @@ class UserObjectRole
     }
     //endregion
 
-    // @todo assert choice
     //region Role
     /**
      * @var string
-     *
+     * @Assert\Choice(
+     *     choices={
+     *         UserObjectRole::ROLE_JURY_MEMBER,
+     *         UserObjectRole::ROLE_PROCESS_OWNER
+     *     }
+     * )
      * @ORM\Column(type="string", length=50, nullable=false)
      */
     private $role;

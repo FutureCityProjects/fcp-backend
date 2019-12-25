@@ -668,9 +668,11 @@ class ProjectApiTest extends ApiTestCase
             'email' => TestFixtures::ADMIN['email']
         ]);
 
+        $ideaIRI = $this->findIriBy(Project::class, ['id' => 1]);
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
+            'inspiration'      => $ideaIRI,
             'name'             => 'just for fun',
             'process'          => $processIri,
             'progress'         => Project::PROGRESS_CREATING_PLAN,
@@ -686,6 +688,36 @@ class ProjectApiTest extends ApiTestCase
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'progress: The value you selected is not a valid choice.',
+        ]);
+    }
+
+    public function testCreateProjectWithStateFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+
+        $ideaIRI = $this->findIriBy(Project::class, ['id' => 1]);
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+
+        $client->request('POST', '/projects', ['json' => [
+            'inspiration'      => $ideaIRI,
+            'name'             => 'just for fun',
+            'process'          => $processIri,
+            'progress'         => Project::PROGRESS_CREATING_PROFILE,
+            'state'            => Project::STATE_DEACTIVATED,
+            'shortDescription' => 'The Testers',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("state" are unknown).',
         ]);
     }
 
@@ -1061,6 +1093,8 @@ class ProjectApiTest extends ApiTestCase
     }
 
     // @todo
+    // * create with state fails
+    // * update with invalid state fails
     // * create and read return the same properties
     // * memberships and applications are shown when reading a project as member
     // * createdBy cannot be set on creation (and also not updated)

@@ -667,5 +667,8 @@
     },
     "willdurand/negotiation": {
         "version": "v2.3.1"
+    },
+    "zalas/phpunit-globals": {
+        "version": "v2.0.2"
     }
 }

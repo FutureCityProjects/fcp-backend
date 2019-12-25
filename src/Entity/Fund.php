@@ -576,12 +576,17 @@ class Fund
     }
     //endregion
 
-    // @todo assert choice
     //region State
     /**
      * @var string
      *
      * @Groups({"fund:read", "fund:update"})
+     * @Assert\Choice(
+     *     choices={
+     *         Fund::STATE_ACTIVE,
+     *         Fund::STATE_INACTIVE
+     *     }
+     * )
      * @ORM\Column(type="string", length=50, nullable=false, options={"default":"inactive"})
      */
     private $state = self::STATE_INACTIVE;

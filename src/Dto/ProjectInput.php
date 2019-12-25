@@ -58,23 +58,23 @@ class ProjectInput
     public ?string $progress = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $shortDescription = null;
 
     /**
      * @Assert\Choice({Project::STATE_ACTIVE, Project::STATE_DEACTIVATED})
-     * @Groups({"project:owner-write", "project:po-write", "project:admin-write"})
+     * @Groups({"project:owner-update", "project:po-update", "project:admin-update"})
      */
     public ?string $state = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $target = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $vision = null;
 }

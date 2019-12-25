@@ -534,9 +534,9 @@ class Project
      * )
      * @Groups({
      *     "project:read",
-     *     "project:owner-write",
-     *     "project:po-write",
-     *     "project:admin-write"
+     *     "project:owner-update",
+     *     "project:po-update",
+     *     "project:admin-update"
      * })
      * @ORM\Column(type="string", length=50, nullable=false, options={"default":"active"})
      */

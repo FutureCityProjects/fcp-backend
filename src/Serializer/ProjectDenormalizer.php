@@ -64,6 +64,20 @@ class ProjectDenormalizer implements
             {
                 $context['groups'][] = 'project:member-write';
             }
+
+            if ($context['operation_type'] === 'item'
+                && $context['item_operation_name'] === "put"
+            ) {
+                if ($project->userIsOwner($currentUser))
+                {
+                    $context['groups'][] = 'project:owner-update';
+                }
+
+                if ($project->userIsMember($currentUser))
+                {
+                    $context['groups'][] = 'project:member-update';
+                }
+            }
         }
 
         $context[self::ALREADY_CALLED] = true;

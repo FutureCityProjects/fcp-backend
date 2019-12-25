@@ -50,6 +50,13 @@ class ValidMembershipUpdateValidator extends ConstraintValidator
             return;
         }
 
+        if (!in_array($object->getRole(), [ProjectMembership::ROLE_APPLICANT,
+            ProjectMembership::ROLE_MEMBER, ProjectMembership::ROLE_OWNER])
+        ) {
+            // should be handled by a choice constraint
+            return;
+        }
+
         $oldObject = $this->manager->getUnitOfWork()
             ->getOriginalEntityData($object);
         $oldRole = $oldObject['role'];

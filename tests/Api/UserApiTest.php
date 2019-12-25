@@ -357,7 +357,7 @@ class UserApiTest extends ApiTestCase
             'application/json');
 
         self::assertJsonContains([
-            'code' => 401,
+            'code'    => 401,
             'message' => 'JWT Token not found',
         ]);
     }
@@ -545,6 +545,29 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
+    public function testCreateWithUnknownRoleFails(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('POST', '/users', ['json' => [
+            'email'    => 'new@zukunftsstadt.de',
+            'password' => 'irrelevant',
+            'roles'    => ['SUPER_USER'],
+            'username' => 'will-fail'
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'roles[0]: The value you selected is not a valid choice.',
+        ]);
+    }
+
     public function testCreateWithoutPasswordSetsRandom(): void
     {
         $response = static::createAuthenticatedClient([
@@ -565,7 +588,7 @@ class UserApiTest extends ApiTestCase
         $this->assertNotEmpty($user->getPassword());
     }
 
-    public function testUpdateUser(): void
+    public function testUpdate(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
@@ -752,6 +775,82 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
+    public function testUpdateWithDuplicateUsernameFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'username'       => TestFixtures::ADMIN['username'],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'username: Username already exists.',
+        ]);
+    }
+
+    public function testUpdateWithEmptyUsernameFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'username' => '',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'username: This value should not be blank.',
+        ]);
+    }
+
+    public function testUpdateWithUnknownRoleFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'email' => 'test@example.com',
+            'roles' => ['SUPER_USER'],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'roles[0]: The value you selected is not a valid choice.',
+        ]);
+    }
+
     public function testDeleteUser(): void
     {
         $before = new DateTimeImmutable();
@@ -837,9 +936,4 @@ class UserApiTest extends ApiTestCase
             'hydra:description' => 'User already deleted',
         ]);
     }
-
-    // @todo
-    // * create w/o username fails
-    // * update w/ empty username fails
-    // * todo normal users cannot filter by deletedat
 }

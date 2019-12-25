@@ -35,15 +35,15 @@ class UserInputDataTransformer implements DataTransformerInterface
         $user = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE]
             ?? new User();
 
-        if ($data->username) {
+        if ($data->username !== null) {
             $user->setUsername($data->username);
         }
 
-        if ($data->email) {
+        if ($data->email !== null) {
             $user->setEmail($data->email);
         }
 
-        if ($data->roles) {
+        if ($data->roles !== null) {
             $user->setRoles($data->roles);
         }
 
@@ -55,11 +55,11 @@ class UserInputDataTransformer implements DataTransformerInterface
             $user->setIsActive($data->isActive);
         }
 
-        if ($data->firstName) {
+        if ($data->firstName !== null) {
             $user->setFirstName($data->firstName);
         }
 
-        if ($data->lastName) {
+        if ($data->lastName !== null) {
             $user->setLastName($data->lastName);
         }
 
@@ -71,7 +71,7 @@ class UserInputDataTransformer implements DataTransformerInterface
         }
 
         // we have a (new) password given -> encode and replace the old one
-        if ($data->password) {
+        if ($data->password !== null) {
             $user->setPassword(
                 $this->passwordEncoder->encodePassword($user, $data->password)
             );

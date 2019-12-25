@@ -117,7 +117,6 @@ class ProjectMembership
     }
     //endregion
 
-    // @todo assert choice
     //region Role
     /**
      * @var string
@@ -127,6 +126,13 @@ class ProjectMembership
      *     "projectMembership:write",
      *     "user:read"
      * })
+     * @Assert\Choice(
+     *     choices={
+     *         ProjectMembership::ROLE_APPLICANT,
+     *         ProjectMembership::ROLE_MEMBER,
+     *         ProjectMembership::ROLE_OWNER
+     *     }
+     * )
      * @ORM\Column(type="string", length=50, nullable=false)
      */
     private ?string $role = null;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e8c08dfc9c3b72f61bea9a7c7cf1538",
+    "content-hash": "ddd9091473e7d5004a85621c35ad6ebf",
     "packages": [
         {
             "name": "antishov/doctrine-extensions-bundle",
@@ -8867,6 +8867,48 @@
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
             "time": "2019-06-13T22:48:21+00:00"
+        },
+        {
+            "name": "zalas/phpunit-globals",
+            "version": "v2.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jakzal/phpunit-globals.git",
+                "reference": "fea8068f2ddafb13aa8472441388b4f097c8170c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jakzal/phpunit-globals/zipball/fea8068f2ddafb13aa8472441388b4f097c8170c",
+                "reference": "fea8068f2ddafb13aa8472441388b4f097c8170c",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2",
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Zalas\\PHPUnit\\Globals\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jakub Zalas",
+                    "email": "jakub@zalas.pl"
+                }
+            ],
+            "description": "Allows to use annotations to define global variables in PHPUnit test cases.",
+            "time": "2019-12-14T09:32:03+00:00"
         }
     ],
     "aliases": [],
