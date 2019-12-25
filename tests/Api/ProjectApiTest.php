@@ -1092,6 +1092,27 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
+    /**
+     * Test that the DELETE operation for the whole collection is not available.
+     */
+    public function testCollectionDeleteNotAvailable(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('DELETE', '/projects');
+
+        self::assertResponseStatusCodeSame(405);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "DELETE /projects": Method Not Allowed (Allow: GET, POST)',
+        ]);
+    }
+
     // @todo
     // * create with state fails
     // * update with invalid state fails

@@ -75,6 +75,8 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         'id'        => 6, // because we persist him sixth
         'username'  => 'member',
         'email'     => 'member@zukunftsstadt.de',
+        'firstName' => 'Peter',
+        'lastName'  => 'Pan',
         'roles'     => [],
         'password'  => 'O_O',
         'createdAt' => '2019-02-02',
@@ -268,11 +270,19 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $user->setRoles($data['roles']);
         $user->setIsValidated(true);
 
-        if ($data['createdAt']) {
+        if (isset($data['firstName'])) {
+            $user->setFirstName($data['firstName']);
+        }
+
+        if (isset($data['lastName'])) {
+            $user->setLastName($data['lastName']);
+        }
+
+        if (isset($data['createdAt'])) {
             $user->setCreatedAt(new \DateTimeImmutable($data['createdAt']));
         }
 
-        if ($data['deletedAt']) {
+        if (isset($data['deletedAt'])) {
             $user->setDeletedAt(new \DateTimeImmutable($data['deletedAt']));
             $user->setPassword('');
         } else {

@@ -11,17 +11,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ProjectInput
 {
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $challenges = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $delimitation = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $description = null;
 
@@ -37,7 +37,7 @@ class ProjectInput
     public ?bool $isLocked = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?string $name = null;
 
@@ -48,7 +48,7 @@ class ProjectInput
     public ?Process $process = null;
 
     /**
-     * @Groups({"project:write", "project:create"})
+     * @Groups({"project:write"})
      */
     public ?int $profileSelfAssessment = null;
 

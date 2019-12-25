@@ -1,20 +1,20 @@
 # Anstehend
+* custom operations:
+    * post POST listener: https://api-platform.com/docs/core/events/
+    * prePersist EntityListener: https://symfonycasts.com/screencast/api-platform-security/entity-listener#codeblock-07a35d3111
+* JuryCriterion & FundConcretization zu Subresource machen  
+  https://api-platform.com/docs/core/subresources/
+* API Annotations zu YAML migrieren statt bei den Entities
 * db less user provider https://github.com/lexik/LexikJWTAuthenticationBundle/blob/master/Resources/doc/8-jwt-user-provider.md
 * Entities
-    * https://www.slideshare.net/nkopliku/high-quality-ap-is-with-api-platform-120132764
-    * https://symfonycasts.com/screencast/api-platform/filters
-    * https://medium.com/@bpolaszek/expose-a-rest-api-to-different-kinds-of-users-with-api-platform-part-3-4-a259f338546f
     * Unittests
         * uploadable
             * richtiger filename
             * richtiger dirname
             * entfernt beim Löschen
     * User Pre/Post Delete events
-    * Process PostDelete: Delete ObjectROles
-    * Project PostDelete: Delete ObjectROles
     * Filter implementieren
 * User-System
-    * https://symfonycasts.com/screencast/api-platform-security/service-decoration
     * https://symfony.com/blog/new-in-symfony-4-4-password-migrations
 * Messenger aktivieren
     * https://symfony.com/blog/new-in-symfony-4-4-messenger-middleware-to-clear-doctrine-entity-manager
@@ -22,6 +22,7 @@
     * http://eresdev.com/how-to-change-namespace-of-symfony-4-project/
     * namespace for make konfigurieren
 * ElasticSearch
+    * manual indexer: https://symfony.com/doc/current/doctrine/events.html#doctrine-lifecycle-listeners
     * required features:
         * read/write (FOSElastica can r/w, Api Platform can only r)
         * support multiple indexes (one type each, forced for ES 7+)
@@ -34,6 +35,7 @@
         * map ES results back to Doctrine?
 * PHP 7.4 preload
 * SF 5.0
+
 # Postponed
 * document which endpoints are public and which require authentication,
   currently swagger ui shows a lock on all actions

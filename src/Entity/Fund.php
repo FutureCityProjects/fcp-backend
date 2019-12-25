@@ -43,6 +43,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * )
  *
  * @ORM\Entity
+ * @ORM\EntityListeners({"App\Entity\Listener\FundListener"})
  * @ORM\Table(indexes={
  *     @ORM\Index(name="state_idx", columns={"state"})
  * }, uniqueConstraints={

@@ -6,6 +6,7 @@ namespace App\Tests\Entity;
 use App\Entity\Fund;
 use App\Entity\Process;
 use App\Entity\Project;
+use App\Entity\UserObjectRole;
 use App\PHPUnit\RefreshDatabaseTrait;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityRepository;
@@ -120,5 +121,24 @@ class ProcessTest extends KernelTestCase
 
         $this->assertCount(4, $process->getProjects());
         $this->assertInstanceOf(Project::class, $process->getProjects()[0]);
+    }
+
+    public function testDeleteRemovesObjectRoles()
+    {
+        $this->assertSame(1,
+            $this->entityManager->getRepository(UserObjectRole::class)
+                ->count(['objectId' => 1, 'objectType' => Process::class]));
+
+        /* @var $process Process */
+        $process = $this->getProcessRepository()->find(1);
+        $this->entityManager->remove($process);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $notFound = $this->getProcessRepository()->find(1);
+        $this->assertNull($notFound);
+        $this->assertSame(0,
+            $this->entityManager->getRepository(UserObjectRole::class)
+                ->count(['objectId' => 1, 'objectType' => Process::class]));
     }
 }

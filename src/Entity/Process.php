@@ -40,6 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     }
  * )
  * @ORM\Entity
+ * @ORM\EntityListeners({"App\Entity\Listener\ProcessListener"})
  * @UniqueEntity(fields={"name"}, message="Name already exists.")
  */
 class Process

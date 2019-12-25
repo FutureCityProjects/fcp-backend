@@ -7,6 +7,7 @@ use App\DataFixtures\TestFixtures;
 use App\Entity\Project;
 use App\Entity\ProjectMembership;
 use App\Entity\User;
+use App\Entity\UserObjectRole;
 use App\PHPUnit\RefreshDatabaseTrait;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -182,23 +183,88 @@ class UserTest extends KernelTestCase
      */
     public function testSoftdeleteUser(): void
     {
-        /* @var $admin User */
-        $admin = $this->getUserRepository()
-            ->findNonDeleted(1);
+        /** @var User $user */
+        $user = $this->getUserRepository()
+            ->findNonDeleted(TestFixtures::PROJECT_MEMBER['id']);
 
-        $this->assertSame(null, $admin->getDeletedAt());
-        $admin->markDeleted();
+        $this->assertSame(null, $user->getDeletedAt());
+        $user->markDeleted();
 
         $this->entityManager->flush();
         $this->entityManager->clear();
 
+        /** @var User $deleted */
+        $deleted = $this->getUserRepository()
+            ->find(TestFixtures::PROJECT_MEMBER['id']);
+
         $this->assertInstanceOf(\DateTimeImmutable::class,
-            $admin->getDeletedAt());
-        $this->assertSame(true, $admin->isDeleted());
+            $deleted->getDeletedAt());
+        $this->assertSame(true, $deleted->isDeleted());
+        $this->assertSame(null, $deleted->getFirstName());
+        $this->assertSame(null, $deleted->getLastName());
+        $this->assertSame('', $deleted->getPassword());
+        $this->assertSame('deleted_'.TestFixtures::PROJECT_MEMBER['id'],
+            $deleted->getUsername());
+        $this->assertSame('deleted_'.TestFixtures::PROJECT_MEMBER['id'].'@fcp.user',
+            $deleted->getEmail());
 
         $notFound = $this->getUserRepository()
-            ->findNonDeleted(1);
+            ->findNonDeleted(TestFixtures::PROJECT_MEMBER['id']);
         $this->assertNull($notFound);
+    }
+
+    public function testSoftdeleteRemovesMemberships(): void
+    {
+        /** @var User $user */
+        $user = $this->getUserRepository()
+            ->findNonDeleted(TestFixtures::PROJECT_MEMBER['id']);
+        $this->assertCount(2, $user->getProjectMemberships());
+
+        $this->assertSame(2,
+            $this->entityManager->getRepository(ProjectMembership::class)
+                ->count(['user' => $user]));
+
+        $user->markDeleted();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        /** @var User $deleted */
+        $deleted = $this->getUserRepository()
+            ->find(TestFixtures::PROJECT_MEMBER['id']);
+
+        $this->assertSame(true, $deleted->isDeleted());
+        $this->assertCount(0, $user->getProjectMemberships());
+
+        $this->assertSame(0,
+            $this->entityManager->getRepository(ProjectMembership::class)
+                ->count(['user' => $deleted]));
+    }
+
+    public function testSoftdeleteRemovesObjectRoles(): void
+    {
+        /** @var User $user */
+        $user = $this->getUserRepository()
+            ->findNonDeleted(TestFixtures::PROCESS_OWNER['id']);
+        $this->assertCount(1, $user->getObjectRoles());
+
+        $this->assertSame(1,
+            $this->entityManager->getRepository(UserObjectRole::class)
+                ->count(['user' => $user]));
+
+        $user->markDeleted();
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        /** @var User $deleted */
+        $deleted = $this->getUserRepository()
+            ->find(TestFixtures::PROCESS_OWNER['id']);
+
+        $this->assertSame(true, $deleted->isDeleted());
+        $this->assertCount(0, $user->getObjectRoles());
+
+        $this->assertSame(0,
+            $this->entityManager->getRepository(UserObjectRole::class)
+                ->count(['user' => $deleted]));
     }
 
     /**
@@ -249,6 +315,19 @@ class UserTest extends KernelTestCase
         $this->assertCount(0, $user->getValidations());
     }
 
+    public function testEmailRestrictions()
+    {
+        // fetch a valid user and automatically initialize the service container
+        $user = $this->getUserRepository()->find(TestFixtures::ADMIN['id']);
+
+        $validator = self::$container->get(ValidatorInterface::class);
+
+        $user->setEmail('deleted_12@fcp.user');
+        $failing = $validator->validate($user);
+        $this->assertSame('Email is not valid.',
+                    $failing->offsetGet(0)->getMessage());
+    }
+
     public function testUsernameRestrictions()
     {
         // fetch a valid user and automatically initialize the service container
@@ -264,6 +343,7 @@ class UserTest extends KernelTestCase
             'Test,de', // , not allowed
             'Test-dé', // only a-ZA-Z letters
             'Te as', // no spaces
+            'deleted_12', // reserved for deleted users
         ];
 
         foreach ($invalidUsernames as $invalidName) {

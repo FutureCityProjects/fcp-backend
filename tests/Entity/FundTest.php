@@ -8,6 +8,7 @@ use App\Entity\FundApplication;
 use App\Entity\FundConcretization;
 use App\Entity\JuryCriterion;
 use App\Entity\Process;
+use App\Entity\UserObjectRole;
 use App\PHPUnit\RefreshDatabaseTrait;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityRepository;
@@ -145,5 +146,24 @@ class FundTest extends KernelTestCase
 
         $this->assertCount(1, $fund->getJuryCriteria());
         $this->assertInstanceOf(JuryCriterion::class, $fund->getJuryCriteria()[0]);
+    }
+
+    public function testDeleteRemovesObjectRoles()
+    {
+        $this->assertSame(1,
+            $this->entityManager->getRepository(UserObjectRole::class)
+                ->count(['objectId' => 1, 'objectType' => Fund::class]));
+
+        /** @var Fund $fund */
+        $fund = $this->getFundRepository()->find(1);
+        $this->entityManager->remove($fund);
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        $notFound = $this->getFundRepository()->find(1);
+        $this->assertNull($notFound);
+        $this->assertSame(0,
+            $this->entityManager->getRepository(UserObjectRole::class)
+                ->count(['objectId' => 1, 'objectType' => Fund::class]));
     }
 }

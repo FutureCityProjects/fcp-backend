@@ -58,25 +58,20 @@ class ProjectDenormalizer implements
             if ($project->userIsOwner($currentUser))
             {
                 $context['groups'][] = 'project:owner-write';
+
+                // this denormalizer is never called for the creation of
+                // projects so we can simply add this here without checking
+                // the context for operation_type=item & item_operation_name=put
+                $context['groups'][] = 'project:owner-update';
             }
 
+            // an owner is also a member so he gets both groups:
             if ($project->userIsMember($currentUser))
             {
                 $context['groups'][] = 'project:member-write';
-            }
 
-            if ($context['operation_type'] === 'item'
-                && $context['item_operation_name'] === "put"
-            ) {
-                if ($project->userIsOwner($currentUser))
-                {
-                    $context['groups'][] = 'project:owner-update';
-                }
-
-                if ($project->userIsMember($currentUser))
-                {
-                    $context['groups'][] = 'project:member-update';
-                }
+                // same as before, no additional checks needed
+                $context['groups'][] = 'project:member-update';
             }
         }
 

@@ -7,6 +7,7 @@ use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
 use App\Entity\Fund;
 use App\Entity\Process;
+use App\Entity\UserObjectRole;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
 
@@ -17,6 +18,20 @@ class FundApiTest extends ApiTestCase
 {
     use AuthenticatedClientTrait;
     use RefreshDatabaseTrait;
+
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    private $entityManager;
+
+    protected function setUp(): void
+    {
+        $kernel = self::bootKernel();
+
+        $this->entityManager = $kernel->getContainer()
+            ->get('doctrine')
+            ->getManager();
+    }
 
     public function testGetCollection(): void
     {
@@ -1034,8 +1049,12 @@ class FundApiTest extends ApiTestCase
         ]);
     }
 
-    public function testDeleteFund(): void
+    public function testDelete(): void
     {
+        $before = $this->entityManager->getRepository(UserObjectRole::class)
+            ->findBy(['objectId' => 1, 'objectType' => Fund::class]);
+        $this->assertCount(1, $before);
+
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
         ]);
@@ -1048,6 +1067,10 @@ class FundApiTest extends ApiTestCase
             ->getRepository(Fund::class)
             ->find(1);
         $this->assertNull($deleted);
+
+        $after = $this->entityManager->getRepository(UserObjectRole::class)
+            ->findBy(['objectId' => 1, 'objectType' => Fund::class]);
+        $this->assertCount(0, $after);
     }
 
     public function testDeleteFailsUnauthenticated(): void
@@ -1111,6 +1134,27 @@ class FundApiTest extends ApiTestCase
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    /**
+     * Test that the DELETE operation for the whole collection is not available.
+     */
+    public function testCollectionDeleteNotAvailable(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('DELETE', '/funds');
+
+        self::assertResponseStatusCodeSame(405);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "DELETE /funds": Method Not Allowed (Allow: GET, POST)',
         ]);
     }
 

@@ -36,6 +36,7 @@ services:
         decorates: 'api_platform.serializer.context_builder'
         arguments: [ '@App\Serializer\RoleContextBuilder.inner' ]
 
+    # Entity Listeners are auto-wired
     # DataPersisters are auto-wired
     # DataTransformers are auto-wired
     # Doctrine/Extensions are auto-wired

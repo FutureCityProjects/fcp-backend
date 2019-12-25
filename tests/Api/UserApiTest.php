@@ -851,7 +851,7 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
-    public function testDeleteUser(): void
+    public function testDelete(): void
     {
         $before = new DateTimeImmutable();
 
@@ -865,14 +865,15 @@ class UserApiTest extends ApiTestCase
 
         static::assertResponseStatusCodeSame(204);
 
+        /** @var User $user */
         $user = static::$container->get('doctrine')
             ->getRepository(User::class)
-            ->findOneBy(['email' => TestFixtures::PROJECT_MEMBER['email']]);
+            ->find(TestFixtures::PROJECT_MEMBER['id']);
         $this->assertNotNull($user);
         $this->assertTrue($user->isDeleted());
         $this->assertGreaterThan($before, $user->getDeletedAt());
-
-        // @todo delete all non-essential data, test it
+        $this->assertCount(0, $user->getProjectMemberships());
+        // removal of other private data is tested in Enity\UserTest
     }
 
     public function testDeleteFailsUnauthenticated(): void
@@ -934,6 +935,27 @@ class UserApiTest extends ApiTestCase
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'User already deleted',
+        ]);
+    }
+
+    /**
+     * Test that the DELETE operation for the whole collection is not available.
+     */
+    public function testCollectionDeleteNotAvailable(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('DELETE', '/users');
+
+        self::assertResponseStatusCodeSame(405);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "DELETE /users": Method Not Allowed (Allow: GET, POST)',
         ]);
     }
 }

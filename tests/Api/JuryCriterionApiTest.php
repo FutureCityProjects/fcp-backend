@@ -492,4 +492,25 @@ class JuryCriterionApiTest extends ApiTestCase
             'hydra:description' => 'Access Denied.',
         ]);
     }
+
+    /**
+     * Test that the DELETE operation for the whole collection is not available.
+     */
+    public function testCollectionDeleteNotAvailable(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('DELETE', '/jury_criteria');
+
+        self::assertResponseStatusCodeSame(405);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "DELETE /jury_criteria": Method Not Allowed (Allow: POST)',
+        ]);
+    }
 }

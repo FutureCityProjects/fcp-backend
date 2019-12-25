@@ -11,7 +11,6 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\CreatedAtFunctions;
-use App\Entity\Traits\DeletedAtFunctions;
 use App\Validator\Constraints as AppAssert;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -89,12 +88,19 @@ class User implements UserInterface
     //region Username
     /**
      * User names must start with a letter may contain only letters, digits,
-     * dots, hyphens and underscores (first regex).
-     * They must contain at least two letters (second regex).
+     * dots, hyphens and underscores, thy must contain at least two letters
+     * (first regex).
+     * User names may not be in the format "deleted_{0-9}" as this is reserved
+     * for deleted users (second regex).
      *
      * @Assert\NotBlank
      * @Assert\Regex(
      *     pattern="/^[a-zA-Z]+[a-zA-Z0-9._-]*[a-zA-Z][a-zA-Z0-9._-]*$/",
+     *     message="Username is not valid."
+     * )
+     * @Assert\Regex(
+     *     pattern="/^deleted_[0-9]+$/",
+     *     match=false,
      *     message="Username is not valid."
      * )
      * @Groups({"user:read", "user:create", "user:admin-write", "project:read"})
@@ -147,6 +153,11 @@ class User implements UserInterface
      *
      * @Assert\Email
      * @Assert\NotBlank
+     * @Assert\Regex(
+     *     pattern="/^deleted_[0-9]+@fcp.user$/",
+     *     match=false,
+     *     message="Email is not valid."
+     * )
      * @Groups({"user:read", "user:write"})
      * @ORM\Column(type="string", length=255, nullable=false, unique=true)
      */
@@ -225,14 +236,14 @@ class User implements UserInterface
      * @Groups({"user:read", "user:write", "project:read"})
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $firstName;
+    private ?string $firstName = null;
 
     public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
-    public function setFirstName(string $firstName): self
+    public function setFirstName(?string $firstName): self
     {
         $this->firstName = $firstName;
 
@@ -247,14 +258,14 @@ class User implements UserInterface
      * @Groups({"user:read", "user:write", "project:read"})
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $lastName;
+    private ?string $lastName = null;
 
     public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
-    public function setLastName(string $lastName): self
+    public function setLastName(?string $lastName): self
     {
         $this->lastName = $lastName;
 
@@ -334,7 +345,67 @@ class User implements UserInterface
      */
     protected ?DateTimeImmutable $deletedAt = null;
 
-    use DeletedAtFunctions;
+    /**
+     * Sets deletedAt.
+     *
+     * @param DateTimeImmutable|null $deletedAt
+     *
+     * @return $this
+     */
+    public function setDeletedAt(?DateTimeImmutable $deletedAt): self
+    {
+        $this->deletedAt = $deletedAt;
+
+        return $this;
+    }
+
+    /**
+     * Returns deletedAt.
+     *
+     * @return DateTimeImmutable
+     */
+    public function getDeletedAt(): ?DateTimeImmutable
+    {
+        return $this->deletedAt;
+    }
+
+    /**
+     * Is deleted?
+     *
+     * @return bool
+     */
+    public function isDeleted(): bool
+    {
+        return null !== $this->deletedAt;
+    }
+
+    /**
+     * Sets the deletedAt timestamp to mark the object as deleted.
+     * Removes private and/or identifying data to comply with privacy laws.
+     *
+     * @return $this
+     */
+    public function markDeleted(): self
+    {
+        $this->deletedAt = new DateTimeImmutable();
+
+        // remove private / identifying data
+        $this->setUsername('deleted_'.$this->getId());
+        $this->setEmail('deleted_'.$this->getId().'@fcp.user');
+        $this->setPassword('');
+        $this->setFirstName(null);
+        $this->setLastName(null);
+
+        // remove privileges
+        foreach ($this->getObjectRoles() as $objectRole) {
+            $this->removeObjectRole($objectRole);
+        }
+        foreach ($this->getProjectMemberships() as $membership) {
+            $this->removeProjectMembership($membership);
+        }
+
+        return $this;
+    }
     //endregion
 
     //region ObjectRoles
