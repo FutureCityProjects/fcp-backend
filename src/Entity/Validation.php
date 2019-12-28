@@ -104,9 +104,9 @@ class Validation
      */
     public function generateToken(): void
     {
-        // @todo use BASE62 to shorten URLs instead of using 64 hex chars
-        // https://github.com/tuupola/base62
-        $this->setToken(hash('sha256', random_bytes(32)));
+        // we use BASE62 to shorten URLs instead of using 64 hex chars
+        $base62 = new Tuupola\Base62;
+        $this->setToken($base62->encode(random_bytes(32)));
     }
 
     public function setToken(string $token): self
@@ -117,7 +117,6 @@ class Validation
     }
     //endregion
 
-    // @todo assert choice
     //region Type
     /**
      * @var string

@@ -1,0 +1,15 @@
+framework:
+    messenger:
+        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+        # failure_transport: failed
+
+        transports:
+            doctrine:
+                dsn: doctrine://default
+                options:
+                    # or the schema-synchronizer will constantly try to update
+                    # the table with "ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT NULL"
+                    auto_setup: false
+
+        routing:
+            '*': doctrine

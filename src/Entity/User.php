@@ -9,6 +9,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Controller\UserRegistrationAction;
 use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\CreatedAtFunctions;
 use App\Validator\Constraints as AppAssert;
@@ -40,6 +41,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "get",
  *         "post"={
  *             "security"="is_granted('ROLE_ADMIN')",
+ *             "validation_groups"={"Default", "user:create"}
+ *         },
+ *         "register"={
+ *             "controller"=UserRegistrationAction::class,
+ *             "method"="POST",
+ *             "path"="/users/register",
+ *             "security"="is_granted('IS_AUTHENTICATED_ANONYMOUSLY')",
  *             "validation_groups"={"Default", "user:create"}
  *         }
  *     },

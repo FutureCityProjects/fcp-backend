@@ -1,0 +1,6 @@
+framework:
+  messenger:
+    transports:
+      doctrine:
+        options:
+          auto_setup: true

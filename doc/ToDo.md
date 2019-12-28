@@ -1,4 +1,8 @@
 # Anstehend
+* validation confirm action
+* localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
+* pw reset action
+* change email action
 * custom operations:
     * post POST listener: https://api-platform.com/docs/core/events/
     * prePersist EntityListener: https://symfonycasts.com/screencast/api-platform-security/entity-listener#codeblock-07a35d3111
@@ -51,6 +55,7 @@
 * enable versioning by adding an URL prefix like /api/v1
 * rename /authentication_token path?
 * Email signing: https://symfony.com/blog/new-in-symfony-4-4-signing-and-encrypting-email-messages
+
 # Designentscheidungen
 * Wir verwenden Symfony als Basis weil es seit einiger Zeit das populärste und
   am aktivsten weiterentwicklte Framework mit einer extrem großen Menge an
@@ -96,7 +101,16 @@
       to allow extension, e.g. for encoding user password as shown in https://symfonycasts.com/screencast/api-platform-security/encode-user-password
     * For DTOs it should be possible to use PHP 7.4 typed properties without
       @var annotation to determine the type of Relations for Denormalization
-      
+* Symfony
+    * Mailer: EsmtpTransport functions should be protected to allow inheritance,
+      e.g. for testTransport that prevents usage of TLS/STARTTLS for local unittesting
+      where the connection is intercepted by antivirus software and thus the certificate
+      check fails, as there is no way to disable the check.
+    * Mailer: CramMd5Authenticator only works with EsmtpTransport, uses
+      executeCommand which isn't defined there but in SmtpTransport -> prevents
+      re-use 
+    * Messenger: https://github.com/symfony/symfony/issues/35129
+
 # Multi-process platform ToDo
 * DB
     * project name only unique per process

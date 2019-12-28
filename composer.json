@@ -14,9 +14,13 @@
         "symfony/dotenv": "4.4.*",
         "symfony/flex": "^1.4.8",
         "symfony/framework-bundle": "4.4.*",
+        "symfony/mailer": "4.4.*",
         "symfony/mercure-bundle": "*",
+        "symfony/messenger": "4.4.*",
         "symfony/validator": "4.4.*",
         "symfony/yaml": "4.4.*",
+        "tuupola/base62": "^2.0",
+        "twig/extensions": "^1.5.4",
         "vich/uploader-bundle": "^1.12.1"
     },
     "require-dev": {

@@ -55,7 +55,8 @@ class ProjectInputDataTransformer implements DataTransformerInterface
     public function transform($data, string $to, array $context = [])
     {
         // this evaluates all constraint annotations on the DTO
-        $this->validator->validate($data);
+        $context['groups'][] = 'Default';
+        $this->validator->validate($data, $context);
 
         /* @var $project Project */
         $project = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE]

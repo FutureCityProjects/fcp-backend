@@ -65,6 +65,13 @@ class RoleContextBuilder implements SerializerContextBuilderInterface
             $this->addGroups($objectType, 'update');
         }
 
+        if (isset($this->context['collection_operation_name'])) {
+            $this->addGroups($objectType, $this->context['collection_operation_name']);
+        }
+        if (isset($this->context['item_operation_name'])) {
+            $this->addGroups($objectType, $this->context['item_operation_name']);
+        }
+
         return $this->context;
     }
 

@@ -5,6 +5,7 @@ namespace App\DataTransformer;
 
 use ApiPlatform\Core\DataTransformer\DataTransformerInterface;
 use ApiPlatform\Core\Serializer\AbstractItemNormalizer;
+use ApiPlatform\Core\Validator\ValidatorInterface;
 use App\Dto\UserInput;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -19,9 +20,16 @@ class UserInputDataTransformer implements DataTransformerInterface
      */
     private $passwordEncoder;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder,
+        ValidatorInterface $validator)
     {
         $this->passwordEncoder = $passwordEncoder;
+        $this->validator = $validator;
     }
 
     /**
@@ -32,6 +40,10 @@ class UserInputDataTransformer implements DataTransformerInterface
      */
     public function transform($data, string $to, array $context = [])
     {
+        // this evaluates all constraint annotations on the DTO
+        $context['groups'][] = 'Default';
+        $this->validator->validate($data, $context);
+
         $user = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE]
             ?? new User();
 

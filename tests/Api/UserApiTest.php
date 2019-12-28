@@ -6,6 +6,7 @@ namespace App\Tests\Api;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
 use App\Entity\User;
+use App\Message\UserRegisteredMessage;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
 use DateTimeImmutable;
@@ -292,14 +293,14 @@ class UserApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context' => '/contexts/Error',
-            '@type' => 'hydra:Error',
-            'hydra:title' => 'An error occurred',
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
             'hydra:description' => 'Not Found',
         ]);
     }
 
-    public function testCreateUser(): void
+    public function testCreate(): void
     {
         $response = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
@@ -588,6 +589,150 @@ class UserApiTest extends ApiTestCase
         $this->assertNotEmpty($user->getPassword());
     }
 
+    public function testRegistration(): void
+    {
+        $response = static::createClient()
+            ->request('POST', '/users/register', ['json' => [
+                'username'      => 'Tester',
+                'email'         => 'new@zukunftsstadt.de',
+                'firstName'     => 'Peter',
+                'password'      => 'irrelevant',
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}',
+            ]]);
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(User::class);
+
+        self::assertJsonContains([
+            '@context'    => '/contexts/User',
+            '@type'       => 'User',
+            'email'       => 'new@zukunftsstadt.de',
+            'username'    => 'Tester',
+            'isActive'    => true,
+            'isValidated' => false,
+            'firstName'   => 'Peter',
+            'lastName'    => null,
+            'roles'       => [User::ROLE_USER],
+            'objectRoles' => [],
+            'projectMemberships' => [],
+        ]);
+
+        $userData = $response->toArray();
+        $this->assertArrayNotHasKey('password', $userData);
+
+        $messenger = self::$container->get('messenger.default_bus');
+        $messages = $messenger->getDispatchedMessages();
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(UserRegisteredMessage::class,
+            $messages[0]['message']);
+    }
+
+    public function testRegistrationWithDuplicateEmailFails(): void
+    {
+        static::createClient()->request('POST', '/users/register', ['json' => [
+            'email'         => TestFixtures::ADMIN['email'],
+            'username'      => 'Tester',
+            'password'      => 'invalid',
+            'validationUrl' => 'https://fcp.de/?token={{token}}&id={{id}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'email: Email already exists.',
+        ]);
+    }
+
+    public function testRegistrationWithoutValidationUrlFails(): void
+    {
+        static::createClient()->request('POST', '/users/register', ['json' => [
+            'email'         => 'new@zukunftsstadt.de',
+            'username'      => 'Tester',
+            'password'      => 'invalid',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: This value should not be blank.',
+        ]);
+    }
+
+    public function testRegistrationWithoutIdPlaceholderFails(): void
+    {
+        static::createClient()->request('POST', '/users/register', ['json' => [
+            'email'         => 'new@zukunftsstadt.de',
+            'username'      => 'Tester',
+            'password'      => 'invalid',
+            'validationUrl' => 'http://fcp.de/?token={{token}}'
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: ID placeholder is missing.',
+        ]);
+    }
+
+    public function testRegistrationWithoutTokenPlaceholderFails(): void
+    {
+        static::createClient()->request('POST', '/users/register', ['json' => [
+            'email'         => 'new@zukunftsstadt.de',
+            'username'      => 'Tester',
+            'password'      => 'invalid',
+            'validationUrl' => 'https://fcp.de/?token=token&id={{id}}'
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: Token placeholder is missing.',
+        ]);
+    }
+
+    public function testRegistrationWithInvalidUsernameFails(): void
+    {
+        static::createClient()->request('POST', '/users/register', ['json' => [
+            'email'         => 'test@zukunftsstadt.de',
+            'password'      => 'invalid',
+            'username'      => '1@2',
+            'validationUrl' => 'https://fcp.de/?token={{token}}&id={{id}}'
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'username: Username is not valid.',
+        ]);
+    }
+
     public function testUpdate(): void
     {
         $client = static::createAuthenticatedClient([
@@ -657,7 +802,7 @@ class UserApiTest extends ApiTestCase
         $iri = $this->findIriBy(User::class,
             ['email' => TestFixtures::PROJECT_MEMBER['email']]);
 
-        $client->request('PUT', $iri, ['json' => [
+        $r = $client->request('PUT', $iri, ['json' => [
             'email'    => TestFixtures::PROJECT_MEMBER['email'],
             'username' => TestFixtures::PROJECT_MEMBER['username'],
             'isActive' => false,

@@ -1,0 +1,19 @@
+{% extends 'layout/mail.html.twig' %}
+{% block mail_subject %}Email-Validierung{% endblock %}
+{% block mail_body %}
+    <h1>Hallo {{ username }}!</h1>
+    <p>
+        Vielen Dank für Deine Registrierung, bitte bestätige Deine Email-Adresse
+        bis zum {{ expiresAt|localizeddate('long', 'short') }} durch Klick auf folgenden Link:
+    </p>
+    <p>
+        <a href="{{ validationUrl }}">{{ validationUrl }}</a>
+    </p>
+    <p>
+        Sollte der Link nicht funktionieren so kopiere bitte die vollständige URL
+        in die Browser-Adresszeile.<br>
+        Erst nach Bestätigung Deiner Email-Adresse kannst du dich einloggen.<br>
+        Nach Ablauf der Frist wird das Benutzerkonto gelöscht, Du kannst dich danach
+        erneut registrieren.
+    </p>
+{% endblock %}

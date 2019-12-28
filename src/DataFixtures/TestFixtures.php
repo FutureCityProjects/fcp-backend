@@ -72,15 +72,16 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
     ];
 
     public const PROJECT_MEMBER = [
-        'id'        => 6, // because we persist him sixth
-        'username'  => 'member',
-        'email'     => 'member@zukunftsstadt.de',
-        'firstName' => 'Peter',
-        'lastName'  => 'Pan',
-        'roles'     => [],
-        'password'  => 'O_O',
-        'createdAt' => '2019-02-02',
-        'deletedAt' => null,
+        'id'          => 6, // because we persist him sixth
+        'username'    => 'member',
+        'email'       => 'member@zukunftsstadt.de',
+        'firstName'   => 'Peter',
+        'lastName'    => 'Pan',
+        'roles'       => [],
+        'password'    => 'O_O',
+        'createdAt'   => '2019-02-02',
+        'isValidated' => true,
+        'deletedAt'   => null,
     ];
 
     public const IDEA = [
@@ -135,6 +136,10 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
 
     public function load(ObjectManager $manager)
     {
+        $loggerBackup = $manager->getConnection()->getConfiguration()
+            ->getSQLLogger();
+        $manager->getConnection()->getConfiguration()->setSQLLogger(null);
+
         $admin = $this->createUser(self::ADMIN);
         $manager->persist($admin);
 
@@ -260,6 +265,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $manager->persist($juryMemberRole);
 
         $manager->flush();
+        $manager->getConnection()->getConfiguration()->setSQLLogger($loggerBackup);
     }
 
     protected function createUser(array $data): User
@@ -268,7 +274,12 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $user->setUsername($data['username']);
         $user->setEmail($data['email']);
         $user->setRoles($data['roles']);
-        $user->setIsValidated(true);
+
+        if (isset($data['isValidated'])) {
+            $user->setIsValidated($data['isValidated']);
+        } else {
+            $user->setIsValidated(true);
+        }
 
         if (isset($data['firstName'])) {
             $user->setFirstName($data['firstName']);
