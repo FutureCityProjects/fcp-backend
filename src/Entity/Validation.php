@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
+use Tuupola\Base62;
 
 /**
  * Validation
@@ -104,9 +105,9 @@ class Validation
      */
     public function generateToken(): void
     {
-        // we use BASE62 to shorten URLs instead of using 64 hex chars
-        $base62 = new Tuupola\Base62;
-        $this->setToken($base62->encode(random_bytes(32)));
+        // we use BASE62 to shorten URLs instead of using hex chars
+        $base62 = new Base62();
+        $this->setToken($base62->encode(random_bytes(30)));
     }
 
     public function setToken(string $token): self

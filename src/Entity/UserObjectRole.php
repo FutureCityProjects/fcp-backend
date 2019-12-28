@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -23,6 +24,7 @@ class UserObjectRole
     /**
      * @var int
      *
+     * @Groups({"user:admin-read", "user:po-read", "user:self"})
      * @ORM\Column(type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
@@ -46,6 +48,7 @@ class UserObjectRole
     /**
      * @var string
      *
+     * @Groups({"user:admin-read", "user:po-read", "user:self"})
      * @ORM\Column(type="string", length=50, nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
@@ -74,6 +77,7 @@ class UserObjectRole
      *         UserObjectRole::ROLE_PROCESS_OWNER
      *     }
      * )
+     * @Groups({"user:admin-read", "user:po-read", "user:self"})
      * @ORM\Column(type="string", length=50, nullable=false)
      */
     private $role;

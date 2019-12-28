@@ -362,7 +362,7 @@ class Project
     //region Name
     /**
      * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
+     * @Groups({"elastica", "project:read", "project:write", "user:read"})
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private ?string $name = null;

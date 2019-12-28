@@ -5,7 +5,9 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
+use App\Entity\Fund;
 use App\Entity\User;
+use App\Entity\UserObjectRole;
 use App\Message\UserRegisteredMessage;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
@@ -179,15 +181,73 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
-    public function testGetUser(): void
+    public function testGet(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
         $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+        $client->request('GET', $iri);
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(User::class);
+
+        self::assertJsonContains([
+            '@id'                => $iri,
+            'createdAt'          => '2019-02-01T23:00:00+00:00',
+            'username'           => TestFixtures::PROJECT_MEMBER['username'],
+            'email'              => TestFixtures::PROJECT_MEMBER['email'],
+            'id'                 => TestFixtures::PROJECT_MEMBER['id'],
+            'isActive'           => true,
+            'isValidated'        => true,
+            'objectRoles'        => [],
+            'roles'              => [User::ROLE_USER],
+            'projectMemberships' => [
+                0 => [
+                    '@id'        => '/project_memberships/project=2;user=6',
+                    '@type'      => 'ProjectMembership',
+                    'motivation' => 'member motivation',
+                    'role'       => 'member',
+                    'skills'     => 'member skills',
+                    'tasks'      => 'member tasks',
+                    'project'    => [
+                        '@id'   => '/projects/2',
+                        '@type' => 'Project',
+                        'id'    => 2,
+                        'name'  => 'Car-free Dresden',
+                    ],
+                ],
+                1 => [
+                    '@id'        => '/project_memberships/project=3;user=6',
+                    '@type'      => 'ProjectMembership',
+                    'motivation' => 'member motivation',
+                    'role'       => 'member',
+                    'skills'     => 'member skills',
+                    'tasks'      => 'member tasks',
+                    'project'    => [
+                        '@id'   => '/projects/3',
+                        '@type' => 'Project',
+                        'id'    => 3,
+                        'name'  => 'Locked Project',
+                    ],
+                ],
+            ],
+        ]);
+    }
+
+    public function testGetSelf(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
             ['email' => TestFixtures::JUROR['email']]);
-        $response = $client->request('GET', $iri);
+        $client->request('GET', $iri);
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type',
@@ -202,15 +262,16 @@ class UserApiTest extends ApiTestCase
             'id'                 => TestFixtures::JUROR['id'],
             'isActive'           => true,
             'isValidated'        => true,
-            'objectRoles'        => [],
+            'objectRoles'        => [
+                0 => [
+                    'objectId'   => 1,
+                    'objectType' => Fund::class,
+                    'role'       => UserObjectRole::ROLE_JURY_MEMBER
+                ],
+            ],
             'roles'              => [User::ROLE_USER],
             'projectMemberships' => [],
         ]);
-
-        // $userData = $response->toArray();
-        // @todo
-        // * object roles prüfen
-        // * memberships prüfen
     }
 
     public function testGetFailsUnauthenticated(): void
@@ -800,7 +861,7 @@ class UserApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
         $iri = $this->findIriBy(User::class,
-            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+            ['email' => TestFixtures::PROJECT_OWNER['email']]);
 
         $r = $client->request('PUT', $iri, ['json' => [
             'email'    => TestFixtures::PROJECT_MEMBER['email'],
@@ -1041,7 +1102,7 @@ class UserApiTest extends ApiTestCase
     public function testDeleteFailsWithoutPrivilege(): void
     {
         $client = static::createAuthenticatedClient([
-            'email' => TestFixtures::PROCESS_OWNER['email']
+            'email' => TestFixtures::JUROR['email']
         ]);
 
         $iri = $this->findIriBy(User::class,
@@ -1103,4 +1164,9 @@ class UserApiTest extends ApiTestCase
             'hydra:description' => 'No route found for "DELETE /users": Method Not Allowed (Allow: GET, POST)',
         ]);
     }
+
+    // @todo
+    // * update self
+    // * todo delete self
+
 }

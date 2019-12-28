@@ -26,9 +26,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * User
  *
- * Only Admins and ProcessOwners can read users,
- * only Admins can create/update/delete users.
- *
  * @todo
  * * new endpoint for user profile (dont use item:PUT, we maybe want to allow
  *   setting of other properties, trigger events etc)
@@ -52,13 +49,15 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         }
  *     },
  *     itemOperations={
- *         "get",
+ *         "get"={
+ *             "security"="is_granted('READ', object)"
+ *         },
  *         "put"={
- *             "security"="is_granted('ROLE_ADMIN')",
+ *             "security"="is_granted('EDIT', object)",
  *             "validation_groups"={"Default", "user:update"}
  *         },
  *         "delete"={
- *             "security"="is_granted('ROLE_ADMIN')"
+ *             "security"="is_granted('DELETE', object)"
  *         }
  *     },
  *     input="App\Dto\UserInput",
@@ -463,7 +462,7 @@ class User implements UserInterface
     //region ProjectMemberships
     /**
      * @var Collection|ProjectMembership[]
-     * @Groups({"user:read"})
+     * @Groups({"user:admin-read", "user:po-read", "user:self", "user:register"})
      * @ORM\OneToMany(
      *     targetEntity="ProjectMembership",
      *     mappedBy="user",
@@ -507,6 +506,7 @@ class User implements UserInterface
 
     //region CreatedProjects
     /**
+     * @Groups({"user:admin-read", "user:po-read", "user:self", "user:register"})
      * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy")
      */
     private $createdProjects;
