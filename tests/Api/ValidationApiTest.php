@@ -12,7 +12,7 @@ use App\PHPUnit\RefreshDatabaseTrait;
 use DateTimeImmutable;
 
 /**
- * @group UserApi
+ * @group ValidationApi
  */
 class ValidationApiTest extends ApiTestCase
 {
@@ -138,7 +138,7 @@ class ValidationApiTest extends ApiTestCase
         $this->assertSame(TestFixtures::PROJECT_OWNER['email'], $before->getEmail());
         $em->clear();
 
-        $client->request('POST', "/validations/confirm/2", ['json' => [
+        $r = $client->request('POST', "/validations/confirm/2", ['json' => [
             'token' => $token,
         ]]);
 
@@ -151,6 +151,7 @@ class ValidationApiTest extends ApiTestCase
         $after = $em->getRepository(User::class)
             ->find(TestFixtures::PROJECT_OWNER['id']);
         $this->assertSame('new@zukunftsstadt.de', $after->getEmail());
+        $this->assertCount(0, $after->getValidations());
     }
 
     public function testConfirmAccountValidation(): void
@@ -183,6 +184,7 @@ class ValidationApiTest extends ApiTestCase
         $after = $em->getRepository(User::class)
             ->find(TestFixtures::JUROR['id']);
         $this->assertTrue($after->isValidated());
+        $this->assertCount(0, $after->getValidations());
     }
 
     public function testConfirmPasswordReset(): void
@@ -211,14 +213,14 @@ class ValidationApiTest extends ApiTestCase
             'message' => 'Validation successful',
         ]);
 
-        $newPW = $em->getRepository(User::class)
-            ->find(TestFixtures::PROJECT_MEMBER['id'])
-            ->getPassword();
-        $this->assertNotSame($oldPW, $newPW);
+        $after  = $em->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_MEMBER['id']);
+        $this->assertNotSame($oldPW, $after->getPassword());
+        $this->assertCount(0, $after->getValidations());
     }
 
 
-    public function testConfirmAccountValidationFailsWithoutPrivilege(): void
+    public function testConfirmAccountValidationFailsAuthenticated(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -243,11 +245,11 @@ class ValidationApiTest extends ApiTestCase
             '@context'          => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Forbidden for logged in users.',
+            'hydra:description' => 'Forbidden for authenticated users.',
         ]);
     }
 
-    public function testConfirmEmailChangeFailsWithoutPrivilege(): void
+    public function testConfirmEmailChangeFailsAsOtherUser(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -276,7 +278,7 @@ class ValidationApiTest extends ApiTestCase
         ]);
     }
 
-    public function testConfirmPasswordResetFailsWithoutPrivilege(): void
+    public function testConfirmPasswordResetFailsAuthenticated(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
@@ -301,7 +303,7 @@ class ValidationApiTest extends ApiTestCase
             '@context'          => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Forbidden for logged in users.',
+            'hydra:description' => 'Forbidden for authenticated users.',
         ]);
     }
 

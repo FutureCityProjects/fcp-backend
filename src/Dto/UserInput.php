@@ -10,13 +10,23 @@ class UserInput
 {
     /**
      * @var string
-     * @Groups({"user:admin-write", "user:po-write"})
+     * @Assert\NotBlank(groups={"user:resetPassword"}, allowNull=false)
+     * @Groups({
+     *     "user:admin-write",
+     *     "user:po-write",
+     *     "user:register",
+     *     "user:resetPassword"
+     * })
      */
     public ?string $username = null;
 
     /**
      * @var string
-     * @Groups({"user:admin-write", "user:po-write"})
+     * @Groups({
+     *     "user:admin-write",
+     *     "user:po-write",
+     *     "user:register"
+     * })
      */
     public ?string $email = null;
 

@@ -8,6 +8,7 @@ use App\DataFixtures\TestFixtures;
 use App\Entity\Fund;
 use App\Entity\User;
 use App\Entity\UserObjectRole;
+use App\Message\UserForgotPasswordMessage;
 use App\Message\UserRegisteredMessage;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
@@ -1314,7 +1315,6 @@ class UserApiTest extends ApiTestCase
             'hydra:description' => 'User already deleted',
         ]);
     }
-
     /**
      * Test that the DELETE operation for the whole collection is not available.
      */
@@ -1335,4 +1335,159 @@ class UserApiTest extends ApiTestCase
             'hydra:description' => 'No route found for "DELETE /users": Method Not Allowed (Allow: GET, POST)',
         ]);
     }
+
+    public function testPasswordResetWithUsername(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => TestFixtures::PROJECT_OWNER['username'],
+            ]]);
+
+        self::assertResponseStatusCodeSame(202);
+        self::assertJsonContains([
+            'success' => true,
+            'message' => 'Request received',
+        ]);
+
+        $messenger = self::$container->get('messenger.default_bus');
+        $messages = $messenger->getDispatchedMessages();
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(UserForgotPasswordMessage::class,
+            $messages[0]['message']);
+        $this->assertSame(TestFixtures::PROJECT_OWNER['id'],
+            $messages[0]['message']->userId);
+    }
+
+    public function testPasswordResetWithEmail(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => TestFixtures::PROJECT_OWNER['email'],
+            ]]);
+
+        self::assertResponseStatusCodeSame(202);
+        self::assertJsonContains([
+            'success' => true,
+            'message' => 'Request received',
+        ]);
+
+        $messenger = self::$container->get('messenger.default_bus');
+        $messages = $messenger->getDispatchedMessages();
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(UserForgotPasswordMessage::class,
+            $messages[0]['message']);
+        $this->assertSame(TestFixtures::PROJECT_OWNER['id'],
+            $messages[0]['message']->userId);
+    }
+
+    public function testPasswordResetWithUnknownUsernameFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => 'does-not-exist',
+            ]]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No matching user found.',
+        ]);
+    }
+
+    public function testPasswordResetWithUnknownEmailFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => 'does@not-exist.de',
+            ]]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No matching user found.',
+        ]);
+    }
+
+    public function testPasswordResetWithEmptyUsernameFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => '',
+            ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'username: This value should not be blank.',
+        ]);
+    }
+
+    public function testPasswordResetFailsAuthenticated(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+        $client->request('POST', '/users/reset-password', ['json' => [
+            'username' => 'irrelevant',
+        ]]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Forbidden for authenticated users.',
+        ]);
+    }
+
+    public function testPasswordResetWithDeletedUserFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => TestFixtures::DELETED_USER['email'],
+            ]]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No matching user found.',
+        ]);
+    }
+
+    public function testPasswordResetWithInactiveUserFails(): void
+    {
+        $client = static::createClient();
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        $user = $em->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_OWNER['id']);
+        $user->setIsActive(false);
+        $em->flush();
+        $em->clear();
+
+        $client->request('POST', '/users/reset-password', ['json' => [
+            'username' => TestFixtures::PROJECT_OWNER['email'],
+        ]]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No matching user found.',
+        ]);
+    }
+
+    // @todo
 }

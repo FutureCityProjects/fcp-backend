@@ -45,7 +45,7 @@ class PasswordResetEventSubscriber
         }
 
         if ($this->security()->isGranted(User::ROLE_USER)) {
-            throw new AccessDeniedException('Forbidden for logged in users.');
+            throw new AccessDeniedException('Forbidden for authenticated users.');
         }
 
         $user = $event->validation->getUser();

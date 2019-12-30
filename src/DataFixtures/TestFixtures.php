@@ -45,7 +45,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
     public const DELETED_USER = [
         'id'        => 3, // because we persist him third
         'username'  => 'deleted_3',
-        'email'     => 'deleted@zukunftsstadt.de',
+        'email'     => 'deleted_3@zukunftsstadt.de',
         'roles'     => [],
         'password'  => 'empty',
         'createdAt' => '2018-02-01',

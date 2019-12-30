@@ -11,6 +11,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -60,9 +61,11 @@ class ValidationConfirmAction
         $em->remove($data);
         $em->flush();
 
+        // return 205: the server has fulfilled the request and the user agent
+        // SHOULD reset the document view
         return new JsonResponse([
             'success' => true,
             'message' => 'Validation successful',
-        ]);
+        ], Response::HTTP_RESET_CONTENT);
     }
 }
