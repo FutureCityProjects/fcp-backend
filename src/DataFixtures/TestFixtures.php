@@ -13,6 +13,7 @@ use App\Entity\Project;
 use App\Entity\ProjectMembership;
 use App\Entity\User;
 use App\Entity\UserObjectRole;
+use App\Entity\Validation;
 use DateTimeImmutable;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -152,11 +153,33 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $juror = $this->createUser(self::JUROR);
         $manager->persist($juror);
 
+        $accountValidation = new Validation();
+        $accountValidation->setUser($juror);
+        $accountValidation->generateToken();
+        $accountValidation->setType(Validation::TYPE_ACCOUNT);
+        $accountValidation->setExpiresAt(new DateTimeImmutable("tomorrow"));
+        $manager->persist($accountValidation);
+
         $projectOwner = $this->createUser(self::PROJECT_OWNER);
         $manager->persist($projectOwner);
 
+        $emailValidation = new Validation();
+        $emailValidation->setUser($projectOwner);
+        $emailValidation->generateToken();
+        $emailValidation->setType(Validation::TYPE_CHANGE_EMAIL);
+        $emailValidation->setContent(['email' => 'new@zukunftsstadt.de']);
+        $emailValidation->setExpiresAt(new DateTimeImmutable("tomorrow"));
+        $manager->persist($emailValidation);
+
         $projectMember = $this->createUser(self::PROJECT_MEMBER);
         $manager->persist($projectMember);
+
+        $pwValidation = new Validation();
+        $pwValidation->setUser($projectMember);
+        $pwValidation->generateToken();
+        $pwValidation->setType(Validation::TYPE_RESET_PASSWORD);
+        $pwValidation->setExpiresAt(new DateTimeImmutable("tomorrow"));
+        $manager->persist($pwValidation);
 
         $process = new Process();
         $process->setName('Test-Process äüöß');

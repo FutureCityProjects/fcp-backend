@@ -61,7 +61,8 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
             return null;
         }
 
-        return $this->getEntityManager()->createQuery(
+        return $this->getEntityManager()
+            ->createQuery(
             'SELECT u
                 FROM App\Entity\User u
                 WHERE

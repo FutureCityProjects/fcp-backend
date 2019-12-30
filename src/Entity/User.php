@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
-
 use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
@@ -27,8 +26,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * User
  *
  * @todo
- * * new endpoint for user profile (dont use item:PUT, we maybe want to allow
- *   setting of other properties, trigger events etc)
  * * new endpoint for changing email (create validation)
  * * new endpoint for PW reset (create validation)
  *

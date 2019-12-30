@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\ValidationConfirmAction;
 use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\CreatedAtFunctions;
 use DateTimeImmutable;
@@ -14,17 +16,37 @@ use Tuupola\Base62;
 /**
  * Validation
  *
+ * No other operations than "confirm", item:GET is required by API Platform.
+ *
+ * @ApiResource(
+ *     collectionOperations={
+ *     },
+ *     itemOperations={
+ *         "get"={
+ *             "security"="is_granted('ROLE_ADMIN')",
+ *         },
+ *         "confirm"={
+ *             "controller"=ValidationConfirmAction::class,
+ *             "method"="POST",
+ *             "path"="/validations/confirm/{id}",
+ *             "requirements"={"id"="\d+"}
+ *         }
+ *     },
+ *     input="App\Dto\ValidationInput",
+ *     denormalizationContext={
+ *         "allow_extra_attributes"=true,
+ *         "swagger_definition_name"="Write"
+ *     }
+ * )
+ *
  * @ORM\Entity
- * @ORM\Table(uniqueConstraints={
- *     @ORM\UniqueConstraint(name="token_idx", columns={"user_id", "type", "token"})
- * })
  */
 class Validation
 {
-    const TYPE_ACCOUNT        = 'account';
-    const TYPE_RESET_PASSWORD = 'reset-password';
-    const TYPE_CHANGE_EMAIL   = 'change-email';
-    const TYPE_JURY_INVITE    = 'jury_invite';
+    public const TYPE_ACCOUNT        = 'account';
+    public const TYPE_RESET_PASSWORD = 'reset-password';
+    public const TYPE_CHANGE_EMAIL   = 'change-email';
+    public const TYPE_JURY_INVITE    = 'jury_invite';
 
     use AutoincrementId;
 

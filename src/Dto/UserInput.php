@@ -10,13 +10,13 @@ class UserInput
 {
     /**
      * @var string
-     * @Groups({"user:write"})
+     * @Groups({"user:admin-write", "user:po-write"})
      */
     public ?string $username = null;
 
     /**
      * @var string
-     * @Groups({"user:write"})
+     * @Groups({"user:admin-write", "user:po-write"})
      */
     public ?string $email = null;
 
@@ -28,19 +28,19 @@ class UserInput
 
     /**
      * @var array
-     * @Groups({"user:write"})
+     * @Groups({"user:admin-write", "user:po-write"})
      */
     public ?array $roles = null;
 
     /**
      * @var bool
-     * @Groups({"user:write"})
+     * @Groups({"user:admin-write", "user:po-write"})
      */
     public ?bool $isActive = null;
 
     /**
      * @var bool
-     * @Groups({"user:write"})
+     * @Groups({"user:admin-write", "user:po-write"})
      */
     public ?bool $isValidated = null;
 

@@ -25,18 +25,12 @@ class UserRegisteredMessageHandler implements
     use ServiceSubscriberTrait;
 
     /**
-     * @var UserRegisteredMessage
-     */
-    private $message;
-
-    /**
      * Email-Validierungstoken in der DB anlegen und Benutzer eine Email senden.
      *
      * @param UserRegisteredMessage $message
      */
     public function __invoke(UserRegisteredMessage $message)
     {
-        $this->message = $message;
         $this->logger()->debug(
             'Processing "user.registered" message for user '.$message->userId
         );
@@ -110,7 +104,7 @@ class UserRegisteredMessageHandler implements
         $withType = str_replace('{{type}}', $validation->getType(), $withId);
 
         $email = (new TemplatedEmail())
-            // from added via listener
+            // FROM is added via listener
             ->to($validation->getUser()->getEmail())
             ->subject('Willkommen') // @todo translate
             ->htmlTemplate('registration/mail.validation.html.twig')

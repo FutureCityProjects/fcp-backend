@@ -1,6 +1,7 @@
 # Anstehend
-* validation confirm action
+
 * localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
+* validate pw in pw reset listener + user DTO
 * pw reset action
 * change email action
 * custom operations:
@@ -12,6 +13,9 @@
 * db less user provider https://github.com/lexik/LexikJWTAuthenticationBundle/blob/master/Resources/doc/8-jwt-user-provider.md
 * Entities
     * Unittests
+        * Cron commands trigger cron events
+        * Cron daily event dispatches PurgeValidationsMessage
+        * PurgeValidationsMessage is handled and removes expired 
         * uploadable
             * richtiger filename
             * richtiger dirname

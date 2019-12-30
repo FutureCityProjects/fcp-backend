@@ -1,0 +1,400 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Tests\Api;
+
+use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\DataFixtures\TestFixtures;
+use App\Entity\User;
+use App\Entity\Validation;
+use App\PHPUnit\AuthenticatedClientTrait;
+use App\PHPUnit\RefreshDatabaseTrait;
+use DateTimeImmutable;
+
+/**
+ * @group UserApi
+ */
+class ValidationApiTest extends ApiTestCase
+{
+    use AuthenticatedClientTrait;
+    use RefreshDatabaseTrait;
+
+    public function testGetCollectionNotAvailable(): void
+    {
+        $response = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('GET', '/validations');
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "GET /validations"',
+        ]);
+    }
+
+    public function testGetFailsUnauthenticated(): void
+    {
+        $client = static::createClient();
+
+        $iri = $this->findIriBy(Validation::class, ['id' => 1]);
+        $client->request('GET', $iri);
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type',
+            'application/json');
+
+        self::assertJsonContains([
+            'code'    => 401,
+            'message' => 'JWT Token not found',
+        ]);
+    }
+
+    public function testGetFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Validation::class, ['id' => 1]);
+        $client->request('GET', $iri);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testCreateNotAvailable(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('POST', '/validations', ['json' => [
+            'user'  => '/users/1',
+            'type'  => Validation::TYPE_ACCOUNT,
+            'token' => 'irrelevant',
+        ]]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "POST /validations"',
+        ]);
+    }
+
+    public function testUpdateNotAvailable(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+
+        $iri = $this->findIriBy(Validation::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'token' => '123fail',
+        ]]);
+
+        self::assertResponseStatusCodeSame(405);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "PUT /validations/1": Method Not Allowed (Allow: GET)',
+        ]);
+    }
+
+    public function testConfirmEmailChange(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // ID 2 is the owners email change validation
+        $token = $em->getRepository(Validation::class)
+            ->find(2)
+            ->getToken();
+
+        $before = $em->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_OWNER['id']);
+        $this->assertSame(TestFixtures::PROJECT_OWNER['email'], $before->getEmail());
+        $em->clear();
+
+        $client->request('POST', "/validations/confirm/2", ['json' => [
+            'token' => $token,
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            'success' => true,
+            'message' => 'Validation successful',
+        ]);
+
+        $after = $em->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_OWNER['id']);
+        $this->assertSame('new@zukunftsstadt.de', $after->getEmail());
+    }
+
+    public function testConfirmAccountValidation(): void
+    {
+        $client = static::createClient();
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // ID 1 is the jurors account validation
+        $token = $em->getRepository(Validation::class)
+            ->find(1)
+            ->getToken();
+
+        $before = $em->getRepository(User::class)
+            ->find(TestFixtures::JUROR['id']);
+        $before->setIsValidated(false);
+        $em->flush();
+        $em->clear();
+
+        $client->request('POST', "/validations/confirm/1", ['json' => [
+            'token'    => $token,
+            'password' => 'new-password',
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            'success' => true,
+            'message' => 'Validation successful',
+        ]);
+
+        $after = $em->getRepository(User::class)
+            ->find(TestFixtures::JUROR['id']);
+        $this->assertTrue($after->isValidated());
+    }
+
+    public function testConfirmPasswordReset(): void
+    {
+        $client = static::createClient();
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // ID 3 is the members PW reset validation
+        $token = $em->getRepository(Validation::class)
+            ->find(3)
+            ->getToken();
+
+        $oldPW = $em->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_MEMBER['id'])
+            ->getPassword();
+        $em->clear();
+
+        $client->request('POST', "/validations/confirm/3", ['json' => [
+            'token'    => $token,
+            'password' => 'new-password',
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            'success' => true,
+            'message' => 'Validation successful',
+        ]);
+
+        $newPW = $em->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_MEMBER['id'])
+            ->getPassword();
+        $this->assertNotSame($oldPW, $newPW);
+    }
+
+
+    public function testConfirmAccountValidationFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // ID 1 is the jurors account validation
+        $token = $em->getRepository(Validation::class)
+            ->find(1)
+            ->getToken();
+
+        $client->request('POST', '/validations/confirm/1', ['json' => [
+            'token' => $token,
+        ]]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Forbidden for logged in users.',
+        ]);
+    }
+
+    public function testConfirmEmailChangeFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // ID 2 is the owners email change validation
+        $token = $em->getRepository(Validation::class)
+            ->find(2)
+            ->getToken();
+
+        $client->request('POST', '/validations/confirm/2', ['json' => [
+            'token' => $token,
+        ]]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testConfirmPasswordResetFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        // ID 3 is the members PW reset validation
+        $token = $em->getRepository(Validation::class)
+            ->find(3)
+            ->getToken();
+
+        $client->request('POST', '/validations/confirm/3', ['json' => [
+            'token' => $token,
+        ]]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Forbidden for logged in users.',
+        ]);
+    }
+
+    public function testConfirmWithWrongTokenFails(): void
+    {
+        static::createClient()->request('POST', '/validations/confirm/1', ['json' => [
+            'token' => 'fails',
+        ]]);
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'         => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No matching validation found.',
+        ]);
+    }
+
+    public function testConfirmFailsWhenExpired(): void
+    {
+        $client = static::createClient();
+
+        // ID 1 is the owners email change validation
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        /** @var Validation $validation */
+        $validation = $em->getRepository(Validation::class)->find(1);
+        $validation->setExpiresAt(new DateTimeImmutable("yesterday"));
+        $em->flush();;
+        $em->clear();
+
+        $client->request('POST', "/validations/confirm/1", ['json' => [
+            'token' => $validation->getToken(),
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Validation is expired.',
+        ]);
+    }
+
+    public function testDeleteNotAvailable(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ]);
+        $iri = $this->findIriBy(Validation::class, ['id' => 1]);
+        $client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(405);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "DELETE /validations/1": Method Not Allowed (Allow: GET)',
+        ]);
+    }
+
+    /**
+     * Test that the DELETE operation for the whole collection is not available.
+     */
+    public function testCollectionDeleteNotAvailable(): void
+    {
+        static::createAuthenticatedClient([
+            'email' => TestFixtures::ADMIN['email']
+        ])->request('DELETE', '/validations');
+
+        self::assertResponseStatusCodeSame(404);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'No route found for "DELETE /validations"',
+        ]);
+    }
+
+    // @todo
+    // * fail email validation for deleted user
+    // * fail pw reset for deleted user
+    // * fail pw reset for inactive user
+    // * fail account validation for deleted user
+}

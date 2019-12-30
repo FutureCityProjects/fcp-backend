@@ -833,6 +833,27 @@ class UserApiTest extends ApiTestCase
         $this->assertSame($before->getPassword(), $after->getPassword());
     }
 
+    public function testUpdateSelf(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+        $client->request('PUT', $iri, ['json' => [
+            'firstName' => 'Erich',
+            'lastName'  => 'Müller',
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'       => $iri,
+            'firstName' => 'Erich',
+            'lastName'  => 'Müller',
+        ]);
+    }
+
     public function testUpdateFailsUnauthenticated(): void
     {
         $client = static::createClient();
@@ -1057,12 +1078,162 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
+    public function testUpdateOwnEmailFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'email' => 'new@zukunftsstadt.de',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("email" are unknown).',
+        ]);
+    }
+
+    public function testUpdateOwnUsernameFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'username' => 'new-name',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("username" are unknown).',
+        ]);
+    }
+
+    public function testUpdateOwnRolesFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'roles' => [User::ROLE_ADMIN],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("roles" are unknown).',
+        ]);
+    }
+
+    public function testUpdateOwnIsActiveFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'isActive' => false,
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("isActive" are unknown).',
+        ]);
+    }
+
+    public function testUpdateOwnIsValidatedFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('PUT', $iri, ['json' => [
+            'isValidated' => false,
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Extra attributes are not allowed ("isValidated" are unknown).',
+        ]);
+    }
+
     public function testDelete(): void
     {
         $before = new DateTimeImmutable();
 
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
+        ]);
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+
+        $client->request('DELETE', $iri);
+
+        static::assertResponseStatusCodeSame(204);
+
+        /** @var User $user */
+        $user = static::$container->get('doctrine')
+            ->getRepository(User::class)
+            ->find(TestFixtures::PROJECT_MEMBER['id']);
+        $this->assertNotNull($user);
+        $this->assertTrue($user->isDeleted());
+        $this->assertGreaterThan($before, $user->getDeletedAt());
+        $this->assertCount(0, $user->getProjectMemberships());
+        // removal of other private data is tested in Enity\UserTest
+    }
+
+    public function testDeleteSelf(): void
+    {
+        $before = new DateTimeImmutable();
+
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
         $iri = $this->findIriBy(User::class,
             ['email' => TestFixtures::PROJECT_MEMBER['email']]);
@@ -1164,9 +1335,4 @@ class UserApiTest extends ApiTestCase
             'hydra:description' => 'No route found for "DELETE /users": Method Not Allowed (Allow: GET, POST)',
         ]);
     }
-
-    // @todo
-    // * update self
-    // * todo delete self
-
 }
