@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+
 use App\Entity\User;
 use App\Entity\Validation;
-use App\Message\UserRegisteredMessage;
+use App\Message\UserEmailChangeMessage;
 use DateInterval;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,7 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
-class UserRegisteredMessageHandler implements
+class UserEmailChangeMessageHandler implements
     MessageHandlerInterface,
     ServiceSubscriberInterface
 {
@@ -27,39 +28,41 @@ class UserRegisteredMessageHandler implements
     /**
      * Create the validation token and send the user an email with a link to click.
      *
-     * @param UserRegisteredMessage $message
+     * @param UserEmailChangeMessage $message
      */
-    public function __invoke(UserRegisteredMessage $message)
+    public function __invoke(UserEmailChangeMessage $message)
     {
         $this->logger()->debug(
-            'Processing UserRegisteredMessage for user '.$message->userId
+            'Processing UserEmailChangeMessage for user '
+            .$message->userId
         );
 
         $entityManager = $this->entityManager();
         $user = $entityManager->getRepository(User::class)
             ->findOneBy([
                 'id'          => $message->userId,
-                'isValidated' => false,
                 'deletedAt'   => null,
             ]);
 
         if (!$user) {
             $this->logger()->info(
-                "User {$message->userId} does not exist or is already validated!"
+                "User {$message->userId} does not exist!"
             );
 
             return;
         }
 
-        $validation = $this->createValidation($user);
+        // @todo check if a (valid) email change validation exists -> cancel
+
+        $validation = $this->createValidation($user, $message);
 
         $sent = $this->sendValidationMail($validation, $message->validationUrl);
         if ($sent) {
             $this->logger()
-                ->info("Sent validation email to user {$user->getEmail()}!");
+                ->info("Sent email change validation email to user {$user->getEmail()}!");
         } else {
             $this->logger()
-                ->error("Failed to send the validation email to {$user->getEmail()}!");
+                ->error("Failed to send the email change validation email to {$user->getEmail()}!");
         }
     }
 
@@ -69,11 +72,12 @@ class UserRegisteredMessageHandler implements
      * @return Validation
      * @throws Exception when token generation fails
      */
-    private function createValidation(User $user): Validation
+    private function createValidation(User $user, UserEmailChangeMessage $message): Validation
     {
         $validation = new Validation();
         $validation->setUser($user);
-        $validation->setType(Validation::TYPE_ACCOUNT);
+        $validation->setType(Validation::TYPE_CHANGE_EMAIL);
+        $validation->setContent(['email' => $message->newEmail]);
         $validation->generateToken();
 
         // @todo make interval configurable
@@ -89,7 +93,7 @@ class UserRegisteredMessageHandler implements
     }
 
     /**
-     * Sends an email with the validation details (URL to click) to the new user.
+     * Sends an email with the validation link (URL to click) to the new user.
      *
      * @param Validation $validation
      * @param string $url
@@ -106,9 +110,12 @@ class UserRegisteredMessageHandler implements
 
         $email = (new TemplatedEmail())
             // FROM is added via listener
-            ->to($validation->getUser()->getEmail())
-            ->subject('Willkommen') // @todo translate
-            ->htmlTemplate('registration/mail.validation.html.twig')
+
+            // send to the NEW email address
+            ->to($validation->getContent()['email'])
+
+            ->subject('Email-Adresse bestätigen') // @todo translate
+            ->htmlTemplate('security/mail.email-change.html.twig')
             ->context([
                 'expiresAt'     => $validation->getExpiresAt(),
                 'username'      => $validation->getUser()->getUsername(),

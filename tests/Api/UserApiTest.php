@@ -8,6 +8,7 @@ use App\DataFixtures\TestFixtures;
 use App\Entity\Fund;
 use App\Entity\User;
 use App\Entity\UserObjectRole;
+use App\Message\UserEmailChangeMessage;
 use App\Message\UserForgotPasswordMessage;
 use App\Message\UserRegisteredMessage;
 use App\PHPUnit\AuthenticatedClientTrait;
@@ -309,9 +310,9 @@ class UserApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context' => '/contexts/Error',
-            '@type' => 'hydra:Error',
-            'hydra:title' => 'An error occurred',
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
             'hydra:description' => 'Access Denied.',
         ]);
     }
@@ -659,7 +660,7 @@ class UserApiTest extends ApiTestCase
                 'email'         => 'new@zukunftsstadt.de',
                 'firstName'     => 'Peter',
                 'password'      => 'irrelevant',
-                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}',
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(201);
@@ -1304,17 +1305,18 @@ class UserApiTest extends ApiTestCase
 
         $client->request('DELETE', $iri);
 
-        // @todo 500 -> 400
-        self::assertResponseStatusCodeSame(500);
-        self::assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
             '@context'          => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'User already deleted',
+            'hydra:description' => 'Access Denied.',
         ]);
     }
+
     /**
      * Test that the DELETE operation for the whole collection is not available.
      */
@@ -1340,7 +1342,8 @@ class UserApiTest extends ApiTestCase
     {
         static::createClient()
             ->request('POST', '/users/reset-password', ['json' => [
-                'username' => TestFixtures::PROJECT_OWNER['username'],
+                'username'      => TestFixtures::PROJECT_OWNER['username'],
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(202);
@@ -1362,7 +1365,8 @@ class UserApiTest extends ApiTestCase
     {
         static::createClient()
             ->request('POST', '/users/reset-password', ['json' => [
-                'username' => TestFixtures::PROJECT_OWNER['email'],
+                'username'      => TestFixtures::PROJECT_OWNER['email'],
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(202);
@@ -1384,7 +1388,8 @@ class UserApiTest extends ApiTestCase
     {
         static::createClient()
             ->request('POST', '/users/reset-password', ['json' => [
-                'username' => 'does-not-exist',
+                'username'      => 'does-not-exist',
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(404);
@@ -1400,7 +1405,8 @@ class UserApiTest extends ApiTestCase
     {
         static::createClient()
             ->request('POST', '/users/reset-password', ['json' => [
-                'username' => 'does@not-exist.de',
+                'username'      => 'does@not-exist.de',
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(404);
@@ -1416,7 +1422,8 @@ class UserApiTest extends ApiTestCase
     {
         static::createClient()
             ->request('POST', '/users/reset-password', ['json' => [
-                'username' => '',
+                'username'      => '',
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -1428,13 +1435,70 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
+    public function testPasswordResetWithoutValidationUrlFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => 'irrelevant',
+            ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: This value should not be blank.',
+        ]);
+    }
+
+    public function testPasswordResetWithoutIdPlaceholderFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username'      => 'irrelevant',
+                'validationUrl' => 'http://fcp.de/?token={{token}}'
+            ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: ID placeholder is missing.',
+        ]);
+    }
+
+    public function testPasswordResetWithoutTokenPlaceholderFails(): void
+    {
+        static::createClient()
+            ->request('POST', '/users/reset-password', ['json' => [
+                'username' => 'irrelevant',
+                'validationUrl' => 'http://fcp.de/?id={{id}}'
+            ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: Token placeholder is missing.',
+        ]);
+    }
+
     public function testPasswordResetFailsAuthenticated(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
         $client->request('POST', '/users/reset-password', ['json' => [
-            'username' => 'irrelevant',
+            'username'     => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
         ]]);
 
         self::assertResponseStatusCodeSame(403);
@@ -1453,7 +1517,8 @@ class UserApiTest extends ApiTestCase
     {
         static::createClient()
             ->request('POST', '/users/reset-password', ['json' => [
-                'username' => TestFixtures::DELETED_USER['email'],
+                'username'      => TestFixtures::DELETED_USER['email'],
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
             ]]);
 
         self::assertResponseStatusCodeSame(404);
@@ -1477,7 +1542,8 @@ class UserApiTest extends ApiTestCase
         $em->clear();
 
         $client->request('POST', '/users/reset-password', ['json' => [
-            'username' => TestFixtures::PROJECT_OWNER['email'],
+            'username'      => TestFixtures::PROJECT_OWNER['email'],
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
         ]]);
 
         self::assertResponseStatusCodeSame(404);
@@ -1489,5 +1555,179 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
-    // @todo
+    public function testEmailChange(): void
+    {
+        $client = self::createAuthenticatedClient(
+            ['id' => TestFixtures::PROCESS_OWNER['id']]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'email'         => 'new@zukunftsstadt.de',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(202);
+        self::assertJsonContains([
+            'success' => true,
+            'message' => 'Request received',
+        ]);
+
+        // check that the email wasn't changed already
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $user = $em->getRepository(User::class)
+            ->find(TestFixtures::PROCESS_OWNER['id']);
+        $this->assertSame(TestFixtures::PROCESS_OWNER['email'], $user->getEmail());
+
+        // ... instead a queue message was dispatched
+        $messenger = self::$container->get('messenger.default_bus');
+        $messages = $messenger->getDispatchedMessages();
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(UserEmailChangeMessage::class,
+            $messages[0]['message']);
+        $this->assertSame(TestFixtures::PROCESS_OWNER['id'],
+            $messages[0]['message']->userId);
+        $this->assertSame('new@zukunftsstadt.de',
+            $messages[0]['message']->newEmail);
+    }
+
+    public function testEmailChangeFailsWithInvalidEmail(): void
+    {
+        $client = self::createAuthenticatedClient(
+            ['id' => TestFixtures::PROCESS_OWNER['id']]);
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'email'         => 'invalid',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'email: This value is not a valid email address.',
+        ]);
+    }
+
+    public function testEmailChangeFailsWithDuplicateEmail(): void
+    {
+        $client = self::createAuthenticatedClient(
+            ['id' => TestFixtures::PROCESS_OWNER['id']]);
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'email'         => TestFixtures::ADMIN['email'],
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'email: Email already exists.',
+        ]);
+    }
+
+    public function testEmailChangeFailsWithoutEmail(): void
+    {
+        $client = self::createAuthenticatedClient(
+            ['id' => TestFixtures::PROCESS_OWNER['id']]);
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'email: This value should not be blank.',
+        ]);
+    }
+
+    public function testEmailChangeFailsWithoutValidationUrl(): void
+    {
+        $client = self::createAuthenticatedClient(
+            ['id' => TestFixtures::PROCESS_OWNER['id']]);
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'email' => 'new@zukunftsstadt.de',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validationUrl: This value should not be blank.',
+        ]);
+    }
+
+    public function testEmailChangeFailsUnauthenticated(): void
+    {
+        $client = self::createClient();
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'email'         => 'new@zukunftsstadt.de',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type',
+            'application/json');
+
+        self::assertJsonContains([
+            'code' => 401,
+            'message' => 'JWT Token not found',
+        ]);
+    }
+
+    public function testEmailChangeFailsWithoutPrivilege(): void
+    {
+        $client = self::createAuthenticatedClient(
+            ['id' => TestFixtures::PROJECT_MEMBER['id']]);
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROCESS_OWNER['email']]);
+
+        $client->request('POST', $iri.'/change-email', ['json' => [
+            'email'         => 'new@zukunftsstadt.de',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+        ]]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
 }

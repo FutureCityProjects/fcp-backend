@@ -30,6 +30,8 @@ class UserRegistrationAction
 
         $params = json_decode($request->getContent(), true);
 
+        // @todo no event, directly dispatch message? Event could be
+        // thrown in the messagehandler
         // trigger an event to allow follow-up actions like sending
         // a validation email etc.
         $dispatcher->dispatch(

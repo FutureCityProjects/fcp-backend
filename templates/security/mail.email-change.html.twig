@@ -1,0 +1,19 @@
+{% extends 'layout/mail.html.twig' %}
+{% block mail_subject %}Email-Adresse ändern{% endblock %}
+{% block mail_body %}
+    <h1>Hallo {{ username }}!</h1>
+    <p>
+        Du hast die Änderung Deiner Email-Adresse angefordert, bitte bestätige die Anfrage
+        bis zum {{ expiresAt|localizeddate('long', 'short') }} durch Klick auf folgenden Link,
+        die Email-Adresse Deines Zugangs wird dann umgestellt:
+    </p>
+    <p>
+        <a href="{{ validationUrl }}">{{ validationUrl }}</a>
+    </p>
+    <p>
+        Sollte der Link nicht funktionieren so kopiere bitte die vollständige URL
+        in die Browser-Adresszeile.<br>
+        Hast du diese Anfrage nicht selbst gestellt so kannst du diese Email ignorieren,
+        der Link wird nach Ablauf der Frist automatisch ungültig.
+    </p>
+{% endblock %}

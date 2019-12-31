@@ -6,12 +6,12 @@ namespace App\Tests\Messenger;
 use App\DataFixtures\TestFixtures;
 use App\Entity\User;
 use App\Entity\Validation;
-use App\Message\UserRegisteredMessage;
-use App\MessageHandler\UserRegisteredMessageHandler;
+use App\Message\UserEmailChangeMessage;
+use App\MessageHandler\UserEmailChangeMessageHandler;
 use App\PHPUnit\RefreshDatabaseTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class UserRegisteredTest extends KernelTestCase
+class EmailChangeTest extends KernelTestCase
 {
     use RefreshDatabaseTrait;
 
@@ -31,21 +31,19 @@ class UserRegisteredTest extends KernelTestCase
 
     public function testHandlerSendsMessage()
     {
-        $admin = $this->entityManager->getRepository(User::class)
-            ->find(TestFixtures::ADMIN['id']);
-        $admin->setIsValidated(false);
-        $this->entityManager->flush();
-
-        $msg = new UserRegisteredMessage(
-            TestFixtures::ADMIN['id'],
+        $msg = new UserEmailChangeMessage(
+            TestFixtures::PROCESS_OWNER['id'],
+            'new@zukunftsstadt.de',
             'https://fcp.vrok.de/confirm-validation/?id={{id}}&token={{token}}&type={{type}}'
         );
 
+        $po = $this->entityManager->getRepository(User::class)
+            ->find(TestFixtures::PROCESS_OWNER['id']);
         $notFound = $this->entityManager->getRepository(Validation::class)
-            ->findOneBy(['user' => $admin]);
+            ->findOneBy(['user' => $po]);
         $this->assertNull($notFound);
 
-        $handler = self::$container->get(UserRegisteredMessageHandler::class);
+        $handler = self::$container->get(UserEmailChangeMessageHandler::class);
         $handler($msg);
 
         // check for sent emails, @see Symfony\Component\Mailer\Test\Constraint\EmailCount
@@ -58,8 +56,9 @@ class UserRegisteredTest extends KernelTestCase
         $this->assertCount(1, $sent);
 
         $validation = $this->entityManager->getRepository(Validation::class)
-            ->findOneBy(['user' => $admin]);
+            ->findOneBy(['user' => $po]);
         $this->assertInstanceOf(Validation::class, $validation);
-        $this->assertSame(Validation::TYPE_ACCOUNT, $validation->getType());
+        $this->assertSame(Validation::TYPE_CHANGE_EMAIL, $validation->getType());
+        $this->assertSame(['email' => 'new@zukunftsstadt.de'], $validation->getContent());
     }
 }

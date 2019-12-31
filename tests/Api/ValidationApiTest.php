@@ -21,7 +21,7 @@ class ValidationApiTest extends ApiTestCase
 
     public function testGetCollectionNotAvailable(): void
     {
-        $response = static::createAuthenticatedClient([
+        static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
         ])->request('GET', '/validations');
 
@@ -138,7 +138,7 @@ class ValidationApiTest extends ApiTestCase
         $this->assertSame(TestFixtures::PROJECT_OWNER['email'], $before->getEmail());
         $em->clear();
 
-        $r = $client->request('POST', "/validations/confirm/2", ['json' => [
+        $client->request('POST', '/validations/2/confirm', ['json' => [
             'token' => $token,
         ]]);
 
@@ -170,7 +170,7 @@ class ValidationApiTest extends ApiTestCase
         $em->flush();
         $em->clear();
 
-        $client->request('POST', "/validations/confirm/1", ['json' => [
+        $client->request('POST', '/validations/1/confirm', ['json' => [
             'token'    => $token,
             'password' => 'new-password',
         ]]);
@@ -202,7 +202,7 @@ class ValidationApiTest extends ApiTestCase
             ->getPassword();
         $em->clear();
 
-        $client->request('POST', "/validations/confirm/3", ['json' => [
+        $client->request('POST', '/validations/3/confirm', ['json' => [
             'token'    => $token,
             'password' => 'new-password',
         ]]);
@@ -233,7 +233,7 @@ class ValidationApiTest extends ApiTestCase
             ->find(1)
             ->getToken();
 
-        $client->request('POST', '/validations/confirm/1', ['json' => [
+        $client->request('POST', '/validations/1/confirm', ['json' => [
             'token' => $token,
         ]]);
 
@@ -262,7 +262,7 @@ class ValidationApiTest extends ApiTestCase
             ->find(2)
             ->getToken();
 
-        $client->request('POST', '/validations/confirm/2', ['json' => [
+        $client->request('POST', '/validations/2/confirm', ['json' => [
             'token' => $token,
         ]]);
 
@@ -291,7 +291,7 @@ class ValidationApiTest extends ApiTestCase
             ->find(3)
             ->getToken();
 
-        $client->request('POST', '/validations/confirm/3', ['json' => [
+        $client->request('POST', '/validations/3/confirm', ['json' => [
             'token' => $token,
         ]]);
 
@@ -309,7 +309,7 @@ class ValidationApiTest extends ApiTestCase
 
     public function testConfirmWithWrongTokenFails(): void
     {
-        static::createClient()->request('POST', '/validations/confirm/1', ['json' => [
+        static::createClient()->request('POST', '/validations/1/confirm', ['json' => [
             'token' => 'fails',
         ]]);
 
@@ -337,7 +337,7 @@ class ValidationApiTest extends ApiTestCase
         $em->flush();;
         $em->clear();
 
-        $client->request('POST', "/validations/confirm/1", ['json' => [
+        $client->request('POST', '/validations/1/confirm', ['json' => [
             'token' => $validation->getToken(),
         ]]);
 

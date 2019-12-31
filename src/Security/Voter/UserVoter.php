@@ -33,10 +33,6 @@ class UserVoter extends Voter
 
         switch ($attribute) {
             case 'READ':
-                // no break
-            case 'EDIT':
-                // no break
-            case 'DELETE':
                 if ($user->hasRole(User::ROLE_ADMIN)
                     || $user->hasRole(User::ROLE_PROCESS_OWNER)
                 ) {
@@ -45,6 +41,28 @@ class UserVoter extends Voter
 
                 if ($subject->isDeleted()) {
                     return false;
+                }
+
+                if ($subject->getId() == $user->getId()) {
+                    // check should not be neccessary, only a valid & active
+                    // user can login
+                    return $subject->isActive() && $subject->isValidated();
+                }
+
+                return false;
+                break;
+
+            case 'EDIT':
+                // no break
+            case 'DELETE':
+                if ($subject->isDeleted()) {
+                    return false;
+                }
+
+                if ($user->hasRole(User::ROLE_ADMIN)
+                    || $user->hasRole(User::ROLE_PROCESS_OWNER)
+                ) {
+                    return true;
                 }
 
                 if ($subject->getId() == $user->getId()) {

@@ -7,7 +7,6 @@ use ApiPlatform\Core\Validator\ValidatorInterface;
 use App\Entity\User;
 use App\Message\UserForgotPasswordMessage;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,23 +17,8 @@ use Symfony\Component\Security\Core\Security;
 
 class PasswordResetAction
 {
-    /**
-     * @var EventDispatcherInterface
-     */
-    private EventDispatcherInterface $dispatcher;
-
-    private $entityManager;
-
-    public function __construct(ManagerRegistry $registry, EventDispatcherInterface $dispatcher)
-    {
-        $this->dispatcher    = $dispatcher;
-        $this->entityManager = $registry->getManagerForClass(User::class);
-    }
-
     public function __invoke(
         Request $request,
-        User $data,
-        EventDispatcherInterface $dispatcher,
         ManagerRegistry $registry,
         MessageBusInterface $bus,
         Security $security,
@@ -44,20 +28,11 @@ class PasswordResetAction
             throw new AccessDeniedException('Forbidden for authenticated users.');
         }
 
+        // DTO was validated by the DataTransformer, username & validationUrl
+        // should be there
         $params = json_decode($request->getContent(), true);
-        /*
-        if (isset($params['username']) && isset($params['email'])) {
-            throw new BadRequestHttpException('Only username OR email allowed.');
-        }
 
-        $identifier = $params['username'] ?? ($params['email'] ?? null);
-        if (empty($identifier)) {
-            throw new BadRequestHttpException('Username OR email required.');
-        }
-*/
         $entityManager = $registry->getManagerForClass(User::class);
-
-        // DTO was validated by the DataTransformer, username should be there
         $user = $entityManager->getRepository(User::class)
             ->loadUserByUsername($params['username']);
 
@@ -71,7 +46,7 @@ class PasswordResetAction
         }
 
         $bus->dispatch(
-            new UserForgotPasswordMessage($user->getId())
+            new UserForgotPasswordMessage($user->getId(), $params['validationUrl'])
         );
 
         // return 202: the action has not yet been enacted

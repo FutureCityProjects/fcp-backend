@@ -8,6 +8,7 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Controller\ChangeEmailAction;
 use App\Controller\PasswordResetAction;
 use App\Controller\UserRegistrationAction;
 use App\Entity\Traits\AutoincrementId;
@@ -26,10 +27,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * User
  *
- * @todo
- * * new endpoint for changing email (create validation)
- * * new endpoint for PW reset (create validation)
- *
  * @ApiResource(
  *     attributes={"security"="is_granted('ROLE_ADMIN') or is_granted('ROLE_PROCESS_OWNER')"},
  *     collectionOperations={
@@ -43,14 +40,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  *             "method"="POST",
  *             "path"="/users/register",
  *             "security"="is_granted('IS_AUTHENTICATED_ANONYMOUSLY')",
- *             "validation_groups"={"Default", "user:create"}
+ *             "validation_groups"={"Default", "user:register"}
  *         },
  *         "resetPassword"={
  *             "controller"=PasswordResetAction::class,
  *             "method"="POST",
  *             "path"="/users/reset-password",
  *             "security"="is_granted('IS_AUTHENTICATED_ANONYMOUSLY')",
- *             "validation_groups"={"Default", "user:create"}
+ *             "validation_groups"={"Default", "user:resetPassword"}
  *         }
  *     },
  *     itemOperations={
@@ -63,6 +60,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         },
  *         "delete"={
  *             "security"="is_granted('DELETE', object)"
+ *         },
+ *         "changeEmail"={
+ *             "controller"=ChangeEmailAction::class,
+ *             "method"="POST",
+ *             "path"="/users/{id}/change-email",
+ *             "security"="is_granted('EDIT', object)",
+ *             "validation_groups"={"Default", "user:changeEmail"}
  *         }
  *     },
  *     input="App\Dto\UserInput",
@@ -170,7 +174,7 @@ class User implements UserInterface
      *     match=false,
      *     message="Email is not valid."
      * )
-     * @Groups({"user:read", "user:write"})
+     * @Groups({"user:changeEmail", "user:read", "user:write"})
      * @ORM\Column(type="string", length=255, nullable=false, unique=true)
      */
     private $email;

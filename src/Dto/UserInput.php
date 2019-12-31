@@ -22,9 +22,11 @@ class UserInput
 
     /**
      * @var string
+     * @Assert\NotBlank(groups={"user:changeEmail"}, allowNull=false)
      * @Groups({
      *     "user:admin-write",
      *     "user:po-write",
+     *     "user:changeEmail",
      *     "user:register"
      * })
      */
@@ -68,18 +70,16 @@ class UserInput
 
     /**
      * @var string
-     * @Groups({"user:register"})
-     * @Assert\NotBlank(groups={"user:register"}, allowNull=false)
+     * @Assert\NotBlank(allowNull=false, groups={"user:changeEmail", "user:register", "user:resetPassword"})
      * @Assert\Regex(
-     *     groups={"user:register"},
      *     pattern="/{{token}}/",
      *     message="Token placeholder is missing."
      * )
      * @Assert\Regex(
-     *     groups={"user:register"},
      *     pattern="/{{id}}/",
      *     message="ID placeholder is missing."
      * )
+     * @Groups({"user:changeEmail", "user:register", "user:resetPassword"})
      */
     public ?string $validationUrl = null;
 }

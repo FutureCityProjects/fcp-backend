@@ -28,7 +28,7 @@ use Tuupola\Base62;
  *         "confirm"={
  *             "controller"=ValidationConfirmAction::class,
  *             "method"="POST",
- *             "path"="/validations/confirm/{id}",
+ *             "path"="/validations/{id}/confirm",
  *             "requirements"={"id"="\d+"}
  *         }
  *     },

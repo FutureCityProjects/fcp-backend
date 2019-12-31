@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\MessageHandler;
 
+
 use App\Entity\User;
 use App\Entity\Validation;
-use App\Message\UserRegisteredMessage;
+use App\Message\UserForgotPasswordMessage;
 use DateInterval;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,7 @@ use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
-class UserRegisteredMessageHandler implements
+class UserForgotPasswordMessageHandler implements
     MessageHandlerInterface,
     ServiceSubscriberInterface
 {
@@ -27,39 +28,41 @@ class UserRegisteredMessageHandler implements
     /**
      * Create the validation token and send the user an email with a link to click.
      *
-     * @param UserRegisteredMessage $message
+     * @param UserForgotPasswordMessage $message
      */
-    public function __invoke(UserRegisteredMessage $message)
+    public function __invoke(UserForgotPasswordMessage $message)
     {
         $this->logger()->debug(
-            'Processing UserRegisteredMessage for user '.$message->userId
+            'Processing UserForgotPasswordMessage for user '
+            .$message->userId
         );
 
         $entityManager = $this->entityManager();
         $user = $entityManager->getRepository(User::class)
             ->findOneBy([
                 'id'          => $message->userId,
-                'isValidated' => false,
                 'deletedAt'   => null,
             ]);
 
         if (!$user) {
             $this->logger()->info(
-                "User {$message->userId} does not exist or is already validated!"
+                "User {$message->userId} does not exist!"
             );
 
             return;
         }
+
+        // @todo check if a (valid) pw reset validation exists -> cancel
 
         $validation = $this->createValidation($user);
 
         $sent = $this->sendValidationMail($validation, $message->validationUrl);
         if ($sent) {
             $this->logger()
-                ->info("Sent validation email to user {$user->getEmail()}!");
+                ->info("Sent password reset validation email to user {$user->getEmail()}!");
         } else {
             $this->logger()
-                ->error("Failed to send the validation email to {$user->getEmail()}!");
+                ->error("Failed to send the password reset validation email to {$user->getEmail()}!");
         }
     }
 
@@ -73,7 +76,7 @@ class UserRegisteredMessageHandler implements
     {
         $validation = new Validation();
         $validation->setUser($user);
-        $validation->setType(Validation::TYPE_ACCOUNT);
+        $validation->setType(Validation::TYPE_RESET_PASSWORD);
         $validation->generateToken();
 
         // @todo make interval configurable
@@ -89,7 +92,8 @@ class UserRegisteredMessageHandler implements
     }
 
     /**
-     * Sends an email with the validation details (URL to click) to the new user.
+     * Sends an email with the validation link (URL to click) to the new user,
+     * the client should show a form to enter a new password on this URL.
      *
      * @param Validation $validation
      * @param string $url
@@ -107,8 +111,8 @@ class UserRegisteredMessageHandler implements
         $email = (new TemplatedEmail())
             // FROM is added via listener
             ->to($validation->getUser()->getEmail())
-            ->subject('Willkommen') // @todo translate
-            ->htmlTemplate('registration/mail.validation.html.twig')
+            ->subject('Passwort zurücksetzen') // @todo translate
+            ->htmlTemplate('security/mail.password-reset.html.twig')
             ->context([
                 'expiresAt'     => $validation->getExpiresAt(),
                 'username'      => $validation->getUser()->getUsername(),
