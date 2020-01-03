@@ -33,19 +33,29 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceCollectionJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@context' => '/contexts/Project',
-            '@id' => '/projects',
-            '@type' => 'hydra:Collection',
+            '@context'         => '/contexts/Project',
+            '@id'              => '/projects',
+            '@type'            => 'hydra:Collection',
             'hydra:totalItems' => 2,
+            'hydra:member'     => [
+                0 => [
+                    'id'                => TestFixtures::IDEA['id'],
+                    'resultingProjects' => [
+                        [
+                            'id' => TestFixtures::PROJECT['id'],
+                        ]
+                    ]
+                ],
+                1 => [
+                    'id' => TestFixtures::PROJECT['id'],
+                ],
+            ],
         ]);
 
         $collection = $response->toArray();
 
         // the locked and the deleted project are NOT returned
         $this->assertCount(2, $collection['hydra:member']);
-
-        $this->assertSame(TestFixtures::IDEA['id'], $collection['hydra:member'][0]['id']);
-        $this->assertSame(TestFixtures::PROJECT['id'], $collection['hydra:member'][1]['id']);
 
         // those properties should not be visible to anonymous
         $this->assertArrayNotHasKey('applications', $collection['hydra:member'][1]);
@@ -224,20 +234,25 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@id' => $iri,
-            'challenges' => null,
-            'delimitation' => null,
-            'description' => null,
-            'id' => TestFixtures::IDEA['id'],
-            'inspiration' => null,
-            'name' => null,
+            '@id'                   => $iri,
+            'challenges'            => null,
+            'delimitation'          => null,
+            'description'           => null,
+            'id'                    => TestFixtures::IDEA['id'],
+            'inspiration'           => null,
+            'name'                  => null,
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_0_PERCENT,
-            'progress' => Project::PROGRESS_IDEA,
-            'shortDescription' => 'Car-free city center around the year',
-            'slug' => null,
-            'state' => Project::STATE_ACTIVE,
-            'goal' => null,
-            'vision' => null,
+            'progress'              => Project::PROGRESS_IDEA,
+            'resultingProjects'     => [
+                [
+                    'id' => TestFixtures::PROJECT['id'],
+                ]
+            ],
+            'shortDescription'      => 'Car-free city center around the year',
+            'slug'                  => null,
+            'state'                 => Project::STATE_ACTIVE,
+            'goal'                  => null,
+            'vision'                => null,
         ]);
 
         $projectData = $response->toArray();

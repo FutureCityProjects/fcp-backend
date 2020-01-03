@@ -1,6 +1,5 @@
 # Anstehend
 
-* FundApplication API
 * localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
 * validate pw in pw reset listener + user DTO
 * custom operations:

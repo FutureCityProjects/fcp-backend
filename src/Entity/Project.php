@@ -287,7 +287,7 @@ class Project
      * @var Project
      * @Groups({"project:read", "project:create"})
      * @MaxDepth(1)
-     * @ORM\ManyToOne(targetEntity="Project", fetch="EXTRA_LAZY")
+     * @ORM\ManyToOne(targetEntity="Project", fetch="EXTRA_LAZY", inversedBy="resultingProjects")
      * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
      */
     private ?self $inspiration = null;
@@ -507,6 +507,22 @@ class Project
     }
     //endregion
 
+    //region ResultingProjects
+    /**
+     * @Groups({"project:read"})
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="inspiration")
+     */
+    private $resultingProjects;
+
+    /**
+     * @return Collection|Project[]
+     */
+    public function getResultingProjects(): Collection
+    {
+        return $this->resultingProjects;
+    }
+    //endregion
+
     //region ShortDescription
     /**
      * @var string
@@ -630,6 +646,7 @@ class Project
     {
         $this->applications = new ArrayCollection();
         $this->memberships = new ArrayCollection();
+        $this->resultingProjects = new ArrayCollection();
     }
 
     public function userIsMember(UserInterface $user)

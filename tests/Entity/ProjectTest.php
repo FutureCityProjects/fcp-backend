@@ -130,7 +130,8 @@ class ProjectTest extends KernelTestCase
     public function testRelationsAccessible()
     {
         /* @var $project Project */
-        $project = $this->getProjectRepository()->find(2);
+        $project = $this->getProjectRepository()
+            ->find(TestFixtures::PROJECT['id']);
 
         $this->assertCount(2, $project->getMemberships());
         $this->assertInstanceOf(ProjectMembership::class, $project->getMemberships()[0]);
@@ -138,8 +139,15 @@ class ProjectTest extends KernelTestCase
         $this->assertCount(1, $project->getApplications());
         $this->assertInstanceOf(FundApplication::class, $project->getApplications()[0]);
 
+        $this->assertInstanceOf(Project::class, $project->getInspiration());
         $this->assertInstanceOf(Process::class, $project->getProcess());
         $this->assertInstanceOf(User::class, $project->getCreatedBy());
+
+        /* @var $project Project */
+        $idea = $this->getProjectRepository()
+            ->find(TestFixtures::IDEA['id']);
+        $this->assertCount(2, $idea->getResultingProjects());
+        $this->assertInstanceOf(Project::class, $idea->getResultingProjects()[0]);
     }
 
     // @todo name is unique per process
