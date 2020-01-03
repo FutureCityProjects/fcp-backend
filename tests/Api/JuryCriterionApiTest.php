@@ -10,6 +10,9 @@ use App\Entity\JuryCriterion;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
 
+/**
+ * @group JuryCriterionApi
+ */
 class JuryCriterionApiTest extends ApiTestCase
 {
     use AuthenticatedClientTrait;
@@ -53,7 +56,7 @@ class JuryCriterionApiTest extends ApiTestCase
         self::assertJsonContains([
             '@id'        => $iri,
             'name'     => 'Realistic expectations',
-            'question' => 'How realistic are the projects targets?',
+            'question' => 'How realistic are the projects goals?',
             'fund'     => [
                 '@id'   => '/funds/1',
                 '@type' => 'Fund',

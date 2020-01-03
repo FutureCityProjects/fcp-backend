@@ -100,7 +100,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         'profileSelfAssessment' => Project::SELF_ASSESSMENT_75_PERCENT,
         'progress'              => Project::PROGRESS_CREATING_PROFILE,
         'shortDescription'      => 'Car-free city center of Dresden',
-        'target'                => 'target',
+        'goal'                  => 'goal',
         'vision'                => 'vision',
     ];
 
@@ -184,7 +184,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $process = new Process();
         $process->setName('Test-Process äüöß');
         $process->setDescription('Description for Test-Process');
-        $process->setTargets(['first target', 'second target']);
+        $process->setGoals(['first goal', 'second goal']);
         $process->setRegion('Dresden');
         $process->setImprint('FCP Test');
         $manager->persist($process);
@@ -218,7 +218,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
 
         $criterion = new JuryCriterion();
         $criterion->setName('Realistic expectations');
-        $criterion->setQuestion('How realistic are the projects targets?');
+        $criterion->setQuestion('How realistic are the projects goals?');
         $fund->addJuryCriterion($criterion);
         $manager->persist($criterion);
 
@@ -369,8 +369,8 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         if (isset($data['state'])) {
             $project->setState($data['state']);
         }
-        if (isset($data['target'])) {
-            $project->setTarget($data['target']);
+        if (isset($data['goal'])) {
+            $project->setGoal($data['goal']);
         }
         if (isset($data['vision'])) {
             $project->setVision($data['vision']);

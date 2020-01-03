@@ -1,9 +1,8 @@
 # Anstehend
 
+* FundApplication API
 * localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
 * validate pw in pw reset listener + user DTO
-* pw reset action
-* change email action
 * custom operations:
     * post POST listener: https://api-platform.com/docs/core/events/
     * prePersist EntityListener: https://symfonycasts.com/screencast/api-platform-security/entity-listener#codeblock-07a35d3111
@@ -24,8 +23,6 @@
     * Filter implementieren
 * User-System
     * https://symfony.com/blog/new-in-symfony-4-4-password-migrations
-* Messenger aktivieren
-    * https://symfony.com/blog/new-in-symfony-4-4-messenger-middleware-to-clear-doctrine-entity-manager
 * Namespace ändern
     * http://eresdev.com/how-to-change-namespace-of-symfony-4-project/
     * namespace for make konfigurieren
@@ -41,13 +38,16 @@
         * map Doctrine entities/documents to ES, asynchronously via messenger
         * rebuild index via command
         * map ES results back to Doctrine?
+    * use https://github.com/FriendsOfSymfony/FOSElasticaBundle or
+      not supported / updated anymore?
+        * FOSElastica setup: https://hugo-soltys.com/blog/autocomplete-search-with-elasticsearch-and-symfony-4
 * PHP 7.4 preload
 * SF 5.0
+* Token refresh via refresh token stored in httponly samesite cookie 
 
 # Postponed
 * document which endpoints are public and which require authentication,
   currently swagger ui shows a lock on all actions
-* use the database-less user provider from lexik/jwt-authentication-bundle
 * enable Varnish http caching for better performance
 * enable Mercure for pushed updates to watched documents/entities
 * update ElasticSearch to 7.x+ including FosElasticaBundle,
@@ -58,6 +58,7 @@
   use as we use symfonys own message bus, @see https://github.com/FriendsOfSymfony/FOSElasticaBundle/blob/master/doc/cookbook/doctrine-queue-listener.md)
 * enable versioning by adding an URL prefix like /api/v1
 * rename /authentication_token path?
+* use mongodb instead of SQL? https://www.doctrine-project.org/projects/doctrine-mongodb-odm/en/1.2/reference/best-practices.html#best-practices
 * Email signing: https://symfony.com/blog/new-in-symfony-4-4-signing-and-encrypting-email-messages
 
 # Designentscheidungen

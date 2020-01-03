@@ -31,6 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     },
  *     normalizationContext={
  *         "groups"={"default:read", "process:read"},
+ *         "enable_max_depth"=true,
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
@@ -141,6 +142,36 @@ class Process
     }
     //endregion
 
+    //region Goals
+    /**
+     * @var array
+     *
+     * @Assert\All({
+     *     @Assert\NotBlank,
+     *     @Assert\Length(min=5, max=1000, allowEmptyString=false,
+     *         minMessage="This value is too short.",
+     *         maxMessage="This value is too long."
+     *     )
+     * })
+     * @Assert\NotBlank
+     * @Groups({"elastica", "process:read", "process:write"})
+     * @ORM\Column(type="json", nullable=false)
+     */
+    private $goals;
+
+    public function getGoals(): ?array
+    {
+        return $this->goals;
+    }
+
+    public function setGoals(array $goals): self
+    {
+        $this->goals = $goals;
+
+        return $this;
+    }
+    //endregion
+
     //region Imprint
     /**
      * @var string
@@ -244,36 +275,6 @@ class Process
     public function setRegion(string $region): self
     {
         $this->region = $region;
-
-        return $this;
-    }
-    //endregion
-
-    //region Targets
-    /**
-     * @var array
-     *
-     * @Assert\All({
-     *     @Assert\NotBlank,
-     *     @Assert\Length(min=5, max=1000, allowEmptyString=false,
-     *         minMessage="This value is too short.",
-     *         maxMessage="This value is too long."
-     *     )
-     * })
-     * @Assert\NotBlank
-     * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\Column(type="json", nullable=false)
-     */
-    private $targets;
-
-    public function getTargets(): ?array
-    {
-        return $this->targets;
-    }
-
-    public function setTargets(array $targets): self
-    {
-        $this->targets = $targets;
 
         return $this;
     }

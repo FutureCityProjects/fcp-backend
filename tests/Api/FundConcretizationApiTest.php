@@ -10,6 +10,9 @@ use App\Entity\FundConcretization;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
 
+/**
+ * @group FundConcretizationApi
+ */
 class FundConcretizationApiTest extends ApiTestCase
 {
     use AuthenticatedClientTrait;

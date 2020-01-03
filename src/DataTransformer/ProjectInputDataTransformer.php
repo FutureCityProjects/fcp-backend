@@ -110,8 +110,8 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $project->setState($data->state);
         }
 
-        if ($data->target !== null) {
-            $project->setTarget($data->target);
+        if ($data->goal !== null) {
+            $project->setGoal($data->goal);
         }
 
         if ($data->vision !== null) {

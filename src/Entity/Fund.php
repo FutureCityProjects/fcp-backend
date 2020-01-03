@@ -33,6 +33,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     },
  *     normalizationContext={
  *         "groups"={"default:read", "fund:read"},
+ *         "enable_max_depth"=true,
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
@@ -55,6 +56,7 @@ class Fund
 {
     const STATE_INACTIVE = 'inactive';
     const STATE_ACTIVE   = 'active';
+    const STATE_FINISHED = 'finished';
 
     use NameSlug;
 

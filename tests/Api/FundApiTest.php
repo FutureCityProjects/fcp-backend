@@ -186,7 +186,7 @@ class FundApiTest extends ApiTestCase
                     'juryCriteria'    => [
                         0 => [
                             'name'     => 'Realistic expectations',
-                            'question' => 'How realistic are the projects targets?',
+                            'question' => 'How realistic are the projects goals?',
                         ],
                     ],
                     'concretizations' => [
@@ -296,7 +296,7 @@ class FundApiTest extends ApiTestCase
             'juryCriteria'    => [
                 0 => [
                     'name'     => 'Realistic expectations',
-                    'question' => 'How realistic are the projects targets?',
+                    'question' => 'How realistic are the projects goals?',
                 ],
             ],
             'concretizations' => [
@@ -353,7 +353,7 @@ class FundApiTest extends ApiTestCase
             'juryCriteria'    => [
                 0 => [
                     'name'     => 'Realistic expectations',
-                    'question' => 'How realistic are the projects targets?',
+                    'question' => 'How realistic are the projects goals?',
                 ],
             ],
             'concretizations' => [

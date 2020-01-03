@@ -21,6 +21,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -46,6 +47,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     input="App\Dto\ProjectInput",
  *     normalizationContext={
  *         "groups"={"default:read", "project:read"},
+ *         "enable_max_depth"=true,
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
@@ -106,6 +108,7 @@ class Project
      *     "project:po-read",
      *     "project:admin-read"
      * })
+     * @MaxDepth(2)
      * @ORM\OneToMany(targetEntity="FundApplication", mappedBy="project", orphanRemoval=true)
      */
     private $applications;
@@ -186,6 +189,7 @@ class Project
      *     "project:po-read",
      *     "project:owner-read"
      * })
+     * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="User", inversedBy="createdProjects")
      * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
      */
@@ -257,10 +261,32 @@ class Project
     }
     //endregion
 
+    //region Goal
+    /**
+     * @var string
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $goal = null;
+
+    public function getGoal(): ?string
+    {
+        return $this->goal;
+    }
+
+    public function setGoal(?string $goal): self
+    {
+        $this->goal = $goal;
+
+        return $this;
+    }
+    //endregion
+
     //region Inspiration
     /**
      * @var Project
      * @Groups({"project:read", "project:create"})
+     * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Project", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
      */
@@ -318,6 +344,7 @@ class Project
      *     "project:po-read",
      *     "project:admin-read"
      * })
+     * @MaxDepth(2)
      * @ORM\OneToMany(
      *     targetEntity="ProjectMembership",
      *     mappedBy="project",
@@ -406,6 +433,7 @@ class Project
     /**
      * @var Process
      * @Groups({"project:read", "project:create"})
+     * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Process", inversedBy="projects", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(nullable=false)
      */
@@ -550,27 +578,6 @@ class Project
     public function setState(string $state): self
     {
         $this->state = $state;
-
-        return $this;
-    }
-    //endregion
-
-    //region Target
-    /**
-     * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
-     */
-    private ?string $target = null;
-
-    public function getTarget(): ?string
-    {
-        return $this->target;
-    }
-
-    public function setTarget(?string $target): self
-    {
-        $this->target = $target;
 
         return $this;
     }

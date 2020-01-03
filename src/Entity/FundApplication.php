@@ -10,15 +10,19 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 /**
  * FundApplication
+ *
+ * @todo: add action "submit"
  *
  * @ApiResource(
  *     attributes={"security"="is_granted('ROLE_USER')"},
  *     collectionOperations={
  *         "post"={
  *             "security"="is_granted('ROLE_USER')",
+ *             "security_post_denormalize"="is_granted('CREATE', object)",
  *             "validation_groups"={"Default", "fundApplication:create"}
  *         }
  *     },
@@ -34,9 +38,9 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *             "security"="is_granted('DELETE', object)"
  *         }
  *     },
- *     input="App\Dto\ProjectInput",
  *     normalizationContext={
  *         "groups"={"default:read", "fundApplication:read"},
+ *         "enable_max_depth"=true,
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
@@ -59,7 +63,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class FundApplication
 {
-    const STATE_OPEN = 'open';
+    const STATE_OPEN      = 'open';
+    const STATE_SUBMITTED = 'submitted';
 
     const SELF_ASSESSMENT_0_PERCENT   = 0;
     const SELF_ASSESSMENT_25_PERCENT  = 25;
@@ -127,6 +132,7 @@ class FundApplication
      *     "fundApplication:read",
      *     "fundApplication:create",
      * })
+     * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Fund", inversedBy="applications")
      * @ORM\JoinColumn(nullable=false)
      * @Gedmo\SortableGroup
@@ -228,6 +234,7 @@ class FundApplication
      *     "fundApplication:read",
      *     "fundApplication:create",
      * })
+     * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Project", inversedBy="applications")
      * @ORM\JoinColumn(nullable=false)
      */

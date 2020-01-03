@@ -38,8 +38,12 @@ class UserNormalizer implements ContextAwareNormalizerInterface, NormalizerAware
         if ($token && $token->getUser() instanceof UserInterface) {
             $currentUser = $token->getUser();
 
-            if ($object->getId() == $currentUser->getId())
-            {
+            // only when a user item or the user collection is accessed, we
+            // don't want to add user:self on requests for other entities but
+            // this normalizer is still executed with resourceClass == User
+            if (stripos($context['uri'], '/users/') >= 0
+                && $object->getId() == $currentUser->getId()
+            ) {
                 $context['groups'][] = 'user:self';
             }
         }

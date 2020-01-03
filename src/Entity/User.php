@@ -22,6 +22,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -72,6 +73,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     input="App\Dto\UserInput",
  *     normalizationContext={
  *         "groups"={"default:read", "user:read"},
+ *         "enable_max_depth"=true,
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
@@ -427,6 +429,7 @@ class User implements UserInterface
     //region ObjectRoles
     /**
      * @Groups({"user:read"})
+     * @MaxDepth(2)
      * @ORM\OneToMany(
      *     targetEntity="UserObjectRole",
      *     mappedBy="user",
@@ -471,7 +474,12 @@ class User implements UserInterface
     //region ProjectMemberships
     /**
      * @var Collection|ProjectMembership[]
-     * @Groups({"user:admin-read", "user:po-read", "user:self", "user:register"})
+     * @Groups({
+     *     "user:admin-read",
+     *     "user:po-read",
+     *     "user:self"
+     * })
+     * @MaxDepth(2)
      * @ORM\OneToMany(
      *     targetEntity="ProjectMembership",
      *     mappedBy="user",
@@ -515,7 +523,12 @@ class User implements UserInterface
 
     //region CreatedProjects
     /**
-     * @Groups({"user:admin-read", "user:po-read", "user:self", "user:register"})
+     * @Groups({
+     *     "user:admin-read",
+     *     "user:po-read",
+     *     "user:self"
+     * })
+     * @MaxDepth(1)
      * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy")
      */
     private $createdProjects;

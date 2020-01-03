@@ -8,6 +8,7 @@ use App\Entity\Project;
 use App\Entity\ProjectMembership;
 use App\Entity\User;
 use App\Entity\UserObjectRole;
+use App\Entity\Validation;
 use App\PHPUnit\RefreshDatabaseTrait;
 use App\Repository\UserRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -311,8 +312,8 @@ class UserTest extends KernelTestCase
         $this->assertCount(2, $user->getCreatedProjects());
         $this->assertInstanceOf(Project::class, $user->getCreatedProjects()[0]);
 
-        // @todo
-        $this->assertCount(0, $user->getValidations());
+        $this->assertCount(1, $user->getValidations());
+        $this->assertInstanceOf(Validation::class, $user->getValidations()[0]);
     }
 
     public function testEmailRestrictions()

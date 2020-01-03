@@ -33,9 +33,9 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceCollectionJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@context'         => '/contexts/Project',
-            '@id'              => '/projects',
-            '@type'            => 'hydra:Collection',
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
             'hydra:totalItems' => 2,
         ]);
 
@@ -71,9 +71,9 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceCollectionJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@context'         => '/contexts/Project',
-            '@id'              => '/projects',
-            '@type'            => 'hydra:Collection',
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
             'hydra:totalItems' => 2,
         ]);
 
@@ -104,9 +104,9 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'         => '/contexts/Project',
-            '@id'              => '/projects',
-            '@type'            => 'hydra:Collection',
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
             'hydra:totalItems' => 2,
         ]);
 
@@ -131,9 +131,9 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'         => '/contexts/Project',
-            '@id'              => '/projects',
-            '@type'            => 'hydra:Collection',
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
         ]);
 
@@ -156,9 +156,9 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'         => '/contexts/Project',
-            '@id'              => '/projects',
-            '@type'            => 'hydra:Collection',
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
             'hydra:totalItems' => 1,
         ]);
 
@@ -193,9 +193,9 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'         => '/contexts/Project',
-            '@id'              => '/projects',
-            '@type'            => 'hydra:Collection',
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
             'hydra:totalItems' => 2,
         ]);
 
@@ -224,20 +224,20 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@id'                   => $iri,
-            'challenges'            => null,
-            'delimitation'          => null,
-            'description'           => null,
-            'id'                    => TestFixtures::IDEA['id'],
-            'inspiration'           => null,
-            'name'                  => null,
+            '@id' => $iri,
+            'challenges' => null,
+            'delimitation' => null,
+            'description' => null,
+            'id' => TestFixtures::IDEA['id'],
+            'inspiration' => null,
+            'name' => null,
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_0_PERCENT,
-            'progress'              => Project::PROGRESS_IDEA,
-            'shortDescription'      => 'Car-free city center around the year',
-            'slug'                  => null,
-            'state'                 => Project::STATE_ACTIVE,
-            'target'                => null,
-            'vision'                => null,
+            'progress' => Project::PROGRESS_IDEA,
+            'shortDescription' => 'Car-free city center around the year',
+            'slug' => null,
+            'state' => Project::STATE_ACTIVE,
+            'goal' => null,
+            'vision' => null,
         ]);
 
         $projectData = $response->toArray();
@@ -261,19 +261,19 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@id'                   => $iri,
-            'challenges'            => 'challenges',
-            'delimitation'          => 'delimitation',
-            'description'           => 'long description',
-            'id'                    => TestFixtures::PROJECT['id'],
-            'name'                  => TestFixtures::PROJECT['name'],
+            '@id' => $iri,
+            'challenges' => 'challenges',
+            'delimitation' => 'delimitation',
+            'description' => 'long description',
+            'id' => TestFixtures::PROJECT['id'],
+            'name' => TestFixtures::PROJECT['name'],
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_75_PERCENT,
-            'progress'              => Project::PROGRESS_CREATING_PROFILE,
-            'shortDescription'      => TestFixtures::PROJECT['shortDescription'],
-            'slug'                  => 'car-free-dresden',
-            'state'                 => Project::STATE_ACTIVE,
-            'target'                => TestFixtures::PROJECT['target'],
-            'vision'                => TestFixtures::PROJECT['vision'],
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
+            'shortDescription' => TestFixtures::PROJECT['shortDescription'],
+            'slug' => 'car-free-dresden',
+            'state' => Project::STATE_ACTIVE,
+            'goal' => TestFixtures::PROJECT['goal'],
+            'vision' => TestFixtures::PROJECT['vision'],
         ]);
 
         $projectData = $response->toArray();
@@ -296,8 +296,8 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertMatchesResourceItemJsonSchema(Project::class);
         self::assertJsonContains([
-            '@id'  => $iri,
-            'id'   => TestFixtures::PROJECT['id'],
+            '@id' => $iri,
+            'id' => TestFixtures::PROJECT['id'],
             'name' => TestFixtures::PROJECT['name'],
         ]);
 
@@ -323,8 +323,8 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertMatchesResourceItemJsonSchema(Project::class);
         self::assertJsonContains([
-            '@id'  => $iri,
-            'id'   => TestFixtures::PROJECT['id'],
+            '@id' => $iri,
+            'id' => TestFixtures::PROJECT['id'],
             'name' => 'Car-free Dresden',
         ]);
 
@@ -354,9 +354,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/Error',
+            '@type' => 'hydra:Error',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'Not Found',
         ]);
     }
@@ -379,9 +379,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/Error',
+            '@type' => 'hydra:Error',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'Not Found',
         ]);
     }
@@ -398,8 +398,8 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@id'  => $iri,
-            'id'   => TestFixtures::LOCKED_PROJECT['id'],
+            '@id' => $iri,
+            'id' => TestFixtures::LOCKED_PROJECT['id'],
             'name' => TestFixtures::LOCKED_PROJECT['name'],
         ]);
     }
@@ -416,8 +416,8 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@id'  => $iri,
-            'id'   => TestFixtures::LOCKED_PROJECT['id'],
+            '@id' => $iri,
+            'id' => TestFixtures::LOCKED_PROJECT['id'],
             'name' => TestFixtures::LOCKED_PROJECT['name'],
         ]);
     }
@@ -430,9 +430,9 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $response = $client->request('POST', '/projects', ['json' => [
-            'process'          => $processIri,
+            'process' => $processIri,
             'shortDescription' => 'just for fun',
-            'progress'         => Project::PROGRESS_IDEA,
+            'progress' => Project::PROGRESS_IDEA,
         ]]);
 
         self::assertResponseStatusCodeSame(201);
@@ -441,18 +441,18 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Project::class);
 
         self::assertJsonContains([
-            'challenges'            => null,
-            'delimitation'          => null,
-            'description'           => null,
-            'id'                    => 5, // ID 1-4 created by fixtures
-            'inspiration'           => null,
-            'name'                  => null,
-            'progress'              => Project::PROGRESS_IDEA,
-            'shortDescription'      => 'just for fun',
-            'slug'                  => null,
-            'state'                 => Project::STATE_ACTIVE,
-            'target'                => null,
-            'vision'                => null,
+            'challenges' => null,
+            'delimitation' => null,
+            'description' => null,
+            'id' => 5, // ID 1-4 created by fixtures
+            'inspiration' => null,
+            'name' => null,
+            'progress' => Project::PROGRESS_IDEA,
+            'shortDescription' => 'just for fun',
+            'slug' => null,
+            'state' => Project::STATE_ACTIVE,
+            'goal' => null,
+            'vision' => null,
         ]);
 
         $projectData = $response->toArray();
@@ -472,10 +472,10 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $response = $client->request('POST', '/projects', ['json' => [
-            'inspiration'      => $ideaIRI,
-            'name'             => 'New Project #öüäß',
-            'process'          => $processIri,
-            'progress'         => Project::PROGRESS_CREATING_PROFILE,
+            'inspiration' => $ideaIRI,
+            'name' => 'New Project #öüäß',
+            'process' => $processIri,
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
             'shortDescription' => 'just for fun',
         ]]);
 
@@ -485,21 +485,21 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Project::class);
 
         self::assertJsonContains([
-            'challenges'            => null,
-            'delimitation'          => null,
-            'description'           => null,
-            'id'                    => 5, // ID 1-4 created by fixtures
-            'inspiration'           => [
-                'id'                => 1,
+            'challenges' => null,
+            'delimitation' => null,
+            'description' => null,
+            'id' => 5, // ID 1-4 created by fixtures
+            'inspiration' => [
+                'id' => 1,
             ],
-            'name'                  => "New Project #öüäß",
+            'name' => "New Project #öüäß",
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_0_PERCENT,
-            'progress'              => Project::PROGRESS_CREATING_PROFILE,
-            'shortDescription'      => 'just for fun',
-            'slug'                  => "new-project-ouass",
-            'state'                 => Project::STATE_ACTIVE,
-            'target'                => null,
-            'vision'                => null,
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
+            'shortDescription' => 'just for fun',
+            'slug' => "new-project-ouass",
+            'state' => Project::STATE_ACTIVE,
+            'goal' => null,
+            'vision' => null,
         ]);
 
         $projectData = $response->toArray();
@@ -513,8 +513,8 @@ class ProjectApiTest extends ApiTestCase
 
         $client->request('POST', '/projects', ['json' => [
             'shortDescription' => 'just for fun',
-            'progress'         => Project::PROGRESS_IDEA,
-            'process'          => $processIri,
+            'progress' => Project::PROGRESS_IDEA,
+            'process' => $processIri,
         ]]);
 
         self::assertResponseStatusCodeSame(401);
@@ -522,7 +522,7 @@ class ProjectApiTest extends ApiTestCase
             'application/json');
 
         self::assertJsonContains([
-            'code'    => 401,
+            'code' => 401,
             'message' => 'JWT Token not found',
         ]);
     }
@@ -536,7 +536,7 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
-            'process'          => $processIri,
+            'process' => $processIri,
             'shortDescription' => 'no description',
         ]]);
 
@@ -545,9 +545,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/ConstraintViolationList',
+            '@type' => 'ConstraintViolationList',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'progress: This value should not be null.',
         ]);
     }
@@ -561,20 +561,20 @@ class ProjectApiTest extends ApiTestCase
         $ideaIRI = $this->findIriBy(Project::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
-            'inspiration'      => $ideaIRI,
-            'name'             => 'no name',
+            'inspiration' => $ideaIRI,
+            'name' => 'no name',
             'shortDescription' => 'no description',
-            'progress'         => Project::PROGRESS_CREATING_PROFILE,
-       ]]);
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
+        ]]);
 
         self::assertResponseStatusCodeSame(400);
         self::assertResponseHeaderSame('content-type',
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/ConstraintViolationList',
+            '@type' => 'ConstraintViolationList',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'process: This value should not be null.',
         ]);
     }
@@ -589,10 +589,10 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
-            'name'        => 'no name',
+            'name' => 'no name',
             'inspiration' => $ideaIRI,
-            'process'     => $processIri,
-            'progress'    => Project::PROGRESS_CREATING_PROFILE,
+            'process' => $processIri,
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -600,9 +600,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/ConstraintViolationList',
+            '@type' => 'ConstraintViolationList',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'shortDescription: This value should not be null.',
         ]);
     }
@@ -616,9 +616,9 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
-            'name'             => 'just for fun',
-            'process'          => $processIri,
-            'progress'         => Project::PROGRESS_CREATING_PROFILE,
+            'name' => 'just for fun',
+            'process' => $processIri,
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
             'shortDescription' => 'The Testers',
         ]]);
 
@@ -627,9 +627,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/ConstraintViolationList',
+            '@type' => 'ConstraintViolationList',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'inspiration: Inspiration is required for new projects.',
         ]);
     }
@@ -644,9 +644,9 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
-            'inspiration'      => $ideaIRI,
-            'process'          => $processIri,
-            'progress'         => Project::PROGRESS_CREATING_PROFILE,
+            'inspiration' => $ideaIRI,
+            'process' => $processIri,
+            'progress' => Project::PROGRESS_CREATING_PROFILE,
             'shortDescription' => 'The Testers',
         ]]);
 
@@ -655,9 +655,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/ConstraintViolationList',
+            '@type' => 'ConstraintViolationList',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'name: This value should not be blank.',
         ]);
     }
@@ -672,10 +672,10 @@ class ProjectApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('POST', '/projects', ['json' => [
-            'inspiration'      => $ideaIRI,
-            'name'             => 'just for fun',
-            'process'          => $processIri,
-            'progress'         => Project::PROGRESS_CREATING_PLAN,
+            'inspiration' => $ideaIRI,
+            'name' => 'just for fun',
+            'process' => $processIri,
+            'progress' => Project::PROGRESS_CREATING_PLAN,
             'shortDescription' => 'The Testers',
         ]]);
 
@@ -684,9 +684,9 @@ class ProjectApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
+            '@context' => '/contexts/ConstraintViolationList',
+            '@type' => 'ConstraintViolationList',
+            'hydra:title' => 'An error occurred',
             'hydra:description' => 'progress: The value you selected is not a valid choice.',
         ]);
     }
@@ -740,7 +740,7 @@ class ProjectApiTest extends ApiTestCase
             'challenges'            => 'new challenges',
             'description'           => TestFixtures::PROJECT['description'],
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
-            'target'                => TestFixtures::PROJECT['target'],
+            'goal'                  => TestFixtures::PROJECT['goal'],
         ]);
     }
 
@@ -890,7 +890,7 @@ class ProjectApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(Project::class, ['id' => 2]);
         $client->request('PUT', $iri, ['json' => [
-            'state'              => Project::STATE_DEACTIVATED,
+            'state' => Project::STATE_DEACTIVATED,
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -1114,13 +1114,13 @@ class ProjectApiTest extends ApiTestCase
     }
 
     // @todo
-    // * create with state fails
-    // * update with invalid state fails
+    // * update profile updates progress
     // * create and read return the same properties
     // * memberships and applications are shown when reading a project as member
     // * createdBy cannot be set on creation (and also not updated)
     //   while it is annotated with group project:create to be returned after
     //   creation
-}   // * reading a project as member should not show the memberships/applications etc
+    // * reading a project as member should not show the memberships/applications etc
     //   of its inspiration
     // * name is unique per process
+}

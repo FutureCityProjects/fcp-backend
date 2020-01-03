@@ -41,6 +41,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     input="App\Dto\ProjectInput",
  *     normalizationContext={
  *         "groups"={"default:read", "projectMembership:read"},
+ *         "enable_max_depth"=true,
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={

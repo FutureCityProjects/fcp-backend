@@ -52,7 +52,7 @@ class ProcessTest extends KernelTestCase
         $process->setDescription('Just a test');
         $process->setRegion('world-wide');
         $process->setImprint('The Testers');
-        $process->setTargets(['nothing special']);
+        $process->setGoals(['nothing special']);
 
         $this->entityManager->persist($process);
         $this->entityManager->flush();
@@ -68,7 +68,7 @@ class ProcessTest extends KernelTestCase
 
         $this->assertSame('Just a test', $found->getDescription());
         $this->assertSame('testing-process', $found->getSlug());
-        $this->assertContains('nothing special', $found->getTargets());
+        $this->assertContains('nothing special', $found->getGoals());
 
         $this->assertNull($found->getCriteria());
         $this->assertNull($found->getLogo());
@@ -88,7 +88,7 @@ class ProcessTest extends KernelTestCase
         $process->setDescription('Just a test');
         $process->setRegion('world-wide');
         $process->setImprint('The Testers');
-        $process->setTargets(['nothing special']);
+        $process->setGoals(['nothing special']);
 
         $this->entityManager->persist($process);
 

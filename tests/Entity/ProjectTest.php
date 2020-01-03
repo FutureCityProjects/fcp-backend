@@ -99,7 +99,7 @@ class ProjectTest extends KernelTestCase
         $this->assertFalse($found->isLocked());
         $this->assertNull($found->getChallenges());
         $this->assertNull($found->getDelimitation());
-        $this->assertNull($found->getTarget());
+        $this->assertNull($found->getGoal());
         $this->assertNull($found->getPicture());
         $this->assertNull($found->getVision());
         $this->assertNull($found->getVisualization());

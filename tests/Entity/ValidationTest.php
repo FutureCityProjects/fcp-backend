@@ -60,11 +60,11 @@ class ValidationTest extends KernelTestCase
         $this->entityManager->flush();
         $this->entityManager->clear();
 
-        $this->assertSame(1, $validation->getId());
+        $this->assertSame(4, $validation->getId());
 
         /** @var $found Validation **/
         $found = $this->getValidationRepository()
-            ->find(1);
+            ->find(4);
 
         $this->assertInstanceOf(Validation::class, $found);
         $this->assertFalse($found->isExpired());
@@ -98,12 +98,12 @@ class ValidationTest extends KernelTestCase
         $this->entityManager->flush();
 
         $all = $this->getValidationRepository()->findAll();
-        $this->assertCount(1, $all);
+        $this->assertCount(4, $all);
 
         $this->entityManager->remove($user);
         $this->entityManager->flush();
 
         $none = $this->getValidationRepository()->findAll();
-        $this->assertCount(0, $none);
+        $this->assertCount(3, $none);
     }
 }

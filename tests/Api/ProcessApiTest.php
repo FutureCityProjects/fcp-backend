@@ -74,7 +74,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'FCP Test',
             'name'        => 'Test-Process äüöß',
             'region'      => 'Dresden',
-            'targets'     => ['first target', 'second target'],
+            'goals'     => ['first goal', 'second goal'],
             'criteria'    => null,
         ]);
 
@@ -91,7 +91,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Masterprocess',
             'region'      => 'Berlin',
-            'targets'     => ['no target'],
+            'goals'     => ['no goal'],
         ]]);
 
         self::assertResponseStatusCodeSame(201);
@@ -107,7 +107,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Masterprocess',
             'region'      => 'Berlin',
-            'targets'     => ['no target'],
+            'goals'     => ['no goal'],
         ]);
 
         $processData = $response->toArray();
@@ -125,7 +125,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Masterprocess',
             'region'      => 'Berlin',
-            'targets'     => ['no target'],
+            'goals'     => ['no goal'],
         ]]);
 
         self::assertResponseStatusCodeSame(401);
@@ -147,7 +147,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Masterprocess',
             'region'      => 'Berlin',
-            'targets'     => ['none'],
+            'goals'     => ['none'],
         ]]);
 
         self::assertResponseStatusCodeSame(403);
@@ -170,7 +170,7 @@ class ProcessApiTest extends ApiTestCase
             'description' => 'just for fun',
             'imprint'     => 'The Testers',
             'region'      => 'Berlin',
-            'targets'     => ['no target'],
+            'goals'     => ['no goal'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -194,7 +194,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Test-Process äüöß',
             'region'      => 'Berlin',
-            'targets'     => ['no target'],
+            'goals'     => ['no goal'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -209,7 +209,7 @@ class ProcessApiTest extends ApiTestCase
         ]);
     }
 
-    public function testCreateWithInvalidTargetsFails(): void
+    public function testCreateWithInvalidGoalsFails(): void
     {
         static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -217,7 +217,7 @@ class ProcessApiTest extends ApiTestCase
             'description' => 'just for fun',
             'imprint'     => 'The Testers',
             'region'      => 'Berlin',
-            'targets'     => 'none', // should be an array to work
+            'goals'     => 'none', // should be an array to work
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -228,11 +228,11 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'The type of the "targets" attribute must be "array", "string" given.',
+            'hydra:description' => 'The type of the "goals" attribute must be "array", "string" given.',
         ]);
     }
 
-    public function testCreateWithEmptyTargetsFails(): void
+    public function testCreateWithEmptyGoalsFails(): void
     {
         static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -242,7 +242,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Another test',
             'region'      => 'Berlin',
-            'targets'     => [], // should be not empty to work
+            'goals'     => [], // should be not empty to work
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -253,17 +253,17 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'targets: This value should not be blank.',
+            'hydra:description' => 'goals: This value should not be blank.',
             'violations' => [
                 [
-                    'propertyPath' => 'targets',
+                    'propertyPath' => 'goals',
                     'message'      => 'This value should not be blank.'
                 ]
             ],
         ]);
     }
 
-    public function testCreateWithEmptyTargetFails(): void
+    public function testCreateWithEmptyGoalFails(): void
     {
         static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -273,7 +273,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Another test',
             'region'      => 'Berlin',
-            'targets'     => [null], // minlength = 5
+            'goals'     => [null], // minlength = 5
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -284,17 +284,17 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'targets[0]: This value should not be blank.',
+            'hydra:description' => 'goals[0]: This value should not be blank.',
             'violations' => [
                 [
-                    'propertyPath' => 'targets[0]',
+                    'propertyPath' => 'goals[0]',
                     'message'      => 'This value should not be blank.'
                 ]
             ],
         ]);
     }
 
-    public function testCreateWithShortTargetFails(): void
+    public function testCreateWithShortGoalFails(): void
     {
         static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -304,7 +304,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Another test',
             'region'      => 'Berlin',
-            'targets'     => ['123'], // minlength = 5
+            'goals'     => ['123'], // minlength = 5
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -315,10 +315,10 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'targets[0]: This value is too short.',
+            'hydra:description' => 'goals[0]: This value is too short.',
             'violations' => [
                 [
-                    'propertyPath' => 'targets[0]',
+                    'propertyPath' => 'goals[0]',
                     'message'      => 'This value is too short.'
                 ]
             ],
@@ -335,7 +335,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Testers',
             'name'        => 'Another test',
             'region'      => 'Berlin',
-            'targets'     => ['single target'],
+            'goals'       => ['single goal'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -368,7 +368,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process #2',
             'region'      => 'Paris',
-            'targets'     => ['some target', 'others'],
+            'goals'       => ['some goal', 'others'],
         ]]);
 
         self::assertResponseIsSuccessful();
@@ -378,7 +378,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process #2',
             'region'      => 'Paris',
-            'targets'     => ['some target', 'others'],
+            'goals'       => ['some goal', 'others'],
         ]);
     }
 
@@ -391,7 +391,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process #2',
             'region'      => 'Paris',
-            'targets'     => ['some target', 'others'],
+            'goals'       => ['some goal', 'others'],
         ]]);
 
         self::assertResponseStatusCodeSame(401);
@@ -416,7 +416,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process #2',
             'region'      => 'Paris',
-            'targets'     => ['some target', 'others'],
+            'goals'       => ['some goal', 'others'],
         ]]);
 
         self::assertResponseStatusCodeSame(403);
@@ -442,7 +442,7 @@ class ProcessApiTest extends ApiTestCase
         $process = new Process();
         $process->setName('just for work');
         $process->setDescription('Description for Test-Process');
-        $process->setTargets(['first target', 'second target']);
+        $process->setGoals(['first goal', 'second goal']);
         $process->setRegion('Dresden');
         $process->setImprint('FCP Test');
         $em->persist($process);
@@ -454,7 +454,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process äüöß',
             'region'      => 'Paris',
-            'targets'     => ['some target', 'others'],
+            'goals'     => ['some goals', 'others'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -481,7 +481,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => '',
             'region'      => 'Paris',
-            'targets'     => ['some target', 'others'],
+            'goals'     => ['some goals', 'others'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
