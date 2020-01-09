@@ -94,7 +94,7 @@ class FundConcretization
      *     "fundConcretization:read",
      *     "fundConcretization:create",
      * })
-     * @ORM\ManyToOne(targetEntity="Fund", inversedBy="concretizations")
+     * @ORM\ManyToOne(targetEntity="Fund", inversedBy="concretizations", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $fund;

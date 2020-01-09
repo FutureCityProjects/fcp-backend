@@ -35,9 +35,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "process:write"},
- *         "swagger_definition_name"="Read"
+ *         "swagger_definition_name"="Write"
  *     }
  * )
  * @ORM\Entity

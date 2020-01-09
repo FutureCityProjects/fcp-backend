@@ -29,16 +29,10 @@ class ProjectValidator
         }
 
         if (!$object->getInspiration()) {
-            $context->buildViolation('Inspiration is required for new projects.')
+            $context->buildViolation('validate.project.inspiration.notBlank')
                 ->atPath('inspiration')
                 ->addViolation()
             ;
-        }
-
-        if (empty($object->getName())) {
-            $context->buildViolation('This value should not be blank.')
-                ->atPath('name')
-                ->addViolation();
         }
     }
 

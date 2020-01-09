@@ -5,11 +5,11 @@ framework:
 
         transports:
             doctrine:
-                dsn: doctrine://default
-                options:
+                dsn: '%env(MESSENGER_DSN)%'
+                #options:
                     # or the schema-synchronizer will constantly try to update
                     # the table with "ALTER TABLE messenger_messages CHANGE delivered_at delivered_at DATETIME DEFAULT NULL"
-                    auto_setup: false
+                    #auto_setup: false
 
         routing:
             '*': doctrine

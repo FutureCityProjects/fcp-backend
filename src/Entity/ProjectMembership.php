@@ -71,9 +71,9 @@ class ProjectMembership
      *     "projectMembership:write",
      *     "user:read"
      * })
-     * @Assert\Length(min=20, max=1000, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long.")
+     * @Assert\Length(min=10, max=1000, allowEmptyString=false,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong")
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
     private ?string $motivation = null;
@@ -160,9 +160,9 @@ class ProjectMembership
      *     "projectMembership:write",
      *     "user:read"
      * })
-     * @Assert\Length(min=20, max=1000, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long.")
+     * @Assert\Length(min=10, max=1000, allowEmptyString=false,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong")
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
     private ?string $skills = null;
@@ -210,6 +210,7 @@ class ProjectMembership
     /**
      * @var User
      *
+     * @Assert\NotBlank(allowNull=true, groups={"user:register"})
      * @Groups({
      *     "project:read",
      *     "projectMembership:create",

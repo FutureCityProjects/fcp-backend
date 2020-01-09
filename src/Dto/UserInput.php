@@ -10,7 +10,11 @@ class UserInput
 {
     /**
      * @var string
-     * @Assert\NotBlank(groups={"user:resetPassword"}, allowNull=false)
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     groups={"user:resetPassword"},
+     *     message="validate.general.notBlank"
+     * )
      * @Groups({
      *     "user:admin-write",
      *     "user:po-write",
@@ -22,7 +26,11 @@ class UserInput
 
     /**
      * @var string
-     * @Assert\NotBlank(groups={"user:changeEmail"}, allowNull=false)
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     groups={"user:changeEmail"},
+     *     message="validate.general.notBlank"
+     * )
      * @Groups({
      *     "user:admin-write",
      *     "user:po-write",
@@ -35,6 +43,10 @@ class UserInput
     /**
      * @var string
      * @Groups({"user:write"})
+     * @Assert\Length(min=6, max=200, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
+     * )
      */
     public ?string $password = null;
 
@@ -67,6 +79,16 @@ class UserInput
      * @Groups({"user:write"})
      */
     public ?string $lastName = null;
+
+    /**
+     * @var ProjectInput[]
+     * @Assert\All({
+     *     @Assert\NotBlank,
+     *     @Assert\Type(type=ProjectInput::class)
+     * })
+     * @Groups({"user:register"})
+     */
+    public array $createdProjects = [];
 
     /**
      * @var string

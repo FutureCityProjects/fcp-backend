@@ -150,7 +150,12 @@ class Fund
      * @var Collection|FundConcretization[]
      *
      * @Groups({"fund:read"})
-     * @ORM\OneToMany(targetEntity="FundConcretization", mappedBy="fund", orphanRemoval=true)
+     * @ORM\OneToMany(
+     *     targetEntity="FundConcretization",
+     *     mappedBy="fund",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
      */
     private $concretizations;
 
@@ -267,7 +272,7 @@ class Fund
     /**
      * @var int
      *
-     * @Groups({"fund:read"})
+     * @Groups({"fund:read", "fundApplication:read", "process:read"})
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
@@ -335,7 +340,12 @@ class Fund
      * @var Collection|JuryCriterion[]
      *
      * @Groups({"fund:po-read", "fund:juror-read"})
-     * @ORM\OneToMany(targetEntity="JuryCriterion", mappedBy="fund", orphanRemoval=true)
+     * @ORM\OneToMany(
+     *     targetEntity="JuryCriterion",
+     *     mappedBy="fund",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
      */
     private $juryCriteria;
 

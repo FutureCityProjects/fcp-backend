@@ -1,5 +1,7 @@
 # Anstehend
 
+* Sollten Extra Attributes erlaubt sein beim Update? Oder muss der Client vorher
+  filtern?
 * localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
 * validate pw in pw reset listener + user DTO
 * custom operations:
@@ -20,6 +22,8 @@
             * entfernt beim Löschen
     * User Pre/Post Delete events
     * Filter implementieren
+* ObjectRole API
+* JuryRating API
 * User-System
     * https://symfony.com/blog/new-in-symfony-4-4-password-migrations
 * Namespace ändern

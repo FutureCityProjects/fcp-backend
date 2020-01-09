@@ -37,7 +37,7 @@ class JuryCriterionTest extends KernelTestCase
     {
         $before = $this->getCriteriaRepository()
             ->findAll();
-        $this->assertCount(1, $before);
+        $this->assertCount(2, $before);
 
         /** @var $fund Fund */
         $fund = $this->entityManager->getRepository(Fund::class)
@@ -53,7 +53,7 @@ class JuryCriterionTest extends KernelTestCase
         $this->entityManager->clear();
 
         $after = $this->getCriteriaRepository()->findAll();
-        $this->assertCount(2, $after);
+        $this->assertCount(3, $after);
 
         /* @var $found JuryCriterion */
         $found = $this->getCriteriaRepository()
@@ -62,8 +62,8 @@ class JuryCriterionTest extends KernelTestCase
         $this->assertSame('Is it sustainable?', $found->getQuestion());
         $this->assertSame($fund->getId(), $found->getFund()->getId());
 
-        // ID 1 is created by the fixtures
-        $this->assertSame(2, $found->getId());
+        // ID 1+2 are created by the fixtures
+        $this->assertSame(3, $found->getId());
     }
 
     /**

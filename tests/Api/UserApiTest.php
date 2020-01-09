@@ -6,6 +6,9 @@ namespace App\Tests\Api;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
 use App\Entity\Fund;
+use App\Entity\Process;
+use App\Entity\Project;
+use App\Entity\ProjectMembership;
 use App\Entity\User;
 use App\Entity\UserObjectRole;
 use App\Message\UserEmailChangeMessage;
@@ -516,7 +519,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'username: This value should not be blank.',
+            'hydra:description' => 'username: validate.general.notBlank',
         ]);
     }
 
@@ -692,6 +695,117 @@ class UserApiTest extends ApiTestCase
             $messages[0]['message']);
     }
 
+    public function testRegistrationWithIdea(): void
+    {
+        $client = static::createClient();
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+
+        $client->request('POST', '/users/register', ['json' => [
+                'username'      => 'Tester',
+                'email'         => 'new@zukunftsstadt.de',
+                'firstName'     => 'Peter',
+                'password'      => 'irrelevant',
+                'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+                'createdProjects' => [
+                    [
+                        'shortDescription' => 'this is a idea from a new user',
+                        'process'          => $processIri,
+                        'progress'         => Project::PROGRESS_IDEA
+                    ]
+                ]
+            ]]);
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(User::class);
+
+        self::assertJsonContains([
+            '@context'    => '/contexts/User',
+            '@type'       => 'User',
+            'email'       => 'new@zukunftsstadt.de',
+            'username'    => 'Tester',
+            'isActive'    => true,
+            'isValidated' => false,
+            'firstName'   => 'Peter',
+            'lastName'    => null,
+            'roles'       => [User::ROLE_USER],
+            'objectRoles' => [],
+            'projectMemberships' => [],
+            'createdProjects'    => [
+                [
+                    '@type'            => 'Project',
+                    'shortDescription' => 'this is a idea from a new user',
+                    'process'          => [
+                        '@id'   => '/processes/1',
+                        '@type' => 'Process',
+                        'id'    => 1,
+                    ],
+                    'progress'         => Project::PROGRESS_IDEA
+                ],
+            ],
+        ]);
+    }
+
+    public function testRegistrationWithProject(): void
+    {
+        $client = static::createClient();
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+        $ideaIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::IDEA['id']]);
+
+        $client->request('POST', '/users/register', ['json' => [
+            'username'      => 'Tester',
+            'email'         => 'new@zukunftsstadt.de',
+            'firstName'     => 'Peter',
+            'password'      => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+            'createdProjects' => [
+                [
+                    'inspiration' => $ideaIri,
+                    'motivation' => 'I wanna do something',
+                    'process'    => $processIri,
+                    'progress'   => Project::PROGRESS_CREATING_PROFILE,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(User::class);
+
+        self::assertJsonContains([
+            '@context'           => '/contexts/User',
+            '@type'              => 'User',
+            'projectMemberships' => [
+                [
+                    '@type'      => 'ProjectMembership',
+                    'motivation' => 'I wanna do something',
+                    'role'       => ProjectMembership::ROLE_OWNER,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+            'createdProjects'    => [
+                [
+                    '@type'            => 'Project',
+                    'inspiration'      => [
+                        '@type' => 'Project',
+                        'id'    => TestFixtures::IDEA['id'],
+                    ],
+                    'shortDescription' => TestFixtures::IDEA['shortDescription'],
+                    'progress'         => Project::PROGRESS_CREATING_PROFILE,
+                    'process'          => [
+                        '@id'   => '/processes/1',
+                        '@type' => 'Process',
+                        'id'    => 1,
+                    ],
+                ],
+            ],
+        ]);
+    }
+
     public function testRegistrationWithDuplicateEmailFails(): void
     {
         static::createClient()->request('POST', '/users/register', ['json' => [
@@ -792,7 +906,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'username: Username is not valid.',
+            'hydra:description' => 'username: validate.user.username.notValid',
         ]);
     }
 
@@ -1050,7 +1164,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'username: This value should not be blank.',
+            'hydra:description' => 'username: validate.general.notBlank',
         ]);
     }
 
@@ -1431,7 +1545,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'username: This value should not be blank.',
+            'hydra:description' => 'username: validate.general.notBlank',
         ]);
     }
 
@@ -1659,7 +1773,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'email: This value should not be blank.',
+            'hydra:description' => 'email: validate.general.notBlank',
         ]);
     }
 
@@ -1730,4 +1844,12 @@ class UserApiTest extends ApiTestCase
             'hydra:description' => 'Access Denied.',
         ]);
     }
+
+    // @todo
+    // * user cannot set his own password to an empty value
+    // * registerWithProject:
+    // ** w/o motivation fails
+    // ** w/o skills fails
+    // ** skills too short
+    // ** motivation too short
 }

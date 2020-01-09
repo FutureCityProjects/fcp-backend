@@ -27,7 +27,7 @@ class ProjectInput
 
     /**
      * @var \App\Entity\Project
-     * @Groups({"project:create"})
+     * @Groups({"project:create", "user:register"})
      */
     public ?Project $inspiration = null;
 
@@ -43,7 +43,7 @@ class ProjectInput
 
     /**
      * @var \App\Entity\Process
-     * @Groups({"project:create"})
+     * @Groups({"project:create", "user:register"})
      */
     public ?Process $process = null;
 
@@ -53,12 +53,16 @@ class ProjectInput
     public ?int $profileSelfAssessment = null;
 
     /**
-     * @Groups({"project:create"})
+     * @Assert\Choice(
+     *     choices={Project::PROGRESS_IDEA, Project::PROGRESS_CREATING_PROFILE},
+     *     groups={"project:create", "user:register"}
+     * )
+     * @Groups({"project:create", "user:register"})
      */
     public ?string $progress = null;
 
     /**
-     * @Groups({"project:write"})
+     * @Groups({"project:write", "user:register"})
      */
     public ?string $shortDescription = null;
 
@@ -77,4 +81,18 @@ class ProjectInput
      * @Groups({"project:write"})
      */
     public ?string $vision = null;
+
+    /**
+     * @var string
+     * @Assert\NotBlank(allowNull=true, groups={"user:register"})
+     * @Groups({"project:create", "user:register"})
+     */
+    public ?string $motivation = null;
+
+    /**
+     * @var string
+     * @Assert\NotBlank(allowNull=true, groups={"user:register"})
+     * @Groups({"project:create", "user:register"})
+     */
+    public ?string $skills = null;
 }

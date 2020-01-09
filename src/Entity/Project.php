@@ -64,21 +64,21 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     "slug": "exact",
  *     "state": "exact"
  * })
- *
- * @ORM\Entity
- * @ORM\Table(indexes={
- *     @ORM\Index(name="state_idx", columns={"state"})
- * })
- *
  * @AppAssert\UnmodifiedIdea(groups={"project:write"})
  * @Assert\Callback(
- *     groups={"project:create"},
+ *     groups={"project:create", "user:register"},
  *     callback={"App\Validator\ProjectValidator", "validateCreation"}
  * )
  * @Assert\Callback(
  *     groups={"project:write"},
  *     callback={"App\Validator\ProjectValidator", "validateUpdate"}
  * )
+ *
+ * @ORM\Entity
+ * @ORM\EntityListeners({"App\Entity\Listener\ProjectListener"})
+ * @ORM\Table(indexes={
+ *     @ORM\Index(name="state_idx", columns={"state"})
+ * })
  */
 class Project
 {
@@ -285,7 +285,7 @@ class Project
     //region Inspiration
     /**
      * @var Project
-     * @Groups({"project:read", "project:create"})
+     * @Groups({"project:read", "project:create", "user:register"})
      * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Project", fetch="EXTRA_LAZY", inversedBy="resultingProjects")
      * @ORM\JoinColumn(nullable=true, onDelete="SET NULL")
@@ -342,7 +342,8 @@ class Project
      *     "project:owner-read",
      *     "project:member-read",
      *     "project:po-read",
-     *     "project:admin-read"
+     *     "project:admin-read",
+     *     "user:register"
      * })
      * @MaxDepth(2)
      * @ORM\OneToMany(
@@ -432,7 +433,7 @@ class Project
     //region Process
     /**
      * @var Process
-     * @Groups({"project:read", "project:create"})
+     * @Groups({"project:read", "project:create", "user:register"})
      * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Process", inversedBy="projects", fetch="EXTRA_LAZY")
      * @ORM\JoinColumn(nullable=false)
@@ -447,31 +448,6 @@ class Project
     public function setProcess(Process $process): self
     {
         $this->process = $process;
-
-        return $this;
-    }
-    //endregion
-
-    //region Progress
-    /**
-     * @var string
-     * @Assert\Choice(
-     *     choices={Project::PROGRESS_IDEA, Project::PROGRESS_CREATING_PROFILE},
-     *     groups={"project:create"}
-     * )
-     * @Groups({"project:read"})
-     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"idea"})
-     */
-    private ?string $progress = null;
-
-    public function getProgress(): ?string
-    {
-        return $this->progress;
-    }
-
-    public function setProgress(string $progress): self
-    {
-        $this->progress = $progress;
 
         return $this;
     }
@@ -507,6 +483,36 @@ class Project
     }
     //endregion
 
+    //region Progress
+    /**
+     * @var string
+     * @Assert\Choice(
+     *     choices={
+     *         Project::PROGRESS_IDEA,
+     *         Project::PROGRESS_CREATING_PROFILE,
+     *         Project::PROGRESS_CREATING_PLAN,
+     *         Project::PROGRESS_CREATING_APPLICATION,
+     *         Project::PROGRESS_APPLICATION_SUBMITTED
+     *     }
+     * )
+     * @Groups({"project:read", "user:register"})
+     * @ORM\Column(type="string", length=50, nullable=false, options={"default":"idea"})
+     */
+    private ?string $progress = null;
+
+    public function getProgress(): ?string
+    {
+        return $this->progress;
+    }
+
+    public function setProgress(string $progress): self
+    {
+        $this->progress = $progress;
+
+        return $this;
+    }
+    //endregion
+
     //region ResultingProjects
     /**
      * @Groups({"project:read"})
@@ -526,7 +532,11 @@ class Project
     //region ShortDescription
     /**
      * @var string
-     * @Groups({"elastica", "project:read", "project:write"})
+     * @Groups({"elastica", "project:read", "project:write", "user:register"})
+     * @Assert\Length(min=10, max=280, allowEmptyString=false,
+     *     minMessage="This value is too short.",
+     *     maxMessage="This value is too long."
+     * )
      * @ORM\Column(type="string", length=280, nullable=false)
      */
     private ?string $shortDescription = null;
@@ -649,6 +659,13 @@ class Project
         $this->resultingProjects = new ArrayCollection();
     }
 
+    /**
+     * Returns true when the given User is a member of this project, else false.
+     * The project owner is also a member.
+     *
+     * @param UserInterface $user
+     * @return bool
+     */
     public function userIsMember(UserInterface $user)
     {
         foreach($this->getMemberships() as $membership) {
@@ -666,6 +683,12 @@ class Project
         return false;
     }
 
+    /**
+     * Returns true when the given User is the owner of this project, else false.
+     *
+     * @param UserInterface $user
+     * @return bool
+     */
     public function userIsOwner(UserInterface $user)
     {
         foreach($this->getMemberships() as $membership) {
@@ -679,5 +702,31 @@ class Project
         }
 
         return false;
+    }
+
+    /**
+     * Checks if all required profile fields are set and the self assessment
+     * is 100%, if yes return true, else false.
+     *
+     * @return bool
+     */
+    public function isProfileComplete() : bool
+    {
+        if (!$this->name
+            || !$this->shortDescription
+            || !$this->challenges
+            || !$this->goal
+            || !$this->vision
+            || !$this->description
+            || !$this->delimitation
+        ) {
+            return false;
+        }
+
+        if ($this->profileSelfAssessment !== self::SELF_ASSESSMENT_100_PERCENT) {
+            return false;
+        }
+
+        return true;
     }
 }

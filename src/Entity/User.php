@@ -111,18 +111,22 @@ class User implements UserInterface
      * User names may not be in the format "deleted_{0-9}" as this is reserved
      * for deleted users (second regex).
      *
-     * @Assert\NotBlank
+     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
+     * @Assert\Length(min=2, max=20,allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
+     * )
      * @Assert\Regex(
      *     pattern="/^[a-zA-Z]+[a-zA-Z0-9._-]*[a-zA-Z][a-zA-Z0-9._-]*$/",
-     *     message="Username is not valid."
+     *     message="validate.user.username.notValid"
      * )
      * @Assert\Regex(
      *     pattern="/^deleted_[0-9]+$/",
      *     match=false,
-     *     message="Username is not valid."
+     *     message="validate.user.username.notValid"
      * )
      * @Groups({"user:read", "user:create", "user:admin-write", "project:read"})
-     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
+     * @ORM\Column(type="string", length=20, nullable=false, unique=true)
      */
     private ?string $username = null;
 
@@ -477,7 +481,8 @@ class User implements UserInterface
      * @Groups({
      *     "user:admin-read",
      *     "user:po-read",
-     *     "user:self"
+     *     "user:self",
+     *     "user:register"
      * })
      * @MaxDepth(2)
      * @ORM\OneToMany(
@@ -526,10 +531,11 @@ class User implements UserInterface
      * @Groups({
      *     "user:admin-read",
      *     "user:po-read",
-     *     "user:self"
+     *     "user:self",
+     *     "user:register",
      * })
      * @MaxDepth(1)
-     * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy")
+     * @ORM\OneToMany(targetEntity="Project", mappedBy="user", mappedBy="createdBy", cascade={"persist"})
      */
     private $createdProjects;
 

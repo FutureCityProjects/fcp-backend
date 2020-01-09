@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * JuryCriteria
+ * JuryCriterion
  *
  * No GET, the juryCriteria should be fetched via their fund, we would have to
  * filter for active funds/jury member for this fund.
@@ -69,7 +69,7 @@ class JuryCriterion
      *     "juryCriterion:read",
      *     "juryCriterion:create",
      * })
-     * @ORM\ManyToOne(targetEntity="Fund", inversedBy="juryCriteria")
+     * @ORM\ManyToOne(targetEntity="Fund", inversedBy="juryCriteria", cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
     private $fund;

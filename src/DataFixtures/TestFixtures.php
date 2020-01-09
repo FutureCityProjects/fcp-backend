@@ -120,6 +120,18 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         'deletedAt'             => '2019-12-12 12:12:12',
     ];
 
+    public const ACTIVE_FUND = [
+        'id'    => 1,
+        'name'  => 'Future City',
+        'state' => Fund::STATE_ACTIVE,
+    ];
+
+    public const INACTIVE_FUND = [
+        'id'    => 2,
+        'name'  => 'Culture City',
+        'state' => Fund::STATE_INACTIVE,
+    ];
+
     /**
      * @var UserPasswordEncoderInterface
      */
@@ -189,38 +201,17 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $process->setImprint('FCP Test');
         $manager->persist($process);
 
-        $fund = new Fund();
-        $fund->setName('Future City');
-        $fund->setRegion('Dresden');
-        $fund->setDescription('Funding from the BMBF');
-        $fund->setSponsor('Bundesministerium für Forschung und Bildung');
-        $fund->setImprint('Landeshauptstadt Dresden');
-        $fund->setMinimumGrant(1000.);
-        $fund->setMaximumGrant(5000.);
-        $fund->setBudget(50000.);
-        $fund->setCriteria(['must be sustainable']);
-        $fund->setJurorsPerApplication(3);
-        $fund->setSubmissionBegin(new DateTimeImmutable('2019-12-01'));
-        $fund->setSubmissionEnd(new DateTimeImmutable('2019-12-31'));
-        $fund->setRatingBegin(new DateTimeImmutable('2020-01-02'));
-        $fund->setRatingEnd(new DateTimeImmutable('2020-01-16'));
-        $fund->setBriefingDate(new DateTimeImmutable('2020-01-17'));
-        $fund->setFinalJuryDate(new DateTimeImmutable('2020-02-01'));
-        $process->addFund($fund);
-        $manager->persist($fund);
+        /**
+         * Create an active fund
+         */
+        $activeFund = $this->createFund(self::ACTIVE_FUND, $process);
+        $manager->persist($activeFund);
+        /**
+         * /Create an active fund
+         */
 
-        $concretization = new FundConcretization();
-        $concretization->setQuestion('How does it help?');
-        $concretization->setDescription('What does the project do for you?');
-        $concretization->setMaxLength(280);
-        $fund->addConcretization($concretization);
-        $manager->persist($concretization);
-
-        $criterion = new JuryCriterion();
-        $criterion->setName('Realistic expectations');
-        $criterion->setQuestion('How realistic are the projects goals?');
-        $fund->addJuryCriterion($criterion);
-        $manager->persist($criterion);
+        $inactiveFund = $this->createFund(self::INACTIVE_FUND, $process);
+        $manager->persist($inactiveFund);
 
         $idea = $this->createProject(self::IDEA, $admin);
         $process->addProject($idea);
@@ -236,7 +227,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
 
         $application = new FundApplication();
         $project->addApplication($application);
-        $fund->addApplication($application);
+        $activeFund->addApplication($application);
         $manager->persist($application);
 
         $rating = new JuryRating();
@@ -282,10 +273,17 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
 
         $juryMemberRole = new UserObjectRole();
         $juryMemberRole->setObjectType(Fund::class);
-        $juryMemberRole->setObjectId($fund->getId());
+        $juryMemberRole->setObjectId($activeFund->getId());
         $juryMemberRole->setRole(UserObjectRole::ROLE_JURY_MEMBER);
         $juror->addObjectRole($juryMemberRole);
         $manager->persist($juryMemberRole);
+
+        $juryMemberRoleInactive = new UserObjectRole();
+        $juryMemberRoleInactive->setObjectType(Fund::class);
+        $juryMemberRoleInactive->setObjectId($inactiveFund->getId());
+        $juryMemberRoleInactive->setRole(UserObjectRole::ROLE_JURY_MEMBER);
+        $juror->addObjectRole($juryMemberRoleInactive);
+        $manager->persist($juryMemberRoleInactive);
 
         $manager->flush();
         $manager->getConnection()->getConfiguration()->setSQLLogger($loggerBackup);
@@ -399,5 +397,43 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         }
 
         return $project;
+    }
+
+    protected function createFund($data, Process $process)
+    {
+        $fund = new Fund();
+        $fund->setName($data['name']);
+        $fund->setState($data['state']);
+
+        $fund->setRegion('Dresden');
+        $fund->setDescription('Funding from the BMBF');
+        $fund->setSponsor('Bundesministerium für Forschung und Bildung');
+        $fund->setImprint('Landeshauptstadt Dresden');
+        $fund->setMinimumGrant(1000.);
+        $fund->setMaximumGrant(5000.);
+        $fund->setBudget(50000.);
+        $fund->setCriteria(['must be sustainable']);
+        $fund->setJurorsPerApplication(3);
+        $fund->setSubmissionBegin(new DateTimeImmutable('2019-12-01'));
+        $fund->setSubmissionEnd(new DateTimeImmutable('2019-12-31'));
+        $fund->setRatingBegin(new DateTimeImmutable('2020-01-02'));
+        $fund->setRatingEnd(new DateTimeImmutable('2020-01-16'));
+        $fund->setBriefingDate(new DateTimeImmutable('2020-01-17'));
+        $fund->setFinalJuryDate(new DateTimeImmutable('2020-02-01'));
+        $process->addFund($fund);
+
+
+        $concretization = new FundConcretization();
+        $concretization->setQuestion('How does it help?');
+        $concretization->setDescription('What does the project do for you?');
+        $concretization->setMaxLength(280);
+        $fund->addConcretization($concretization);
+
+        $criterion = new JuryCriterion();
+        $criterion->setName('Realistic expectations');
+        $criterion->setQuestion('How realistic are the projects goals?');
+        $fund->addJuryCriterion($criterion);
+
+        return $fund;
     }
 }

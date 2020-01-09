@@ -37,7 +37,7 @@ class FundConcretizationTest extends KernelTestCase
     {
         $before = $this->getConcretizationRepository()
             ->findAll();
-        $this->assertCount(1, $before);
+        $this->assertCount(2, $before);
 
         /** @var $fund Fund */
         $fund = $this->entityManager->getRepository(Fund::class)
@@ -54,7 +54,7 @@ class FundConcretizationTest extends KernelTestCase
         $this->entityManager->clear();
 
         $after = $this->getConcretizationRepository()->findAll();
-        $this->assertCount(2, $after);
+        $this->assertCount(3, $after);
 
         /* @var $found FundConcretization */
         $found = $this->getConcretizationRepository()
@@ -64,8 +64,8 @@ class FundConcretizationTest extends KernelTestCase
         $this->assertSame(44, $found->getMaxLength());
         $this->assertSame($fund->getId(), $found->getFund()->getId());
 
-        // ID 1 is created by the fixtures
-        $this->assertSame(2, $found->getId());
+        // ID 1+2 are created by the fixtures
+        $this->assertSame(3, $found->getId());
     }
 
     /**

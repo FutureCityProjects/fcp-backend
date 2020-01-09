@@ -44,7 +44,6 @@ use Symfony\Component\Serializer\Annotation\MaxDepth;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "fundApplication:write"},
  *         "swagger_definition_name"="Write"
  *     }

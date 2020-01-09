@@ -496,6 +496,46 @@ class ProcessApiTest extends ApiTestCase
         ]);
     }
 
+    public function testUpdateOfIdIsIgnoredProcess(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Process::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'id' => '33',
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'         => $iri,
+            'id'          => 1,
+            'name'        => 'Test-Process äüöß',
+            'slug'        => 'test-process-auoss',
+        ]);
+    }
+
+    public function testUpdateOfSlugIsIgnoredProcess(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Process::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'slug'        => 'will-not-work',
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'         => $iri,
+            'id'          => 1,
+            'name'        => 'Test-Process äüöß',
+            'slug'        => 'test-process-auoss',
+        ]);
+    }
+
     public function testDelete(): void
     {
         $before = $this->entityManager->getRepository(UserObjectRole::class)

@@ -336,7 +336,7 @@ class FundConcretizationApiTest extends ApiTestCase
         $em->persist($concretization);
         $em->flush();
 
-        $iri = $this->findIriBy(FundConcretization::class, ['id' => 2]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 3]);
         $client->request('PUT', $iri, ['json' => [
             'question'    => 'How does it help?',
         ]]);
@@ -454,14 +454,14 @@ class FundConcretizationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
-        $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
+        $iri = $this->findIriBy(FundConcretization::class, ['id' => 2]);
         $client->request('DELETE', $iri);
 
         static::assertResponseStatusCodeSame(204);
 
         $deleted = static::$container->get('doctrine')
             ->getRepository(FundConcretization::class)
-            ->find(1);
+            ->find(2);
         $this->assertNull($deleted);
     }
 

@@ -20,15 +20,6 @@ class FundApplicationApiTest extends ApiTestCase
     use AuthenticatedClientTrait;
     use RefreshDatabaseTrait;
 
-    protected function activateFund()
-    {
-        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
-        /* @var $fund Fund */
-        $fund = $em->getRepository(Fund::class)->find(1);
-        $fund->setState(Fund::STATE_ACTIVE);
-        $em->flush();
-    }
-
     protected function removeApplications()
     {
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
@@ -94,10 +85,10 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
 
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $response = $client->request('POST', '/fund_applications', ['json' => [
@@ -112,11 +103,11 @@ class FundApplicationApiTest extends ApiTestCase
 
         self::assertJsonContains([
             'fund' => [
-                '@id'   => '/funds/1',
+                '@id'   => $fundIri,
                 '@type' => 'Fund',
             ],
             'project' => [
-                '@id'   => '/projects/2',
+                '@id'   => $projectIri,
                 '@type' => 'Project',
             ],
             'state'                        => FundApplication::STATE_OPEN,
@@ -137,10 +128,10 @@ class FundApplicationApiTest extends ApiTestCase
     public function testCreateFailsUnauthenticated()
     {
         $client = static::createClient();
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
@@ -163,10 +154,10 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
@@ -192,7 +183,6 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
 
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
         $projectIri = $this->findIriBy(Project::class,
@@ -219,10 +209,10 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
 
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
             'fund' => $fundIri,
         ]]);
@@ -245,9 +235,8 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
 
-        $this->activateFund(); // can only apply on active fund
-
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
@@ -272,10 +261,10 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::LOCKED_PROJECT['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
@@ -300,10 +289,10 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
-        $this->activateFund(); // can only apply on active fund
         $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::IDEA['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
@@ -328,9 +317,9 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
-        $this->removeApplications(); // only one application per project&fund
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
@@ -355,7 +344,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
-        $this->activateFund(); // can only update when fund is active
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
@@ -373,12 +361,12 @@ class FundApplicationApiTest extends ApiTestCase
             ],
             'concretizationSelfAssessment' => FundApplication::SELF_ASSESSMENT_0_PERCENT,
             'fund'        => [
-                '@id'   => '/funds/1',
                 '@type' => 'Fund',
+                'id'    => TestFixtures::ACTIVE_FUND['id']
             ],
             'project'        => [
-                '@id'   => '/projects/2',
                 '@type' => 'Project',
+                'id'    => TestFixtures::PROJECT['id']
             ],
         ]);
     }
@@ -386,7 +374,6 @@ class FundApplicationApiTest extends ApiTestCase
     public function testUpdateFailsUnauthenticated()
     {
         $client = static::createClient();
-        $this->activateFund(); // can only update when fund is active
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
@@ -408,7 +395,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::JUROR['email']
         ]);
-        $this->activateFund(); // can only update when fund is active
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
@@ -427,55 +413,60 @@ class FundApplicationApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateFundFails(): void
+    public function testUpdateOfFundFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
-        $this->activateFund(); // can only update when fund is active
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
+
         $client->request('PUT', $iri, ['json' => [
-            'concretizations' => ['more specifics'],
+            'concretizations' => ['no more specifics'],
             'fund'            => $fundIri,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
+        self::assertResponseIsSuccessful();
 
+        // concretizations got updated but fund didn't
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("fund" are unknown).',
+            'concretizations' => [
+                'no more specifics',
+            ],
+            'fund'        => [
+                '@type' => 'Fund',
+                'id'    => TestFixtures::ACTIVE_FUND['id'],
+            ],
         ]);
     }
 
-    public function testUpdateProjectFails(): void
+    public function testUpdateOfProjectFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
-        $this->activateFund(); // can only update when fund is active
 
-        $projectIri = $this->findIriBy(Project::class, ['id' => 1]);
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::IDEA['id']]);
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'concretizations' => ['more specifics'],
+            'concretizations' => ['no more specifics'],
             'project'         => $projectIri,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
+        self::assertResponseIsSuccessful();
 
+        // concretizations got updated but project didn't
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("project" are unknown).',
+            'concretizations' => [
+                'no more specifics',
+            ],
+            'project'        => [
+                'id'    => TestFixtures::PROJECT['id'],
+                '@type' => 'Project',
+            ],
         ]);
     }
 
@@ -485,11 +476,17 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        /* @var $fund Fund */
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setState(Fund::STATE_INACTIVE);
+        $em->flush();
+
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
             'concretizations' => ['more specifics'],
         ]]);
-
 
         self::assertResponseStatusCodeSame(403);
         self::assertResponseHeaderSame('content-type',
@@ -508,7 +505,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
-        $this->activateFund(); // can only update when fund is active
 
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
 
@@ -541,7 +537,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
-        $this->activateFund(); // can only update when fund is active
 
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
 
@@ -573,7 +568,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
-        $this->activateFund();
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('DELETE', $iri);
@@ -588,7 +582,6 @@ class FundApplicationApiTest extends ApiTestCase
     public function testDeleteFailsUnauthenticated(): void
     {
         $client = static::createClient();
-        $this->activateFund();
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('DELETE', $iri);
@@ -607,7 +600,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
-        $this->activateFund();
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('DELETE', $iri);
@@ -631,7 +623,8 @@ class FundApplicationApiTest extends ApiTestCase
 
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
         /* @var $fund Fund */
-        $fund = $em->getRepository(Fund::class)->find(1);
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
         $fund->setState(Fund::STATE_FINISHED);
         $em->flush();
 
@@ -655,7 +648,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::JUROR['email']
         ]);
-        $this->activateFund();
 
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
         /** @var Project $project */
@@ -684,7 +676,6 @@ class FundApplicationApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::JUROR['email']
         ]);
-        $this->activateFund();
 
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
 
@@ -730,6 +721,7 @@ class FundApplicationApiTest extends ApiTestCase
     }
 
     // @todo
+    // * create for fund in a different process than the project fails
     // * update concretizations updates state
     // * submit
     // * submit unauth

@@ -350,7 +350,7 @@ class UserTest extends KernelTestCase
         foreach ($invalidUsernames as $invalidName) {
             $user->setUsername($invalidName);
             $failing = $validator->validate($user);
-            $this->assertSame('Username is not valid.',
+            $this->assertSame('validate.user.username.notValid',
                 $failing->offsetGet(0)->getMessage(), sprintf(
                     '"%s" should be invalid but is is not', $invalidName));
         }

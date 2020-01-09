@@ -328,7 +328,7 @@ class JuryCriterionApiTest extends ApiTestCase
         $em->persist($criterion);
         $em->flush();
 
-        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 2]);
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 3]);
         $client->request('PUT', $iri, ['json' => [
             'name'     => 'Realistic expectations',
             'question' => 'New question',
@@ -422,14 +422,14 @@ class JuryCriterionApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
-        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
+        $iri = $this->findIriBy(JuryCriterion::class, ['id' => 2]);
         $client->request('DELETE', $iri);
 
         static::assertResponseStatusCodeSame(204);
 
         $deleted = static::$container->get('doctrine')
             ->getRepository(JuryCriterion::class)
-            ->find(1);
+            ->find(2);
         $this->assertNull($deleted);
     }
 

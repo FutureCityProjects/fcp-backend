@@ -116,7 +116,7 @@ class ProcessTest extends KernelTestCase
         /* @var $process Process */
         $process = $this->getProcessRepository()->find(1);
 
-        $this->assertCount(1, $process->getFunds());
+        $this->assertCount(2, $process->getFunds());
         $this->assertInstanceOf(Fund::class, $process->getFunds()[0]);
 
         $this->assertCount(4, $process->getProjects());

@@ -4,6 +4,6 @@ framework:
             doctrine:
                 # @todo cannot override auto_setup via option
                 # @see https://github.com/symfony/symfony/issues/35129
-                dsn: doctrine://default?auto_setup=true
-                options:
+                #dsn: doctrine://default?auto_setup=true
+                #options:
                     # auto_setup: true

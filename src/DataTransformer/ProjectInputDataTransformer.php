@@ -9,8 +9,10 @@ use ApiPlatform\Core\Serializer\AbstractItemNormalizer;
 use ApiPlatform\Core\Validator\ValidatorInterface;
 use App\Dto\ProjectInput;
 use App\Entity\Project;
+use App\Entity\ProjectMembership;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Handles setting the creator.
@@ -35,14 +37,9 @@ class ProjectInputDataTransformer implements DataTransformerInterface
     public function __construct(
         TokenStorageInterface $tokenStorage, ValidatorInterface $validator)
     {
-        if (!$tokenStorage->getToken()
-            || !$tokenStorage->getToken()->getUser()
-        ) {
-            throw new DeserializationException(
-                'User must be set to create project.');
-        }
-
-        $this->user = $tokenStorage->getToken()->getUser();
+        $this->user = $tokenStorage->getToken()
+            ? $tokenStorage->getToken()->getUser()
+            : null;
         $this->validator = $validator;
     }
 
@@ -62,11 +59,13 @@ class ProjectInputDataTransformer implements DataTransformerInterface
         $project = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE]
             ?? new Project();
 
-        if (!$project->getId()) {
+        // creator is optional, we can create projects when a user registers
+        // so the creator is set afterwards by the userInput Transformer
+        if (!$project->getId() && $this->user instanceof UserInterface) {
             $project->setCreatedBy($this->user);
         }
 
-        if (isset($data->challenges) !== null) {
+        if ($data->challenges !== null) {
             $project->setChallenges($data->challenges);
         }
 
@@ -78,8 +77,17 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $project->setDescription($data->description);
         }
 
+        // inspiration can only be set when the project is created
         if ($data->inspiration) {
             $project->setInspiration($data->inspiration);
+
+            // initial value
+            $project->setShortDescription(
+                $data->inspiration->getShortDescription());
+        }
+
+        if ($data->shortDescription !== null) {
+            $project->setShortDescription($data->shortDescription);
         }
 
         if ($data->isLocked !== null) {
@@ -102,10 +110,6 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $project->setProgress($data->progress);
         }
 
-        if ($data->shortDescription !== null) {
-            $project->setShortDescription($data->shortDescription);
-        }
-
         if ($data->state !== null) {
             $project->setState($data->state);
         }
@@ -116,6 +120,31 @@ class ProjectInputDataTransformer implements DataTransformerInterface
 
         if ($data->vision !== null) {
             $project->setVision($data->vision);
+        }
+
+        // When a user creates a new project set him as owner.
+        if ($data->progress === Project::PROGRESS_CREATING_PROFILE
+            && !$project->getId()
+        ) {
+            $membership = new ProjectMembership();
+            $membership->setRole(ProjectMembership::ROLE_OWNER);
+            $project->addMembership($membership);
+
+            // This can also happen when a user registers, then the user is
+            // set afterwards by the userInput transformer.
+            if ($this->user instanceof UserInterface) {
+                $membership->setUser($this->user);
+            }
+
+            if ($data->motivation !== null) {
+                $membership->setMotivation($data->motivation);
+            }
+
+            if ($data->skills !== null) {
+                $membership->setSkills($data->skills);
+            }
+
+            $this->validator->validate($membership, $context);
         }
 
         return $project;

@@ -47,11 +47,35 @@ class FundApiTest extends ApiTestCase
             '@context'         => '/contexts/Fund',
             '@id'              => '/funds',
             '@type'            => 'hydra:Collection',
-            'hydra:totalItems' => 1,
+            'hydra:totalItems' => 2,
             'hydra:member'     => [
                 0 => [
-                    'id'              => 1,
+                    'id'              => TestFixtures::ACTIVE_FUND['id'],
                     'name'            => 'Future City',
+                    'region'          => 'Dresden',
+                    'description'     => 'Funding from the BMBF',
+                    'criteria'        => [
+                        'must be sustainable',
+                    ],
+                    'sponsor'         => 'Bundesministerium für Forschung und Bildung',
+                    'imprint'         => 'Landeshauptstadt Dresden',
+                    'state'           => Fund::STATE_ACTIVE,
+                    'budget'          => 50000,
+                    'minimumGrant'    => 1000,
+                    'maximumGrant'    => 5000,
+                    'submissionBegin' => '2019-11-30T23:00:00+00:00',
+                    'submissionEnd'   => '2019-12-30T23:00:00+00:00',
+                    'concretizations' => [
+                        0 => [
+                            'question'    => 'How does it help?',
+                            'description' => 'What does the project do for you?',
+                            'maxLength'   => 280,
+                        ],
+                    ],
+                ],
+                1 => [
+                    'id'              => TestFixtures::INACTIVE_FUND['id'],
+                    'name'            => 'Culture City',
                     'region'          => 'Dresden',
                     'description'     => 'Funding from the BMBF',
                     'criteria'        => [
@@ -77,7 +101,7 @@ class FundApiTest extends ApiTestCase
         ]);
 
         $collection = $response->toArray();
-        $this->assertCount(1, $collection['hydra:member']);
+        $this->assertCount(2, $collection['hydra:member']);
         $this->assertArrayNotHasKey('applications',
             $collection['hydra:member'][0]);
         $this->assertArrayNotHasKey('briefingDate',
@@ -105,10 +129,10 @@ class FundApiTest extends ApiTestCase
             '@context'         => '/contexts/Fund',
             '@id'              => '/funds',
             '@type'            => 'hydra:Collection',
-            'hydra:totalItems' => 1,
+            'hydra:totalItems' => 2,
             'hydra:member'     => [
                 0 => [
-                    'id'              => 1,
+                    'id'              => TestFixtures::ACTIVE_FUND['id'],
                     'name'            => 'Future City',
                     'region'          => 'Dresden',
                     'description'     => 'Funding from the BMBF',
@@ -117,7 +141,7 @@ class FundApiTest extends ApiTestCase
                     ],
                     'sponsor'         => 'Bundesministerium für Forschung und Bildung',
                     'imprint'         => 'Landeshauptstadt Dresden',
-                    'state'           => Fund::STATE_INACTIVE,
+                    'state'           => Fund::STATE_ACTIVE,
                     'budget'          => 50000,
                     'minimumGrant'    => 1000,
                     'maximumGrant'    => 5000,
@@ -138,7 +162,7 @@ class FundApiTest extends ApiTestCase
         ]);
 
         $collection = $response->toArray();
-        $this->assertCount(1, $collection['hydra:member']);
+        $this->assertCount(2, $collection['hydra:member']);
         $this->assertArrayNotHasKey('applications',
             $collection['hydra:member'][0]);
     }
@@ -158,7 +182,7 @@ class FundApiTest extends ApiTestCase
             '@context'         => '/contexts/Fund',
             '@id'              => '/funds',
             '@type'            => 'hydra:Collection',
-            'hydra:totalItems' => 1,
+            'hydra:totalItems' => 2,
             'hydra:member'     => [
                 0 => [
                     'id'              => 1,
@@ -170,7 +194,7 @@ class FundApiTest extends ApiTestCase
                     ],
                     'sponsor'         => 'Bundesministerium für Forschung und Bildung',
                     'imprint'         => 'Landeshauptstadt Dresden',
-                    'state'           => Fund::STATE_INACTIVE,
+                    'state'           => Fund::STATE_ACTIVE,
                     'budget'          => 50000,
                     'minimumGrant'    => 1000,
                     'maximumGrant'    => 5000,
@@ -202,7 +226,7 @@ class FundApiTest extends ApiTestCase
         ]);
 
         $collection = $response->toArray();
-        $this->assertCount(1, $collection['hydra:member']);
+        $this->assertCount(2, $collection['hydra:member']);
         $this->assertArrayNotHasKey('applications',
             $collection['hydra:member'][0]);
     }
@@ -211,7 +235,8 @@ class FundApiTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
 
         $response = $client->request('GET', $iri);
 
@@ -222,7 +247,7 @@ class FundApiTest extends ApiTestCase
 
         self::assertJsonContains([
             '@id'             => $iri,
-            'id'              => 1,
+            'id'              => TestFixtures::ACTIVE_FUND['id'],
             'name'            => 'Future City',
             'region'          => 'Dresden',
             'description'     => 'Funding from the BMBF',
@@ -231,7 +256,7 @@ class FundApiTest extends ApiTestCase
             ],
             'sponsor'         => 'Bundesministerium für Forschung und Bildung',
             'imprint'         => 'Landeshauptstadt Dresden',
-            'state'           => Fund::STATE_INACTIVE,
+            'state'           => Fund::STATE_ACTIVE,
             'budget'          => 50000,
             'minimumGrant'    => 1000,
             'maximumGrant'    => 5000,
@@ -265,13 +290,14 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $response = $client->request('GET', $iri);
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
             '@id'             => $iri,
-            'id'              => 1,
+            'id'              => TestFixtures::ACTIVE_FUND['id'],
             'name'            => 'Future City',
             'region'          => 'Dresden',
             'description'     => 'Funding from the BMBF',
@@ -280,7 +306,7 @@ class FundApiTest extends ApiTestCase
             ],
             'sponsor'         => 'Bundesministerium für Forschung und Bildung',
             'imprint'         => 'Landeshauptstadt Dresden',
-            'state'           => Fund::STATE_INACTIVE,
+            'state'           => Fund::STATE_ACTIVE,
             'budget'          => 50000,
             'minimumGrant'    => 1000,
             'maximumGrant'    => 5000,
@@ -322,13 +348,14 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::JUROR['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $response = $client->request('GET', $iri);
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
             '@id'             => $iri,
-            'id'              => 1,
+            'id'              => TestFixtures::ACTIVE_FUND['id'],
             'name'            => 'Future City',
             'region'          => 'Dresden',
             'description'     => 'Funding from the BMBF',
@@ -340,7 +367,7 @@ class FundApiTest extends ApiTestCase
             'budget'          => 50000,
             'minimumGrant'    => 1000,
             'maximumGrant'    => 5000,
-            'state'           => Fund::STATE_INACTIVE,
+            'state'           => Fund::STATE_ACTIVE,
             'submissionBegin' => '2019-11-30T23:00:00+00:00',
             'submissionEnd'   => '2019-12-30T23:00:00+00:00',
             'ratingBegin'     => '2020-01-01T23:00:00+00:00',
@@ -379,7 +406,7 @@ class FundApiTest extends ApiTestCase
         ]);
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
-        $response = $client->request('POST', '/funds', ['json' => [
+        $client->request('POST', '/funds', ['json' => [
             'description' => 'description with 20 characters',
             'name'        => 'Masterfund',
             'process'     => $processIri,
@@ -395,7 +422,7 @@ class FundApiTest extends ApiTestCase
         self::assertJsonContains([
             '@context'    => '/contexts/Fund',
             '@type'       => 'Fund',
-            'id'          => 2,
+            'id'          => 3, // 1-2 created by fixtures
             'description' => 'description with 20 characters',
             'name'        => 'Masterfund',
             'slug'        => 'masterfund',
@@ -631,7 +658,7 @@ class FundApiTest extends ApiTestCase
         ]);
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
         $client->request('POST', '/funds', ['json' => [
-            'name'        => 'Future City',
+            'name'        => TestFixtures::ACTIVE_FUND['name'],
             'description' => 'description with 20 characters',
             'process'     => $processIri,
             'region'      => 'Berlin',
@@ -748,7 +775,8 @@ class FundApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
 
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
@@ -772,7 +800,8 @@ class FundApiTest extends ApiTestCase
     public function testUpdateFailsUnauthenticated(): void
     {
         $client = static::createClient();
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
 
         $client->request('PUT', $iri, ['json' => [
             'description' => 'new Description',
@@ -797,7 +826,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'new Description',
             'name'        => 'New Name!',
@@ -823,23 +853,11 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        // add a second fund to the db, we will try to name it like the first
-        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
-
-        $process = $em->getRepository(Process::class)->find(1);
-        $fund = new Fund();
-        $fund->setName('New Fund');
-        $fund->setRegion('Dresden');
-        $fund->setDescription('new description');
-        $fund->setSponsor('Test');
-        $process->addFund($fund);
-        $em->persist($fund);
-        $em->flush();
-
-        $iri = $this->findIriBy(Fund::class, ['id' => 2]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
-            'name'        => 'Future City',
+            'name'        => TestFixtures::INACTIVE_FUND['name'],
             'region'      => 'Paris',
             'sponsor'     => 'Bundesministerium',
         ]]);
@@ -862,7 +880,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
             'name'        => '',
@@ -887,7 +906,8 @@ class FundApiTest extends ApiTestCase
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('PUT', $iri, ['json' => [
@@ -917,7 +937,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => '',
             'name'        => 'Test',
@@ -943,7 +964,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
             'name'        => 'Test',
@@ -969,7 +991,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
             'name'        => 'Test',
@@ -995,7 +1018,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
             'name'        => 'Test',
@@ -1028,7 +1052,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
             'name'        => 'Test',
@@ -1052,31 +1077,33 @@ class FundApiTest extends ApiTestCase
     public function testDelete(): void
     {
         $before = $this->entityManager->getRepository(UserObjectRole::class)
-            ->findBy(['objectId' => 1, 'objectType' => Fund::class]);
+            ->findBy(['objectId' => TestFixtures::INACTIVE_FUND['id'], 'objectType' => Fund::class]);
         $this->assertCount(1, $before);
 
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
         ]);
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $client->request('DELETE', $iri);
 
         static::assertResponseStatusCodeSame(204);
 
         $deleted = static::$container->get('doctrine')
             ->getRepository(Fund::class)
-            ->find(1);
+            ->find(TestFixtures::INACTIVE_FUND['id']);
         $this->assertNull($deleted);
 
         $after = $this->entityManager->getRepository(UserObjectRole::class)
-            ->findBy(['objectId' => 1, 'objectType' => Fund::class]);
+            ->findBy(['objectId' => TestFixtures::INACTIVE_FUND['id'], 'objectType' => Fund::class]);
         $this->assertCount(0, $after);
     }
 
     public function testDeleteFailsUnauthenticated(): void
     {
         $client = static::createClient();
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $client->request('DELETE', $iri);
 
         self::assertResponseStatusCodeSame(401);
@@ -1095,7 +1122,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::JUROR['email']
         ]);
 
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $client->request('DELETE', $iri);
 
         self::assertResponseStatusCodeSame(403);
@@ -1116,13 +1144,8 @@ class FundApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
-        /* @var $fund Fund */
-        $fund = $em->getRepository(Fund::class)->find(1);
-        $fund->setState(Fund::STATE_ACTIVE);
-        $em->flush();
-
-        $iri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('DELETE', $iri);
 
         self::assertResponseStatusCodeSame(403);

@@ -47,7 +47,7 @@ class FundTest extends KernelTestCase
     {
         $before = $this->getFundRepository()
             ->findAll();
-        $this->assertCount(1, $before);
+        $this->assertCount(2, $before);
 
         $process = $this->entityManager->getRepository(Process::class)
             ->find(1);
@@ -66,7 +66,7 @@ class FundTest extends KernelTestCase
 
         $after = $this->getFundRepository()
             ->findAll();
-        $this->assertCount(2, $after);
+        $this->assertCount(3, $after);
 
         /* @var $found Fund */
         $found = $this->getFundRepository()
@@ -90,8 +90,8 @@ class FundTest extends KernelTestCase
         $this->assertCount(0, $found->getApplications());
         $this->assertCount(0, $found->getJuryCriteria());
 
-        // ID 1 is created by the fixtures
-        $this->assertSame(2, $found->getId());
+        // ID 1+2 are created by the fixtures
+        $this->assertSame(3, $found->getId());
     }
 
     /**

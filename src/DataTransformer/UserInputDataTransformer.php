@@ -7,30 +7,19 @@ use ApiPlatform\Core\DataTransformer\DataTransformerInterface;
 use ApiPlatform\Core\Serializer\AbstractItemNormalizer;
 use ApiPlatform\Core\Validator\ValidatorInterface;
 use App\Dto\UserInput;
+use App\Entity\Project;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
 /**
  * Handles password encoding and setting a random password if none was given.
  */
-class UserInputDataTransformer implements DataTransformerInterface
+class UserInputDataTransformer implements DataTransformerInterface,
+    ServiceSubscriberInterface
 {
-    /**
-     * @var UserPasswordEncoderInterface
-     */
-    private $passwordEncoder;
-
-    /**
-     * @var ValidatorInterface
-     */
-    private $validator;
-
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder,
-        ValidatorInterface $validator)
-    {
-        $this->passwordEncoder = $passwordEncoder;
-        $this->validator = $validator;
-    }
+    use ServiceSubscriberTrait;
 
     /**
      * {@inheritdoc}
@@ -42,7 +31,7 @@ class UserInputDataTransformer implements DataTransformerInterface
     {
         // this evaluates all constraint annotations on the DTO
         $context['groups'][] = 'Default';
-        $this->validator->validate($data, $context);
+        $this->validator()->validate($data, $context);
 
         $user = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE]
             ?? new User();
@@ -85,8 +74,27 @@ class UserInputDataTransformer implements DataTransformerInterface
         // we have a (new) password given -> encode and replace the old one
         if ($data->password !== null) {
             $user->setPassword(
-                $this->passwordEncoder->encodePassword($user, $data->password)
+                $this->passwordEncoder()->encodePassword($user, $data->password)
             );
+        }
+
+        foreach($data->createdProjects as $projectData) {
+            $project = $this->projectTransformer()
+                ->transform($projectData, Project::class, $context);
+
+            // @todo the ProjectValidator is not called automatically, why?
+            $this->validator()->validate($project, $context);
+
+            // createdProjects can only be set when a user registers ->
+            // set all projects/ideas to deactivated, they wil be activated
+            // when the user validates
+            $project->setState(Project::STATE_DEACTIVATED);
+
+            foreach ($project->getMemberships() as $membership) {
+                $user->addProjectMembership($membership);
+            }
+
+            $user->addCreatedProject($project);
         }
 
         return $user;
@@ -102,5 +110,20 @@ class UserInputDataTransformer implements DataTransformerInterface
         }
 
         return User::class === $to && null !== ($context['input']['class'] ?? null);
+    }
+
+    private function projectTransformer(): ProjectInputDataTransformer
+    {
+        return $this->container->get(__METHOD__);
+    }
+
+    private function passwordEncoder(): UserPasswordEncoderInterface
+    {
+        return $this->container->get(__METHOD__);
+    }
+
+    private function validator(): ValidatorInterface
+    {
+        return $this->container->get(__METHOD__);
     }
 }
