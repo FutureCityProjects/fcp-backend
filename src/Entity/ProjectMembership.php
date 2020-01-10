@@ -101,7 +101,7 @@ class ProjectMembership
      * })
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Project", inversedBy="memberships")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private ?Project $project = null;
 
@@ -219,7 +219,7 @@ class ProjectMembership
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
      * @ORM\ManyToOne(targetEntity="User", inversedBy="projectMemberships")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private ?User $user = null;
 
