@@ -189,7 +189,7 @@ class ProjectApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
-        $response = $client->request('GET', '/projects', [
+        $client->request('GET', '/projects', [
             'query' => ['id' => [
                 TestFixtures::PROJECT['id'],
                 TestFixtures::LOCKED_PROJECT['id'],
@@ -204,20 +204,51 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context' => '/contexts/Project',
-            '@id' => '/projects',
-            '@type' => 'hydra:Collection',
-            'hydra:totalItems' => 2,
+            '@context'          => '/contexts/Project',
+            '@id'               => '/projects',
+            '@type'             => 'hydra:Collection',
+
+            // the deleted project is NOT returned
+            'hydra:totalItems'  => 2,
+            'hydra:member'      => [
+                0 => ['id' => TestFixtures::PROJECT['id']],
+                1 => ['id' => TestFixtures::LOCKED_PROJECT['id']]
+            ],
+        ]);
+    }
+
+    public function testGetProjectsByProgress(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
-        $collection = $response->toArray();
+        $client->request('GET', '/projects', [
+            'query' => ['progress' => [
+                TestFixtures::PROJECT['id'],
+                TestFixtures::LOCKED_PROJECT['id'],
+                TestFixtures::DELETED_PROJECT['id'],
 
-        // the deleted project is NOT returned
-        $this->assertCount(2, $collection['hydra:member']);
-        $this->assertSame(TestFixtures::PROJECT['id'],
-            $collection['hydra:member'][0]['id']);
-        $this->assertSame(TestFixtures::LOCKED_PROJECT['id'],
-            $collection['hydra:member'][1]['id']);
+                // by IRI works too
+                //$this->findIriBy(Project::class, ['id' => TestFixtures::PROJECT['id']]),
+                //$this->findIriBy(Project::class, ['id' => TestFixtures::LOCKED_PROJECT['id']]),
+                //$this->findIriBy(Project::class, ['id' => TestFixtures::DELETED_PROJECT['id']]),
+            ]]
+        ]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@context'          => '/contexts/Project',
+            '@id'               => '/projects',
+            '@type'             => 'hydra:Collection',
+
+            // the deleted project is NOT returned
+            'hydra:totalItems'  => 2,
+            'hydra:member'      => [
+                0 => ['id' => TestFixtures::PROJECT['id']],
+                1 => ['id' => TestFixtures::LOCKED_PROJECT['id']]
+            ],
+        ]);
     }
 
     public function testGetProjectIdea(): void

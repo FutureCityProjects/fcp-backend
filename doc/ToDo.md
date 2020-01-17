@@ -15,7 +15,6 @@
     * Unittests
         * Cron commands trigger cron events
         * Cron daily event dispatches PurgeValidationsMessage
-        * PurgeValidationsMessage is handled and removes expired 
         * uploadable
             * richtiger filename
             * richtiger dirname

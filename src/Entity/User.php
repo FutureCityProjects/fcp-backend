@@ -540,7 +540,7 @@ class User implements UserInterface
     private $createdProjects;
 
     /**
-     * @return Collection|Validation[]
+     * @return Collection|Project[]
      */
     public function getCreatedProjects(): Collection
     {

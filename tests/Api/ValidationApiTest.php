@@ -5,6 +5,8 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
+use App\Entity\Process;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Entity\Validation;
 use App\PHPUnit\AuthenticatedClientTrait;
@@ -159,14 +161,22 @@ class ValidationApiTest extends ApiTestCase
         $client = static::createClient();
         $em = static::$kernel->getContainer()->get('doctrine')->getManager();
 
-        // ID 1 is the jurors account validation
-        $token = $em->getRepository(Validation::class)
-            ->find(1)
-            ->getToken();
-
+        /** @var User $before */
         $before = $em->getRepository(User::class)
             ->find(TestFixtures::JUROR['id']);
         $before->setIsValidated(false);
+
+        $token = $before->getValidations()[0]->getToken();
+        $process = $em->getRepository(Process::class)->find(1);
+
+        $project = new Project();
+        $project->setShortDescription("this is deactivated");
+        $project->setState(Project::STATE_DEACTIVATED);
+        $project->setProgress(Project::PROGRESS_IDEA);
+        $project->setProcess($process);
+        $project->setCreatedBy($before);
+        $em->persist($project);
+
         $em->flush();
         $em->clear();
 
@@ -181,10 +191,16 @@ class ValidationApiTest extends ApiTestCase
             'message' => 'Validation successful',
         ]);
 
+        /** @var User $after */
         $after = $em->getRepository(User::class)
             ->find(TestFixtures::JUROR['id']);
         $this->assertTrue($after->isValidated());
         $this->assertCount(0, $after->getValidations());
+
+        // project was activated on validation confirm
+        $this->assertCount(1, $after->getCreatedProjects());
+        $this->assertSame(Project::STATE_ACTIVE,
+            $after->getCreatedProjects()[0]->getState());
     }
 
     public function testConfirmPasswordReset(): void
