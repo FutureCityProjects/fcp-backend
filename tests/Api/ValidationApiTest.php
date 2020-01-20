@@ -337,7 +337,7 @@ class ValidationApiTest extends ApiTestCase
             '@context'         => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'No matching validation found.',
+            'hydra:description' => 'Not Found',
         ]);
     }
 

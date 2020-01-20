@@ -58,9 +58,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class ProjectMembership
 {
-    const ROLE_APPLICANT = 'applicant';
-    const ROLE_MEMBER    = 'member';
-    const ROLE_OWNER     = 'owner';
+    public const ROLE_APPLICANT = 'applicant';
+    public const ROLE_MEMBER    = 'member';
+    public const ROLE_OWNER     = 'owner';
 
     //region Motivation
     /**
@@ -71,6 +71,7 @@ class ProjectMembership
      *     "projectMembership:write",
      *     "user:read"
      * })
+     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
      * @Assert\Length(min=10, max=1000, allowEmptyString=false,
      *     minMessage="validate.general.tooShort",
      *     maxMessage="validate.general.tooLong")
@@ -160,6 +161,7 @@ class ProjectMembership
      *     "projectMembership:write",
      *     "user:read"
      * })
+     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
      * @Assert\Length(min=10, max=1000, allowEmptyString=false,
      *     minMessage="validate.general.tooShort",
      *     maxMessage="validate.general.tooLong")
@@ -189,6 +191,7 @@ class ProjectMembership
      *     "projectMembership:write",
      *     "user:read"
      * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
      * @ORM\Column(type="text", length=1000, nullable=true)
      */
     private ?string $tasks = null;
@@ -211,6 +214,11 @@ class ProjectMembership
      * @var User
      *
      * @Assert\NotBlank(allowNull=true, groups={"user:register"})
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     groups={"projectMembership:create"},
+     *     message="validate.general.notBlank"
+     * )
      * @Groups({
      *     "project:read",
      *     "projectMembership:create",

@@ -108,7 +108,7 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         'id'                    => 3, // because we persist it third
         'name'                  => 'Locked Project',
         'isLocked'              => true,
-        'progress'              => Project::PROGRESS_CREATING_PROFILE,
+        'progress'              => Project::PROGRESS_CREATING_PLAN,
         'shortDescription'      => 'this is locked',
     ];
 

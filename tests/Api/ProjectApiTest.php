@@ -225,14 +225,8 @@ class ProjectApiTest extends ApiTestCase
 
         $client->request('GET', '/projects', [
             'query' => ['progress' => [
-                TestFixtures::PROJECT['id'],
-                TestFixtures::LOCKED_PROJECT['id'],
-                TestFixtures::DELETED_PROJECT['id'],
-
-                // by IRI works too
-                //$this->findIriBy(Project::class, ['id' => TestFixtures::PROJECT['id']]),
-                //$this->findIriBy(Project::class, ['id' => TestFixtures::LOCKED_PROJECT['id']]),
-                //$this->findIriBy(Project::class, ['id' => TestFixtures::DELETED_PROJECT['id']]),
+                Project::PROGRESS_CREATING_PROFILE, // only one matching PRJ
+                Project::PROGRESS_CREATING_PLAN, // only LOCKED_PRJ matching
             ]]
         ]);
 
@@ -242,11 +236,12 @@ class ProjectApiTest extends ApiTestCase
             '@id'               => '/projects',
             '@type'             => 'hydra:Collection',
 
-            // the deleted project is NOT returned
-            'hydra:totalItems'  => 2,
+            // the deleted project is NOT returned for "normal" users
+            // the locked project is only returned for "normal" users when
+            // they request it via ID
+            'hydra:totalItems'  => 1,
             'hydra:member'      => [
                 0 => ['id' => TestFixtures::PROJECT['id']],
-                1 => ['id' => TestFixtures::LOCKED_PROJECT['id']]
             ],
         ]);
     }
@@ -778,7 +773,6 @@ class ProjectApiTest extends ApiTestCase
             'hydra:description' => 'skills: validate.general.notBlank',
         ]);
     }
-
 
     public function testCreateProjectWithShortSkillsFails(): void
     {
