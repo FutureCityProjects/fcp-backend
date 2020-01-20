@@ -112,6 +112,7 @@ class AuthApiTest extends ApiTestCase
         $this->assertArrayHasKey('exp', $decoded);
         $this->assertSame(TestFixtures::ADMIN['username'], $decoded['username']);
         $this->assertSame([User::ROLE_ADMIN, User::ROLE_USER], $decoded['roles']);
+        $this->assertSame(TestFixtures::ADMIN['id'], $decoded['id']);
     }
 
     public function testAuthFailsWithUnknownUsername(): void

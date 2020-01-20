@@ -495,7 +495,7 @@ class Project
      *         Project::PROGRESS_APPLICATION_SUBMITTED
      *     }
      * )
-     * @Groups({"project:read", "user:register"})
+     * @Groups({"project:read", "user:register", "user:self"})
      * @ORM\Column(type="string", length=50, nullable=false, options={"default":"idea"})
      */
     private ?string $progress = null;

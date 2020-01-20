@@ -31,7 +31,9 @@ class ValidationConfirmAction
             // trigger an event to allow blocking the requesting IP/user after
             // x failed attempts
             $dispatcher->dispatch(new ValidationNotFoundEvent());
-            throw new NotFoundHttpException('No matching validation found.');
+
+            // no special message, same as with unknown/invalid ID
+            throw new NotFoundHttpException('Not Found');
         }
 
         $em = $registry->getManagerForClass(Validation::class);
