@@ -114,7 +114,9 @@ class UserForgotPasswordMessageHandler implements
             ->subject('Passwort zurücksetzen') // @todo translate
             ->htmlTemplate('security/mail.password-reset.html.twig')
             ->context([
+                'id'            => $validation->getId(),
                 'expiresAt'     => $validation->getExpiresAt(),
+                'token'         => $validation->getToken(),
                 'username'      => $validation->getUser()->getUsername(),
                 'validationUrl' => $withType,
             ]);

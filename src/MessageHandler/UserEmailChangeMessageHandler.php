@@ -117,7 +117,9 @@ class UserEmailChangeMessageHandler implements
             ->subject('Email-Adresse bestätigen') // @todo translate
             ->htmlTemplate('security/mail.email-change.html.twig')
             ->context([
+                'id'            => $validation->getId(),
                 'expiresAt'     => $validation->getExpiresAt(),
+                'token'         => $validation->getToken(),
                 'username'      => $validation->getUser()->getUsername(),
                 'validationUrl' => $withType,
             ]);

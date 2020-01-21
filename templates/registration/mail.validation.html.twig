@@ -10,10 +10,23 @@
         <a href="{{ validationUrl }}">{{ validationUrl }}</a>
     </p>
     <p>
-        Sollte der Link nicht funktionieren so kopiere bitte die vollständige URL
-        in die Browser-Adresszeile.<br>
         Erst nach Bestätigung Deiner Email-Adresse kannst du dich einloggen.<br>
         Nach Ablauf der Frist wird das Benutzerkonto gelöscht, Du kannst dich danach
         erneut registrieren.
     </p>
+    <p>
+        Sollte der Link nicht funktionieren so kopiere bitte die vollständige URL
+        in die Browser-Adresszeile.
+    </p>
+    <p>
+        Angaben zur manuellen Bestätigung:
+    </p>
+    <ul>
+        <li>
+            Identifikator: {{ id }}
+        </li>
+        <li>
+            Sicherheitscode: {{ token }}
+        </li>
+    </ul>
 {% endblock %}

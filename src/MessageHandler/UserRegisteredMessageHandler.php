@@ -110,7 +110,9 @@ class UserRegisteredMessageHandler implements
             ->subject('Willkommen') // @todo translate
             ->htmlTemplate('registration/mail.validation.html.twig')
             ->context([
+                'id'            => $validation->getId(),
                 'expiresAt'     => $validation->getExpiresAt(),
+                'token'         => $validation->getToken(),
                 'username'      => $validation->getUser()->getUsername(),
                 'validationUrl' => $withType,
             ]);

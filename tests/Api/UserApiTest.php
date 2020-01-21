@@ -279,6 +279,52 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
+    public function testGetSelfWithMemberships(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(User::class,
+            ['email' => TestFixtures::PROJECT_MEMBER['email']]);
+        $client->request('GET', $iri);
+
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(User::class);
+
+        self::assertJsonContains([
+            '@id'                => $iri,
+            'username'           => TestFixtures::PROJECT_MEMBER['username'],
+            'email'              => TestFixtures::PROJECT_MEMBER['email'],
+            'id'                 => TestFixtures::PROJECT_MEMBER['id'],
+            'roles'              => [User::ROLE_USER],
+            'projectMemberships' => [
+                0 => [
+                    '@type'      => 'ProjectMembership',
+                    'motivation' => 'member motivation',
+                    'project'    => [
+                        'id' => TestFixtures::PROJECT['id'],
+                    ],
+                    'role'       => ProjectMembership::ROLE_MEMBER,
+                    'skills'     => 'member skills',
+                    'tasks'      => 'member tasks',
+                ],
+                1 => [
+                    '@type'      => 'ProjectMembership',
+                    'motivation' => 'member motivation',
+                    'project'    => [
+                        'id' => TestFixtures::LOCKED_PROJECT['id'],
+                    ],
+                    'role'       => ProjectMembership::ROLE_MEMBER,
+                    'skills'     => 'member skills',
+                    'tasks'      => 'member tasks',
+                ],
+            ],
+        ]);
+    }
+
     public function testGetFailsUnauthenticated(): void
     {
         $client = static::createClient();

@@ -422,7 +422,6 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $fund->setFinalJuryDate(new DateTimeImmutable('2020-02-01'));
         $process->addFund($fund);
 
-
         $concretization = new FundConcretization();
         $concretization->setQuestion('How does it help?');
         $concretization->setDescription('What does the project do for you?');
