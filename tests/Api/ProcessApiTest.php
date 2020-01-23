@@ -253,11 +253,11 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'goals: This value should not be blank.',
+            'hydra:description' => 'goals: validate.general.notBlank',
             'violations' => [
                 [
                     'propertyPath' => 'goals',
-                    'message'      => 'This value should not be blank.'
+                    'message'      => 'validate.general.notBlank'
                 ]
             ],
         ]);
@@ -284,11 +284,11 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'goals[0]: This value should not be blank.',
+            'hydra:description' => 'goals[0]: validate.general.notBlank',
             'violations' => [
                 [
                     'propertyPath' => 'goals[0]',
-                    'message'      => 'This value should not be blank.'
+                    'message'      => 'validate.general.notBlank'
                 ]
             ],
         ]);
@@ -315,11 +315,11 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'goals[0]: This value is too short.',
+            'hydra:description' => 'goals[0]: validate.general.tooShort',
             'violations' => [
                 [
                     'propertyPath' => 'goals[0]',
-                    'message'      => 'This value is too short.'
+                    'message'      => 'validate.general.tooShort'
                 ]
             ],
         ]);

@@ -77,7 +77,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "user:write"},
  *         "swagger_definition_name"="Write"
  *     }
@@ -255,7 +254,7 @@ class User implements UserInterface
     /**
      * @var string
      * @AppAssert\ValidPersonName
-     * @Groups({"user:read", "user:write", "project:read"})
+     * @Groups({"user:read", "user:write", "project:member-read"})
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private ?string $firstName = null;
@@ -277,7 +276,7 @@ class User implements UserInterface
     /**
      * @var string
      * @AppAssert\ValidPersonName
-     * @Groups({"user:read", "user:write", "project:read"})
+     * @Groups({"user:read", "user:write", "project:member-read"})
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private ?string $lastName = null;

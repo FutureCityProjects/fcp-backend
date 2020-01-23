@@ -54,10 +54,10 @@ class Process
      * @var array|null
      *
      * @Assert\All({
-     *     @Assert\NotBlank,
-     *     @Assert\Length(min=5, max=1000, allowEmptyString=false,
-     *         minMessage="This value is too short.",
-     *         maxMessage="This value is too long."
+     *     @Assert\NotBlank(allowNull=false, message="validate.general.notBlank"),
+     *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
      *     )
      * })
      * @Assert\NotBlank(allowNull=true)
@@ -146,13 +146,13 @@ class Process
      * @var array
      *
      * @Assert\All({
-     *     @Assert\NotBlank,
-     *     @Assert\Length(min=5, max=1000, allowEmptyString=false,
-     *         minMessage="This value is too short.",
-     *         maxMessage="This value is too long."
+     *     @Assert\NotBlank(allowNull=false, message="validate.general.notBlank"),
+     *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
      *     )
      * })
-     * @Assert\NotBlank
+     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank"),
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="json", nullable=false)
      */

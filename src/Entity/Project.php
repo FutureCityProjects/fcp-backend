@@ -185,9 +185,7 @@ class Project
      * @var User
      * @Groups({
      *     "project:create",
-     *     "project:admin-read",
-     *     "project:po-read",
-     *     "project:owner-read"
+     *     "project:read"
      * })
      * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="User", inversedBy="createdProjects")

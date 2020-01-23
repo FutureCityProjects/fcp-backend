@@ -1253,19 +1253,14 @@ class UserApiTest extends ApiTestCase
             'email' => 'new@zukunftsstadt.de',
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("email" are unknown).',
+            '@id'   => $iri,
+            'email' => TestFixtures::PROJECT_MEMBER['email'],
         ]);
     }
 
-    public function testUpdateOwnUsernameFails(): void
+    public function testUpdateOfOwnUsernameIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -1278,19 +1273,14 @@ class UserApiTest extends ApiTestCase
             'username' => 'new-name',
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("username" are unknown).',
+            '@id'         => $iri,
+            'username'    => TestFixtures::PROJECT_MEMBER['username'],
         ]);
     }
 
-    public function testUpdateOwnRolesFails(): void
+    public function testUpdateOfOwnRolesIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -1303,19 +1293,14 @@ class UserApiTest extends ApiTestCase
             'roles' => [User::ROLE_ADMIN],
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("roles" are unknown).',
+            '@id'         => $iri,
+            'roles'       => [User::ROLE_USER],
         ]);
     }
 
-    public function testUpdateOwnIsActiveFails(): void
+    public function testUpdateOfOwnIsActiveIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -1328,19 +1313,14 @@ class UserApiTest extends ApiTestCase
             'isActive' => false,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("isActive" are unknown).',
+            '@id'         => $iri,
+            'isActive'    => true,
         ]);
     }
 
-    public function testUpdateOwnIsValidatedFails(): void
+    public function testUpdateOfOwnIsValidatedIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -1353,15 +1333,10 @@ class UserApiTest extends ApiTestCase
             'isValidated' => false,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("isValidated" are unknown).',
+            '@id'         => $iri,
+            'isValidated' => true,
         ]);
     }
 

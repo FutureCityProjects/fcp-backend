@@ -331,7 +331,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'motivation: This value should not be null.',
+            'hydra:description' => 'motivation: validate.general.notBlank',
         ]);
     }
 
@@ -362,7 +362,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'skills: This value should not be null.',
+            'hydra:description' => 'skills: validate.general.notBlank',
         ]);
     }
 
@@ -1040,7 +1040,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'motivation: validate.general.tooShort',
+            'hydra:description' => 'motivation: validate.general.notBlank',
         ]);
     }
 
@@ -1069,7 +1069,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'skills: validate.general.tooShort',
+            'hydra:description' => 'skills: validate.general.notBlank',
         ]);
     }
 

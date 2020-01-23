@@ -41,6 +41,9 @@ class ProjectApiTest extends ApiTestCase
             'hydra:member'     => [
                 0 => [
                     'id'                => TestFixtures::IDEA['id'],
+                    'createdBy'             => [
+                        'id' => TestFixtures::ADMIN['id']
+                    ],
                     'resultingProjects' => [
                         [
                             'id' => TestFixtures::PROJECT['id'],
@@ -49,6 +52,9 @@ class ProjectApiTest extends ApiTestCase
                 ],
                 1 => [
                     'id' => TestFixtures::PROJECT['id'],
+                    'createdBy'             => [
+                        'id' => TestFixtures::PROJECT_OWNER['id']
+                    ],
                 ],
             ],
         ]);
@@ -60,9 +66,11 @@ class ProjectApiTest extends ApiTestCase
 
         // those properties should not be visible to anonymous
         $this->assertArrayNotHasKey('applications', $collection['hydra:member'][1]);
-        $this->assertArrayNotHasKey('createdBy', $collection['hydra:member'][1]);
         $this->assertArrayNotHasKey('isLocked', $collection['hydra:member'][1]);
         $this->assertArrayNotHasKey('memberships', $collection['hydra:member'][1]);
+        $this->assertArrayNotHasKey('firstName', $collection['hydra:member'][1]['createdBy']);
+        $this->assertArrayNotHasKey('lastName', $collection['hydra:member'][1]['createdBy']);
+
     }
 
     /**
@@ -263,6 +271,10 @@ class ProjectApiTest extends ApiTestCase
         self::assertJsonContains([
             '@id'                   => $iri,
             'challenges'            => null,
+            'createdBy'             => [
+                'id'       => TestFixtures::ADMIN['id'],
+                'username' => TestFixtures::ADMIN['username'],
+            ],
             'delimitation'          => null,
             'description'           => null,
             'id'                    => TestFixtures::IDEA['id'],
@@ -285,10 +297,11 @@ class ProjectApiTest extends ApiTestCase
         $projectData = $response->toArray();
 
         // these properties are not public
-        $this->assertArrayNotHasKey('createdBy', $projectData);
         $this->assertArrayNotHasKey('isLocked', $projectData);
         $this->assertArrayNotHasKey('memberships', $projectData);
         $this->assertArrayNotHasKey('applications', $projectData);
+        $this->assertArrayNotHasKey('firstName', $projectData['createdBy']);
+        $this->assertArrayNotHasKey('lastName', $projectData['createdBy']);
     }
 
     public function testGetProject(): void
@@ -305,6 +318,9 @@ class ProjectApiTest extends ApiTestCase
         self::assertJsonContains([
             '@id'                   => $iri,
             'challenges'            => 'challenges',
+            'createdBy'             => [
+                'id' => TestFixtures::PROJECT_OWNER['id']
+            ],
             'delimitation'          => 'delimitation',
             'description'           => 'long description',
             'id'                    => TestFixtures::PROJECT['id'],
@@ -320,10 +336,11 @@ class ProjectApiTest extends ApiTestCase
 
         $projectData = $response->toArray();
         $this->assertSame(TestFixtures::IDEA['id'], $projectData['inspiration']['id']);
-        $this->assertArrayNotHasKey('createdBy', $projectData);
         $this->assertArrayNotHasKey('isLocked', $projectData);
         $this->assertArrayNotHasKey('memberships', $projectData);
         $this->assertArrayNotHasKey('applications', $projectData);
+        $this->assertArrayNotHasKey('firstName', $projectData['createdBy']);
+        $this->assertArrayNotHasKey('lastName', $projectData['createdBy']);
     }
 
     public function testGetProjectAsMember(): void
@@ -340,6 +357,9 @@ class ProjectApiTest extends ApiTestCase
         self::assertJsonContains([
             '@id' => $iri,
             'id' => TestFixtures::PROJECT['id'],
+            'createdBy'             => [
+                'id' => TestFixtures::PROJECT_OWNER['id']
+            ],
             'name' => TestFixtures::PROJECT['name'],
         ]);
 
@@ -349,7 +369,6 @@ class ProjectApiTest extends ApiTestCase
         $this->assertCount(2, $projectData['memberships']);
 
         // those properties are only visible to the PO/Admin
-        $this->assertArrayNotHasKey('createdBy', $projectData);
         $this->assertArrayNotHasKey('isLocked', $projectData);
     }
 

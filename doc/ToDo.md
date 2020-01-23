@@ -1,7 +1,11 @@
 # Anstehend
+* testen: autotrim?
+* neuen empty validator: striptags + trim
+* Logo in der Mail austauschen
 * onRefresh: Error: "Unable to load an user with property "username" = "jakob.schumann". If the user identity has changed, you must renew the token. Otherwise, verify that the "lexik_jwt_authentication.user_identity_field" config option is correctly set."
 * Sollten Extra Attributes erlaubt sein beim Update? Oder muss der Client vorher
   filtern?
+* password min length / strength
 * localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
 * validate pw in pw reset listener + user DTO
 * custom operations:

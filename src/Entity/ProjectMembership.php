@@ -72,7 +72,7 @@ class ProjectMembership
      *     "user:read"
      * })
      * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
-     * @Assert\Length(min=10, max=1000, allowEmptyString=false,
+     * @Assert\Length(min=10, max=1000, allowEmptyString=true,
      *     minMessage="validate.general.tooShort",
      *     maxMessage="validate.general.tooLong")
      * @ORM\Column(type="text", length=1000, nullable=false)
@@ -162,7 +162,7 @@ class ProjectMembership
      *     "user:read"
      * })
      * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
-     * @Assert\Length(min=10, max=1000, allowEmptyString=false,
+     * @Assert\Length(min=10, max=1000, allowEmptyString=true,
      *     minMessage="validate.general.tooShort",
      *     maxMessage="validate.general.tooLong")
      * @ORM\Column(type="text", length=1000, nullable=false)
