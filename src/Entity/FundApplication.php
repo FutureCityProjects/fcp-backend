@@ -11,6 +11,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * FundApplication
@@ -106,6 +107,15 @@ class FundApplication
      *     "fundApplication:read",
      *     "fundApplication:write",
      * })
+     * @Assert\Choice(
+     *     choices={
+     *         FundApplication::SELF_ASSESSMENT_0_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_25_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_50_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_75_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_100_PERCENT
+     *     }
+     * )
      * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
      */
     private int $concretizationSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;

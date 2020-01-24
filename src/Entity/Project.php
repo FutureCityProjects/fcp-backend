@@ -51,7 +51,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "project:write"},
  *         "swagger_definition_name"="Write"
  *     }
@@ -160,7 +159,11 @@ class Project
 
     public function setChallenges(?string $challenges): self
     {
-        $this->challenges = $challenges;
+        if (mb_strlen(trim(strip_tags($challenges))) === 0) {
+            $this->challenges = "";
+        } else {
+            $this->challenges = trim($challenges);
+        }
 
         return $this;
     }
@@ -232,7 +235,11 @@ class Project
 
     public function setDelimitation(?string $delimitation): self
     {
-        $this->delimitation = $delimitation;
+        if (mb_strlen(trim(strip_tags($delimitation))) === 0) {
+            $this->delimitation = "";
+        } else {
+            $this->delimitation = trim($delimitation);
+        }
 
         return $this;
     }
@@ -253,7 +260,11 @@ class Project
 
     public function setDescription(?string $description): self
     {
-        $this->description = $description;
+        if (mb_strlen(trim(strip_tags($description))) === 0) {
+            $this->description = "";
+        } else {
+            $this->description = trim($description);
+        }
 
         return $this;
     }
@@ -274,7 +285,11 @@ class Project
 
     public function setGoal(?string $goal): self
     {
-        $this->goal = $goal;
+        if (mb_strlen(trim(strip_tags($goal))) === 0) {
+            $this->goal = "";
+        } else {
+            $this->goal = trim($goal);
+        }
 
         return $this;
     }
@@ -400,7 +415,7 @@ class Project
 
     public function setName(?string $name): self
     {
-        $this->name = $name;
+        $this->name = trim($name);
 
         return $this;
     }
@@ -546,7 +561,7 @@ class Project
 
     public function setShortDescription(string $shortDescription): self
     {
-        $this->shortDescription = $shortDescription;
+        $this->shortDescription = trim($shortDescription);
 
         return $this;
     }
@@ -622,7 +637,11 @@ class Project
 
     public function setVision(?string $vision): self
     {
-        $this->vision = $vision;
+        if (mb_strlen(trim(strip_tags($vision))) === 0) {
+            $this->vision = "";
+        } else {
+            $this->vision = trim($vision);
+        }
 
         return $this;
     }

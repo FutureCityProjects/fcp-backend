@@ -64,6 +64,10 @@ class FundConcretization
     /**
      * @var string|null
      *
+     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
+     * )
      * @Groups({
      *     "fund:read",
      *     "fundConcretization:read",
@@ -80,7 +84,7 @@ class FundConcretization
 
     public function setDescription(?string $description): self
     {
-        $this->description = $description;
+        $this->description = trim($description);
 
         return $this;
     }
@@ -179,7 +183,15 @@ class FundConcretization
      *     "fundConcretization:read",
      *     "fundConcretization:write",
      * })
-     * @Assert\NotBlank(allowNull=false)
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer="trim"
+     * )
+     * @Assert\Length(min=5, max=255, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
+     * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $question = null;
@@ -191,7 +203,7 @@ class FundConcretization
 
     public function setQuestion(string $question): self
     {
-        $this->question = $question;
+        $this->question = trim($question);
 
         return $this;
     }

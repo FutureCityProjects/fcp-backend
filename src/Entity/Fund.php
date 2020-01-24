@@ -6,6 +6,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Traits\NameSlug;
 use App\Entity\UploadedFileTypes\FundLogo;
+use App\Validator\NormalizerHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -196,10 +197,14 @@ class Fund
      * @var array|null
      *
      * @Assert\All({
-     *     @Assert\NotBlank,
-     *     @Assert\Length(min=5, max=280, allowEmptyString=false,
-     *         minMessage="This value is too short.",
-     *         maxMessage="This value is too long."
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
+     *     @Assert\Length(min=5, max=280, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
      *     )
      * })
      * @Groups({"elastica", "fund:read", "fund:write"})
@@ -225,9 +230,14 @@ class Fund
      * @var string
      *
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\Length(min=20, max=65535, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
+     * @Assert\NotBlank(
+     *     allowNull=true,
+     *     message="validate.general.notBlank",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
+     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
      * )
      * @ORM\Column(type="text", length=65535, nullable=false)
      */
@@ -240,7 +250,11 @@ class Fund
 
     public function setDescription(string $description): self
     {
-        $this->description = $description;
+        if (mb_strlen(trim(strip_tags($description))) === 0) {
+            $this->description = "";
+        } else {
+            $this->description = trim($description);
+        }
 
         return $this;
     }
@@ -291,10 +305,14 @@ class Fund
      * @var string|null
      *
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(allowNull=true)
+     * @Assert\NotBlank(
+     *     allowNull=true,
+     *     message="validate.general.notBlank",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Assert\Length(min=20, max=65535, allowEmptyString=true,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
      * )
      * @ORM\Column(type="text", length=65535, nullable=true)
      */
@@ -307,7 +325,11 @@ class Fund
 
     public function setImprint(?string $imprint): self
     {
-        $this->imprint = $imprint;
+        if (mb_strlen(trim(strip_tags($imprint))) === 0) {
+            $this->imprint = "";
+        } else {
+            $this->imprint = trim($imprint);
+        }
 
         return $this;
     }
@@ -452,7 +474,8 @@ class Fund
     /**
      * @var string
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank
+     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank",
+     *     normalizer="trim")
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $name = null;
@@ -464,7 +487,7 @@ class Fund
 
     public function setName(?string $name): self
     {
-        $this->name = $name;
+        $this->name = trim($name);
 
         return $this;
     }
@@ -474,6 +497,10 @@ class Fund
     /**
      * @var Process
      *
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank"
+     * )
      * @Groups({"fund:read", "fund:create"})
      * @ORM\ManyToOne(targetEntity="Process", inversedBy="funds")
      * @ORM\JoinColumn(nullable=false)
@@ -542,9 +569,14 @@ class Fund
      * @var string
      *
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\Length(min=5, max=255, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer="trim"
+     * )
+     * @Assert\Length(min=5, max=255, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
      * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */
@@ -568,9 +600,14 @@ class Fund
      * @var string
      *
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\Length(min=10, max=255, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer="trim"
+     * )
+     * @Assert\Length(min=10, max=255, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong"
      * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */
@@ -583,7 +620,7 @@ class Fund
 
     public function setSponsor(string $sponsor): self
     {
-        $this->sponsor = $sponsor;
+        $this->sponsor = trim($sponsor);
 
         return $this;
     }

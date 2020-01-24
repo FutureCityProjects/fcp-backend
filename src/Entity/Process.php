@@ -54,7 +54,11 @@ class Process
      * @var array|null
      *
      * @Assert\All({
-     *     @Assert\NotBlank(allowNull=false, message="validate.general.notBlank"),
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
      *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
      *         minMessage="validate.general.tooShort",
      *         maxMessage="validate.general.tooLong"
@@ -96,7 +100,11 @@ class Process
 
     public function setDescription(string $description): self
     {
-        $this->description = $description;
+        if (mb_strlen(trim(strip_tags($description))) === 0) {
+            $this->description = "";
+        } else {
+            $this->description = trim($description);
+        }
 
         return $this;
     }
@@ -146,7 +154,11 @@ class Process
      * @var array
      *
      * @Assert\All({
-     *     @Assert\NotBlank(allowNull=false, message="validate.general.notBlank"),
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
      *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
      *         minMessage="validate.general.tooShort",
      *         maxMessage="validate.general.tooLong"
@@ -188,7 +200,11 @@ class Process
 
     public function setImprint(string $imprint): self
     {
-        $this->imprint = $imprint;
+        if (mb_strlen(trim(strip_tags($imprint))) === 0) {
+            $this->imprint = "";
+        } else {
+            $this->imprint = trim($imprint);
+        }
 
         return $this;
     }
@@ -260,7 +276,11 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer="trim"
+     * ),
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="string", length=255, nullable=false)
      */
@@ -273,7 +293,7 @@ class Process
 
     public function setRegion(string $region): self
     {
-        $this->region = $region;
+        $this->region = trim($region);
 
         return $this;
     }

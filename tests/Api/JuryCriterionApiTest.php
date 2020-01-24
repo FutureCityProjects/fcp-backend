@@ -210,7 +210,7 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be blank.',
+            'hydra:description' => 'question: validate.general.notBlank',
         ]);
     }
 
@@ -377,7 +377,7 @@ class JuryCriterionApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(JuryCriterion::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'question' => '',
+            'question' => ' ',
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -388,7 +388,8 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be blank.',
+            'hydra:description' => "question: validate.general.notBlank\n"
+                .'question: validate.general.tooShort',
         ]);
     }
 

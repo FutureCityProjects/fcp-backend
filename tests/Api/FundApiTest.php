@@ -548,7 +548,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            'hydra:description' => 'name: validate.general.notBlank',
         ]);
     }
 
@@ -622,7 +622,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'region: This value should not be null.',
+            'hydra:description' => 'region: validate.general.notBlank',
         ]);
     }
 
@@ -647,7 +647,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'sponsor: This value should not be null.',
+            'hydra:description' => 'sponsor: validate.general.notBlank',
         ]);
     }
 
@@ -727,11 +727,11 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'criteria[0]: This value should not be blank.',
+            'hydra:description' => 'criteria[0]: validate.general.notBlank',
             'violations' => [
                 [
                     'propertyPath' => 'criteria[0]',
-                    'message'      => 'This value should not be blank.'
+                    'message'      => 'validate.general.notBlank'
                 ]
             ],
         ]);
@@ -760,11 +760,11 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'criteria[0]: This value is too short.',
+            'hydra:description' => 'criteria[0]: validate.general.tooShort',
             'violations' => [
                 [
                     'propertyPath' => 'criteria[0]',
-                    'message'      => 'This value is too short.'
+                    'message'      => 'validate.general.tooShort'
                 ]
             ],
         ]);
@@ -897,7 +897,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            'hydra:description' => 'name: validate.general.notBlank',
         ]);
     }
 
@@ -954,11 +954,11 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'description: This value is too short.',
+            'hydra:description' => 'description: validate.general.tooShort',
         ]);
     }
 
-    public function testUpdateWithoutSponsorFails(): void
+    public function testUpdateWithEmptySponsorFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -981,11 +981,11 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'sponsor: This value is too short.',
+            'hydra:description' => 'sponsor: validate.general.notBlank',
         ]);
     }
 
-    public function testUpdateWithoutRegionFails(): void
+    public function testUpdateWithEmptyRegionFails(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -996,7 +996,7 @@ class FundApiTest extends ApiTestCase
         $client->request('PUT', $iri, ['json' => [
             'description' => 'description with 20 characters',
             'name'        => 'Test',
-            'region'      => '',
+            'region'      => ' ',
             'sponsor'     => 'Bundesministerium',
         ]]);
 
@@ -1008,7 +1008,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'region: This value is too short.',
+            'hydra:description' => 'region: validate.general.notBlank',
         ]);
     }
 
@@ -1036,11 +1036,11 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'criteria[0]: This value should not be blank.',
+            'hydra:description' => 'criteria[0]: validate.general.notBlank',
             'violations' => [
                 [
                     'propertyPath' => 'criteria[0]',
-                    'message'      => 'This value should not be blank.'
+                    'message'      => 'validate.general.notBlank'
                 ]
             ],
         ]);

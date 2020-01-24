@@ -49,10 +49,14 @@ class ProjectValidator
             return;
         }
 
+        /*
+         * @todo empty name is allowed, maybe prevent removing an existing
+         * name so it cannot get unnamed again?
         if (empty($object->getName())) {
             $context->buildViolation('This value should not be blank.')
                 ->atPath('name')
                 ->addViolation();
         }
+        */
     }
 }

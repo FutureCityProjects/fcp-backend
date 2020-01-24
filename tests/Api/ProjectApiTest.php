@@ -851,7 +851,7 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
-    public function testCreateProjectWithStateFails(): void
+    public function testStateIsIgnoredWhenCreatingProject(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::ADMIN['email']
@@ -864,20 +864,21 @@ class ProjectApiTest extends ApiTestCase
             'inspiration' => $ideaIRI,
             'process'     => $processIri,
             'progress'    => Project::PROGRESS_CREATING_PROFILE,
-            'motivation'  => 'my motivation',
-            'skills'      => 'my skills',
+            'motivation'  => 'my motivation is good',
+            'skills'      => 'my skills are better',
             'state'       => Project::STATE_DEACTIVATED,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        $this->assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("state" are unknown).',
+            'id'               => 5, // ID 1-4 created by fixtures
+            'inspiration'      => [
+                'id' => TestFixtures::IDEA['id'],
+            ],
+            'motivation'       => 'my motivation is good',
+            'shortDescription' => TestFixtures::IDEA['shortDescription'],
+            'skills'           => 'my skills are better',            'progress'              => Project::PROGRESS_CREATING_PROFILE,
+            'state'            => Project::STATE_ACTIVE,
         ]);
     }
 
@@ -999,52 +1000,26 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateOfProgressIsForbidden(): void
+    public function testUpdateOfProgressIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
-        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $iri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
         $client->request('PUT', $iri, ['json' => [
             'challenges'            => 'new challenges',
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
             'progress'              => Project::PROGRESS_CREATING_APPLICATION,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("progress" are unknown).',
-        ]);
-    }
-
-    public function testUpdateWithEmptyNameFails(): void
-    {
-        $client = static::createAuthenticatedClient([
-            'email' => TestFixtures::PROJECT_MEMBER['email']
-        ]);
-
-        $iri = $this->findIriBy(Project::class, ['id' => 2]);
-        $client->request('PUT', $iri, ['json' => [
-            'name'       => '',
-            'challenges' => 'new challenges',
-        ]]);
-
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
-        self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            '@id'                   => $iri,
+            'challenges'            => 'new challenges',
+            'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
+            'progress'              => Project::PROGRESS_CREATING_PROFILE,
         ]);
     }
 
@@ -1071,26 +1046,22 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateOfStateFailsWithoutPrivilege(): void
+    public function testUpdateOfStateWithoutPrivilegeIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
-        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $iri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
         $client->request('PUT', $iri, ['json' => [
             'state' => Project::STATE_DEACTIVATED,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("state" are unknown).',
+            '@id'   => $iri,
+            'state' => Project::STATE_ACTIVE,
         ]);
     }
 
@@ -1160,26 +1131,23 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
-    public function testLockingFailsWithoutPrivilege(): void
+    public function testLockingWithoutPrivilegeIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
-        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $iri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
         $client->request('PUT', $iri, ['json' => [
             'isLocked' => true,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("isLocked" are unknown).',
+            '@id'      => $iri,
+            'id'       => TestFixtures::PROJECT['id'],
+            'isLocked' => false,
         ]);
     }
 

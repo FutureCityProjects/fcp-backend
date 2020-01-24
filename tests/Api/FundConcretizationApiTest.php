@@ -73,8 +73,8 @@ class FundConcretizationApiTest extends ApiTestCase
 
         $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
         $response = $client->request('POST', '/fund_concretizations', ['json' => [
-            'question'    => 'What does it do?',
-            'description' => 'Explain please',
+            'question'    => 'What does it really do?',
+            'description' => 'Explain what it does please',
             'maxLength'   => 280,
             'fund'        => $fundIri,
         ]]);
@@ -85,8 +85,8 @@ class FundConcretizationApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(FundConcretization::class);
 
         self::assertJsonContains([
-            'question'    => 'What does it do?',
-            'description' => 'Explain please',
+            'question'    => 'What does it really do?',
+            'description' => 'Explain what it does please',
             'maxLength'   => 280,
             'fund'        => [
                 '@id'   => '/funds/1',
@@ -216,7 +216,7 @@ class FundConcretizationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be blank.',
+            'hydra:description' => 'question: validate.general.notBlank',
         ]);
     }
 
@@ -252,8 +252,8 @@ class FundConcretizationApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'question'    => 'New question',
-            'description' => 'New description',
+            'question'    => 'New question with enough characters',
+            'description' => 'New description with enough characters',
             'maxLength'   => 55,
         ]]);
 
@@ -263,8 +263,8 @@ class FundConcretizationApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(FundConcretization::class);
 
         self::assertJsonContains([
-            'question'    => 'New question',
-            'description' => 'New description',
+            'question'    => 'New question with enough characters',
+            'description' => 'New description with enough characters',
             'maxLength'   => 55,
             'fund'        => [
                 '@id'   => '/funds/1',
@@ -385,7 +385,7 @@ class FundConcretizationApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'question'  => 'Test',
+            'question'  => 'Test-Question with enough characters',
             'maxLength' => -1,
         ]]);
 
@@ -420,7 +420,7 @@ class FundConcretizationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'question: This value should not be blank.',
+            'hydra:description' => 'question: validate.general.notBlank',
         ]);
     }
 
