@@ -282,6 +282,7 @@ class FundApiTest extends ApiTestCase
         $this->assertArrayNotHasKey('finalJuryDate', $fundData);
         $this->assertArrayNotHasKey('juryCriteria', $fundData);
         $this->assertArrayNotHasKey('jurorsPerApplication', $fundData);
+        $this->assertArrayNotHasKey('fund', $fundData['concretizations']);
     }
 
     public function testGetFundAsProcessOwner(): void
@@ -500,30 +501,26 @@ class FundApiTest extends ApiTestCase
         ]);
     }
 
-    public function testCreateWithStateFails(): void
+    public function testStateIsIgnoredOnCreation(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
         $client->request('POST', '/funds', ['json' => [
-            'description' => 'just for fun',
+            'description' => 'description with 20 characters',
             'name'        => 'The Future',
             'process'     => $processIri,
             'region'      => 'Berlin',
-            'sponsor'     => 'sponsor',
+            'sponsor'     => 'sponsor name',
             'state'       => Fund::STATE_ACTIVE,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("state" are unknown).',
+            'description' => 'description with 20 characters',
+            'name'        => 'The Future',
+            'state'       => Fund::STATE_INACTIVE,
         ]);
     }
 
@@ -572,7 +569,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'process: This value should not be null.',
+            'hydra:description' => 'process: validate.general.notBlank',
         ]);
     }
 
@@ -597,7 +594,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'description: This value should not be null.',
+            'hydra:description' => 'description: validate.general.notBlank',
         ]);
     }
 
@@ -901,7 +898,7 @@ class FundApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateWithProcessFails(): void
+    public function testUpdateOfProcessIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
@@ -911,25 +908,20 @@ class FundApiTest extends ApiTestCase
         $processIri = $this->findIriBy(Process::class, ['id' => 1]);
 
         $client->request('PUT', $iri, ['json' => [
-            'description' => 'description with 20 characters',
             'name'        => 'New Name!',
-            'process'     => $processIri,
-            'region'      => 'Berlin-Hohenschönhausen',
-            'sponsor'     => 'Bundesministerium',
+            'process'     => str_replace("1", "2", $processIri),
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("process" are unknown).',
+            '@id'         => $iri,
+            'name'        => 'New Name!',
+            'process'     => [
+                '@id' => $processIri,
+                'id'  => 1,
+            ],
         ]);
     }
-
 
     public function testUpdateWithoutDescriptionFails(): void
     {
@@ -954,7 +946,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'description: validate.general.tooShort',
+            'hydra:description' => 'description: validate.general.notBlank',
         ]);
     }
 
@@ -1008,7 +1000,8 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'region: validate.general.notBlank',
+            'hydra:description' => 'region: validate.general.notBlank'
+                ."\nregion: validate.general.tooShort",
         ]);
     }
 

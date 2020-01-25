@@ -875,9 +875,8 @@ class ProjectApiTest extends ApiTestCase
             'inspiration'      => [
                 'id' => TestFixtures::IDEA['id'],
             ],
-            'motivation'       => 'my motivation is good',
             'shortDescription' => TestFixtures::IDEA['shortDescription'],
-            'skills'           => 'my skills are better',            'progress'              => Project::PROGRESS_CREATING_PROFILE,
+            'progress'         => Project::PROGRESS_CREATING_PROFILE,
             'state'            => Project::STATE_ACTIVE,
         ]);
     }
@@ -1010,7 +1009,7 @@ class ProjectApiTest extends ApiTestCase
             ['id' => TestFixtures::PROJECT['id']]);
         $client->request('PUT', $iri, ['json' => [
             'challenges'            => 'new challenges',
-            'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
+            'profileSelfAssessment' => Project::SELF_ASSESSMENT_50_PERCENT,
             'progress'              => Project::PROGRESS_CREATING_APPLICATION,
         ]]);
 
@@ -1018,7 +1017,7 @@ class ProjectApiTest extends ApiTestCase
         self::assertJsonContains([
             '@id'                   => $iri,
             'challenges'            => 'new challenges',
-            'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
+            'profileSelfAssessment' => Project::SELF_ASSESSMENT_50_PERCENT,
             'progress'              => Project::PROGRESS_CREATING_PROFILE,
         ]);
     }
@@ -1147,8 +1146,12 @@ class ProjectApiTest extends ApiTestCase
         self::assertJsonContains([
             '@id'      => $iri,
             'id'       => TestFixtures::PROJECT['id'],
-            'isLocked' => false,
         ]);
+
+        $project = static::$container->get('doctrine')
+            ->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $this->assertFalse($project->isLocked());
     }
 
     public function testLockingProject(): void

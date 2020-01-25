@@ -1,10 +1,11 @@
 # Anstehend
+* testen: budget/min/max werden auf null gesetzt bei 0
 * testen: autotrim?
 * neuen empty validator: striptags + trim
 * Logo in der Mail austauschen
 * onRefresh: Error: "Unable to load an user with property "username" = "jakob.schumann". If the user identity has changed, you must renew the token. Otherwise, verify that the "lexik_jwt_authentication.user_identity_field" config option is correctly set."
-* Sollten Extra Attributes erlaubt sein beim Update? Oder muss der Client vorher
-  filtern?
+* Imprint/Region etc haben bei Fund/Process unterschiedliche max/min Längen? 280 Imprint Fund zu kurz?
+* 100 Zeichen für ein Prozess-Kriterium zu kurz?
 * password min length / strength
 * localizedDate in der Email ist englisch, trotz locale:de in services.yaml?
 * validate pw in pw reset listener + user DTO

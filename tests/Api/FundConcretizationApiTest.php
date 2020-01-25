@@ -91,6 +91,7 @@ class FundConcretizationApiTest extends ApiTestCase
             'fund'        => [
                 '@id'   => '/funds/1',
                 '@type' => 'Fund',
+                'id'    => 1
             ],
         ]);
 
@@ -269,6 +270,7 @@ class FundConcretizationApiTest extends ApiTestCase
             'fund'        => [
                 '@id'   => '/funds/1',
                 '@type' => 'Fund',
+                'id'    => 1
             ],
         ]);
     }
@@ -424,28 +426,28 @@ class FundConcretizationApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateFundFails(): void
+    public function testUpdateOfFundIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
-        $fundIri = $this->findIriBy(Fund::class, ['id' => 1]);
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $iri = $this->findIriBy(FundConcretization::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'question' => 'new question',
+            'question' => 'New question with enough characters',
             'fund'     => $fundIri,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
+        self::assertResponseIsSuccessful();
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("fund" are unknown).',
+            'question'    => 'New question with enough characters',
+            'fund'        => [
+                '@id'   => '/funds/1',
+                '@type' => 'Fund',
+                'id'    => 1
+            ],
         ]);
     }
 

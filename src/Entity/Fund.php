@@ -38,7 +38,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "fund:write"},
  *         "swagger_definition_name"="Write"
  *     }
@@ -140,7 +139,7 @@ class Fund
 
     public function setBudget(?float $budget): self
     {
-        $this->budget = $budget;
+        $this->budget = $budget === 0 ? null : $budget;
 
         return $this;
     }
@@ -231,7 +230,7 @@ class Fund
      *
      * @Groups({"elastica", "fund:read", "fund:write"})
      * @Assert\NotBlank(
-     *     allowNull=true,
+     *     allowNull=false,
      *     message="validate.general.notBlank",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
@@ -286,13 +285,17 @@ class Fund
     /**
      * @var int
      *
-     * @Groups({"fund:read", "fundApplication:read", "process:read"})
+     * @Groups({
+     *     "fund:read",
+     *     "fundApplication:read",
+     *     "fundConcretization:read",
+     *     "process:read"
+     * })
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
      */
     private $id;
-
 
     public function getId(): ?int
     {
@@ -442,7 +445,7 @@ class Fund
 
     public function setMaximumGrant(?float $maximumGrant): self
     {
-        $this->maximumGrant = $maximumGrant;
+        $this->maximumGrant = $maximumGrant === 0 ? null : $maximumGrant;
 
         return $this;
     }
@@ -464,7 +467,7 @@ class Fund
 
     public function setMinimumGrant(?float $minimumGrant): self
     {
-        $this->minimumGrant = $minimumGrant;
+        $this->minimumGrant = $minimumGrant === 0 ? null : $minimumGrant;
 
         return $this;
     }
@@ -576,7 +579,8 @@ class Fund
      * )
      * @Assert\Length(min=5, max=255, allowEmptyString=true,
      *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
+     *     maxMessage="validate.general.tooLong",
+     *     normalizer="trim"
      * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */

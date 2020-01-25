@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
-use App\Entity\Traits\AutoincrementId;
 use App\Entity\UploadedFileTypes\ConcretizationImage;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -44,7 +43,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "fundConcretization:write"},
  *         "swagger_definition_name"="Write"
  *     }
@@ -58,7 +56,22 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class FundConcretization
 {
-    use AutoincrementId;
+    //region Id
+    /**
+     * @var int
+     *
+     * @Groups({"fundConcretization:read", "fund:read"})
+     * @ORM\Id()
+     * @ORM\GeneratedValue()
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+    //endregion
 
     //region Description
     /**
