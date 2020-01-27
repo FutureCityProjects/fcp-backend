@@ -357,7 +357,7 @@ class ValidationApiTest extends ApiTestCase
             'token' => $validation->getToken(),
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
+        self::assertResponseStatusCodeSame(404);
         self::assertResponseHeaderSame('content-type',
             'application/ld+json; charset=utf-8');
 
@@ -365,7 +365,7 @@ class ValidationApiTest extends ApiTestCase
             '@context'          => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Validation is expired.',
+            'hydra:description' => 'Not Found',
         ]);
     }
 

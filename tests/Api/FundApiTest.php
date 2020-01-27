@@ -43,11 +43,12 @@ class FundApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
         self::assertMatchesResourceCollectionJsonSchema(Fund::class);
 
+        $tz = new \DateTimeZone('UTC');
         self::assertJsonContains([
             '@context'         => '/contexts/Fund',
             '@id'              => '/funds',
             '@type'            => 'hydra:Collection',
-            'hydra:totalItems' => 2,
+            'hydra:totalItems' => 1,
             'hydra:member'     => [
                 0 => [
                     'id'              => TestFixtures::ACTIVE_FUND['id'],
@@ -63,32 +64,10 @@ class FundApiTest extends ApiTestCase
                     'budget'          => 50000,
                     'minimumGrant'    => 1000,
                     'maximumGrant'    => 5000,
-                    'submissionBegin' => '2019-11-30T23:00:00+00:00',
-                    'submissionEnd'   => '2019-12-30T23:00:00+00:00',
-                    'concretizations' => [
-                        0 => [
-                            'question'    => 'How does it help?',
-                            'description' => 'What does the project do for you?',
-                            'maxLength'   => 280,
-                        ],
-                    ],
-                ],
-                1 => [
-                    'id'              => TestFixtures::INACTIVE_FUND['id'],
-                    'name'            => 'Culture City',
-                    'region'          => 'Dresden',
-                    'description'     => 'Funding from the BMBF',
-                    'criteria'        => [
-                        'must be sustainable',
-                    ],
-                    'sponsor'         => 'Bundesministerium für Forschung und Bildung',
-                    'imprint'         => 'Landeshauptstadt Dresden',
-                    'state'           => Fund::STATE_INACTIVE,
-                    'budget'          => 50000,
-                    'minimumGrant'    => 1000,
-                    'maximumGrant'    => 5000,
-                    'submissionBegin' => '2019-11-30T23:00:00+00:00',
-                    'submissionEnd'   => '2019-12-30T23:00:00+00:00',
+                    'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'submissionEnd'   =>  (new \DateTimeImmutable('tomorrow +2days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
                     'concretizations' => [
                         0 => [
                             'question'    => 'How does it help?',
@@ -101,7 +80,10 @@ class FundApiTest extends ApiTestCase
         ]);
 
         $collection = $response->toArray();
-        $this->assertCount(2, $collection['hydra:member']);
+
+        // the inactive fund is NOT returned
+        $this->assertCount(1, $collection['hydra:member']);
+
         $this->assertArrayNotHasKey('applications',
             $collection['hydra:member'][0]);
         $this->assertArrayNotHasKey('briefingDate',
@@ -124,12 +106,13 @@ class FundApiTest extends ApiTestCase
             'query' => ['process' => 1]
         ]);
 
+        $tz = new \DateTimeZone('UTC');
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
             '@context'         => '/contexts/Fund',
             '@id'              => '/funds',
             '@type'            => 'hydra:Collection',
-            'hydra:totalItems' => 2,
+            'hydra:totalItems' => 1,
             'hydra:member'     => [
                 0 => [
                     'id'              => TestFixtures::ACTIVE_FUND['id'],
@@ -145,8 +128,10 @@ class FundApiTest extends ApiTestCase
                     'budget'          => 50000,
                     'minimumGrant'    => 1000,
                     'maximumGrant'    => 5000,
-                    'submissionBegin' => '2019-11-30T23:00:00+00:00',
-                    'submissionEnd'   => '2019-12-30T23:00:00+00:00',
+                    'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'submissionEnd'   => (new \DateTimeImmutable('tomorrow +2days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
                     'process'         => [
                         'id' => 1
                     ],
@@ -162,7 +147,10 @@ class FundApiTest extends ApiTestCase
         ]);
 
         $collection = $response->toArray();
-        $this->assertCount(2, $collection['hydra:member']);
+
+        // the inactive fund is NOT returned
+        $this->assertCount(1, $collection['hydra:member']);
+
         $this->assertArrayNotHasKey('applications',
             $collection['hydra:member'][0]);
     }
@@ -178,6 +166,7 @@ class FundApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
         self::assertMatchesResourceCollectionJsonSchema(Fund::class);
 
+        $tz = new \DateTimeZone('UTC');
         self::assertJsonContains([
             '@context'         => '/contexts/Fund',
             '@id'              => '/funds',
@@ -198,12 +187,18 @@ class FundApiTest extends ApiTestCase
                     'budget'          => 50000,
                     'minimumGrant'    => 1000,
                     'maximumGrant'    => 5000,
-                    'submissionBegin' => '2019-11-30T23:00:00+00:00',
-                    'submissionEnd'   => '2019-12-30T23:00:00+00:00',
-                    'ratingBegin'     => '2020-01-01T23:00:00+00:00',
-                    'ratingEnd'       => '2020-01-15T23:00:00+00:00',
-                    'briefingDate'    => '2020-01-16T23:00:00+00:00',
-                    'finalJuryDate'   => '2020-01-31T23:00:00+00:00',
+                    'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'submissionEnd'   => (new \DateTimeImmutable('tomorrow +2days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'ratingBegin'     => (new \DateTimeImmutable('tomorrow +3days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'ratingEnd'       => (new \DateTimeImmutable('tomorrow +5days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'briefingDate'    => (new \DateTimeImmutable('tomorrow +4days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'finalJuryDate'   => (new \DateTimeImmutable('tomorrow +6days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
                     'process'         => [
                         'id' => 1
                     ],
@@ -221,6 +216,32 @@ class FundApiTest extends ApiTestCase
                         ],
                     ],
                     'jurorsPerApplication' => 3,
+                ],
+                1 => [
+                    'id'              => TestFixtures::INACTIVE_FUND['id'],
+                    'name'            => 'Culture City',
+                    'region'          => 'Dresden',
+                    'description'     => 'Funding from the BMBF',
+                    'criteria'        => [
+                        'must be sustainable',
+                    ],
+                    'sponsor'         => 'Bundesministerium für Forschung und Bildung',
+                    'imprint'         => 'Landeshauptstadt Dresden',
+                    'state'           => Fund::STATE_INACTIVE,
+                    'budget'          => 50000,
+                    'minimumGrant'    => 1000,
+                    'maximumGrant'    => 5000,
+                    'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'submissionEnd'   => (new \DateTimeImmutable('tomorrow +2days', $tz))
+                        ->format(\DateTimeInterface::ATOM),
+                    'concretizations' => [
+                        0 => [
+                            'question'    => 'How does it help?',
+                            'description' => 'What does the project do for you?',
+                            'maxLength'   => 280,
+                        ],
+                    ],
                 ],
             ],
         ]);
@@ -245,6 +266,7 @@ class FundApiTest extends ApiTestCase
             'application/ld+json; charset=utf-8');
         self::assertMatchesResourceItemJsonSchema(Fund::class);
 
+        $tz = new \DateTimeZone('UTC');
         self::assertJsonContains([
             '@id'             => $iri,
             'id'              => TestFixtures::ACTIVE_FUND['id'],
@@ -260,8 +282,10 @@ class FundApiTest extends ApiTestCase
             'budget'          => 50000,
             'minimumGrant'    => 1000,
             'maximumGrant'    => 5000,
-            'submissionBegin' => '2019-11-30T23:00:00+00:00',
-            'submissionEnd'   => '2019-12-30T23:00:00+00:00',
+            'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+            ->format(\DateTimeInterface::ATOM),
+            'submissionEnd'   =>  (new \DateTimeImmutable('tomorrow +2days', $tz))
+                ->format(\DateTimeInterface::ATOM),
             'process'         => [
                 'id' => 1
             ],
@@ -295,6 +319,7 @@ class FundApiTest extends ApiTestCase
             ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $response = $client->request('GET', $iri);
 
+        $tz = new \DateTimeZone('UTC');
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
             '@id'             => $iri,
@@ -311,12 +336,18 @@ class FundApiTest extends ApiTestCase
             'budget'          => 50000,
             'minimumGrant'    => 1000,
             'maximumGrant'    => 5000,
-            'submissionBegin' => '2019-11-30T23:00:00+00:00',
-            'submissionEnd'   => '2019-12-30T23:00:00+00:00',
-            'ratingBegin'     => '2020-01-01T23:00:00+00:00',
-            'ratingEnd'       => '2020-01-15T23:00:00+00:00',
-            'briefingDate'    => '2020-01-16T23:00:00+00:00',
-            'finalJuryDate'   => '2020-01-31T23:00:00+00:00',
+            'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'submissionEnd'   => (new \DateTimeImmutable('tomorrow +2days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'ratingBegin'     => (new \DateTimeImmutable('tomorrow +3days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'ratingEnd'       => (new \DateTimeImmutable('tomorrow +5days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'briefingDate'    => (new \DateTimeImmutable('tomorrow +4days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'finalJuryDate'   => (new \DateTimeImmutable('tomorrow +6days', $tz))
+                ->format(\DateTimeInterface::ATOM),
             'process'         => [
                 'id' => 1
             ],
@@ -353,6 +384,7 @@ class FundApiTest extends ApiTestCase
             ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $response = $client->request('GET', $iri);
 
+        $tz = new \DateTimeZone('UTC');
         self::assertResponseIsSuccessful();
         self::assertJsonContains([
             '@id'             => $iri,
@@ -369,12 +401,18 @@ class FundApiTest extends ApiTestCase
             'minimumGrant'    => 1000,
             'maximumGrant'    => 5000,
             'state'           => Fund::STATE_ACTIVE,
-            'submissionBegin' => '2019-11-30T23:00:00+00:00',
-            'submissionEnd'   => '2019-12-30T23:00:00+00:00',
-            'ratingBegin'     => '2020-01-01T23:00:00+00:00',
-            'ratingEnd'       => '2020-01-15T23:00:00+00:00',
-            'briefingDate'    => '2020-01-16T23:00:00+00:00',
-            'finalJuryDate'   => '2020-01-31T23:00:00+00:00',
+            'submissionBegin' => (new \DateTimeImmutable('tomorrow +1day', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'submissionEnd'   => (new \DateTimeImmutable('tomorrow +2days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'ratingBegin'     => (new \DateTimeImmutable('tomorrow +3days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'ratingEnd'       => (new \DateTimeImmutable('tomorrow +5days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'briefingDate'    => (new \DateTimeImmutable('tomorrow +4days', $tz))
+                ->format(\DateTimeInterface::ATOM),
+            'finalJuryDate'   => (new \DateTimeImmutable('tomorrow +6days', $tz))
+                ->format(\DateTimeInterface::ATOM),
             'process'         => [
                 'id' => 1
             ],
@@ -1099,13 +1137,16 @@ class FundApiTest extends ApiTestCase
             ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $client->request('DELETE', $iri);
 
-        self::assertResponseStatusCodeSame(401);
+        // 404 because unauthenticated users can't see inactive funds
+        self::assertResponseStatusCodeSame(404);
         self::assertResponseHeaderSame('content-type',
-            'application/json');
+            'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            'code'    => 401,
-            'message' => 'JWT Token not found',
+            '@context'         => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Not Found',
         ]);
     }
 
@@ -1119,15 +1160,16 @@ class FundApiTest extends ApiTestCase
             ['id' => TestFixtures::INACTIVE_FUND['id']]);
         $client->request('DELETE', $iri);
 
-        self::assertResponseStatusCodeSame(403);
+        // 404 because unprivileged users can't see inactive funds
+        self::assertResponseStatusCodeSame(404);
         self::assertResponseHeaderSame('content-type',
             'application/ld+json; charset=utf-8');
 
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
+            '@context'         => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Access Denied.',
+            'hydra:description' => 'Not Found',
         ]);
     }
 
@@ -1171,6 +1213,182 @@ class FundApiTest extends ApiTestCase
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'No route found for "DELETE /funds": Method Not Allowed (Allow: GET, POST)',
+        ]);
+    }
+
+    public function testActivateFund(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::INACTIVE_FUND['id']]).'/activate';
+
+        $client->request('POST', $iri, ['json' => []]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@context' => '/contexts/Fund',
+            '@type'    => 'Fund',
+            'id'       => TestFixtures::INACTIVE_FUND['id'],
+            'state'    => Fund::STATE_ACTIVE,
+        ]);
+    }
+
+    public function testActivateFailsUnauthenticated(): void
+    {
+        $client = static::createClient();
+        $iri = $this->findIriBy(Fund::class,
+                ['id' => TestFixtures::INACTIVE_FUND['id']]).'/activate';
+        $client->request('POST', $iri, ['json' => []]);
+
+        // 404 because unauthenticated users can't see inactive funds
+        self::assertResponseStatusCodeSame(404);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'         => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Not Found',
+        ]);
+    }
+
+    public function testActivateFailsWithoutPrivilege(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::JUROR['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class,
+                ['id' => TestFixtures::INACTIVE_FUND['id']]).'/activate';
+
+        $client->request('POST', $iri, ['json' => []]);
+
+        // 404 because unprivileged users can't see inactive funds
+        self::assertResponseStatusCodeSame(404);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'         => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Not Found',
+        ]);
+    }
+
+    public function testActivateFailsWithoutSubmissionPeriod(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class,
+                ['id' => TestFixtures::INACTIVE_FUND['id']]).'/activate';
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::INACTIVE_FUND['id']);
+        $fund->setSubmissionEnd(null);
+        $em->flush();
+        $em->clear();
+
+        $client->request('POST', $iri, ['json' => []]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validate.fund.activationNotPossible',
+        ]);
+    }
+
+    public function testActivateFailsWithInvalidSubmissionPeriod(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class,
+                ['id' => TestFixtures::INACTIVE_FUND['id']]).'/activate';
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::INACTIVE_FUND['id']);
+        $fund->setSubmissionEnd(new \DateTimeImmutable('2000-12-12'));
+        $em->flush();
+        $em->clear();
+
+        $client->request('POST', $iri, ['json' => []]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validate.fund.activationNotPossible',
+        ]);
+    }
+
+    public function testActivateFailsWithoutConcretization(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class,
+                ['id' => TestFixtures::INACTIVE_FUND['id']]).'/activate';
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::INACTIVE_FUND['id']);
+        foreach($fund->getConcretizations() as $concretization) {
+            $em->remove($concretization);
+        }
+        $em->flush();
+        $em->clear();
+
+        $client->request('POST', $iri, ['json' => []]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validate.fund.activationNotPossible',
+        ]);
+    }
+
+    public function testActivateFailsWIthActiveFund(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $iri = $this->findIriBy(Fund::class,
+                ['id' => TestFixtures::ACTIVE_FUND['id']]).'/activate';
+
+        $client->request('POST', $iri, ['json' => []]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validate.fund.activationNotPossible',
         ]);
     }
 

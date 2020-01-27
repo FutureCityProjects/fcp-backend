@@ -34,7 +34,7 @@ class ChangeEmailAction
             ->getOriginalEntityData($data);
 
         if ($oldObject['email'] === $data->getEmail()) {
-            throw new BadRequestHttpException('Email not changed.');
+            throw new BadRequestHttpException('validate.user.email.notChanged');
         }
 
         // validate it to check if it's a valid email and not existing in the db

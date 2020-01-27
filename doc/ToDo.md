@@ -2,6 +2,7 @@
 * testen: budget/min/max werden auf null gesetzt bei 0
 * testen: autotrim?
 * neuen empty validator: striptags + trim
+* Doctrine\FundDeletedExtension? Können Funds gelöscht werden?
 * Logo in der Mail austauschen
 * onRefresh: Error: "Unable to load an user with property "username" = "jakob.schumann". If the user identity has changed, you must renew the token. Otherwise, verify that the "lexik_jwt_authentication.user_identity_field" config option is correctly set."
 * Imprint/Region etc haben bei Fund/Process unterschiedliche max/min Längen? 280 Imprint Fund zu kurz?
@@ -67,6 +68,11 @@
 * rename /authentication_token path?
 * use mongodb instead of SQL? https://www.doctrine-project.org/projects/doctrine-mongodb-odm/en/1.2/reference/best-practices.html#best-practices
 * Email signing: https://symfony.com/blog/new-in-symfony-4-4-signing-and-encrypting-email-messages
+* Trigger event when a Fund submission period start -> notification for PO and
+  all projects?
+* Notification X days before a Fund submission ends -> email to all projects
+  that have an unsubmitted application for this fund
+* Trigger event when a Fund submission period ends -> notification for PO
 
 # Designentscheidungen
 * Wir verwenden Symfony als Basis weil es seit einiger Zeit das populärste und

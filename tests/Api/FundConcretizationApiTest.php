@@ -399,7 +399,7 @@ class FundConcretizationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'maxLength: maxLength is out of range.',
+            'hydra:description' => 'maxLength: validate.general.outOfRange',
         ]);
     }
 

@@ -168,7 +168,7 @@ class FundConcretization
      * @Assert\Range(
      *      min = 1,
      *      max = 2000,
-     *      notInRangeMessage="maxLength is out of range."
+     *      notInRangeMessage="validate.general.outOfRange"
      * )
      * @ORM\Column(type="smallint", nullable=false, options={"unsigned": true})
      */

@@ -12,7 +12,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ValidationConfirmAction
@@ -49,7 +48,8 @@ class ValidationConfirmAction
             $em->remove($data);
             $em->flush();
 
-            throw new BadRequestHttpException('Validation is expired.');
+            // no special message, same as with unknown/invalid ID
+            throw new NotFoundHttpException('Not Found');
         }
 
         unset($params['token']);

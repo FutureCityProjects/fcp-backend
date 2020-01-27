@@ -414,12 +414,14 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         $fund->setBudget(50000.);
         $fund->setCriteria(['must be sustainable']);
         $fund->setJurorsPerApplication(3);
-        $fund->setSubmissionBegin(new DateTimeImmutable('2019-12-01'));
-        $fund->setSubmissionEnd(new DateTimeImmutable('2019-12-31'));
-        $fund->setRatingBegin(new DateTimeImmutable('2020-01-02'));
-        $fund->setRatingEnd(new DateTimeImmutable('2020-01-16'));
-        $fund->setBriefingDate(new DateTimeImmutable('2020-01-17'));
-        $fund->setFinalJuryDate(new DateTimeImmutable('2020-02-01'));
+
+        $tz = new \DateTimeZone('UTC');
+        $fund->setSubmissionBegin(new DateTimeImmutable('tomorrow +1day', $tz));
+        $fund->setSubmissionEnd(new DateTimeImmutable('tomorrow +2days', $tz));
+        $fund->setRatingBegin(new DateTimeImmutable('tomorrow +3days', $tz));
+        $fund->setBriefingDate(new DateTimeImmutable('tomorrow +4days', $tz));
+        $fund->setRatingEnd(new DateTimeImmutable('tomorrow +5days', $tz));
+        $fund->setFinalJuryDate(new DateTimeImmutable('tomorrow +6days', $tz));
         $process->addFund($fund);
 
         $concretization = new FundConcretization();

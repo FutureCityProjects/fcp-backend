@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\ActivateFundAction;
 use App\Entity\Traits\NameSlug;
 use App\Entity\UploadedFileTypes\FundLogo;
 use App\Validator\NormalizerHelper;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -30,6 +32,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         },
  *         "delete"={
  *             "security"="is_granted('DELETE', object)"
+ *         },
+ *         "activate"={
+ *             "controller"=ActivateFundAction::class,
+ *             "method"="POST",
+ *             "path"="/funds/{id}/activate",
+ *             "security"="is_granted('ROLE_PROCESS_OWNER')",
+ *             "validation_groups"={"Default", "fund:activate"}
  *         }
  *     },
  *     normalizationContext={
@@ -103,19 +112,19 @@ class Fund
 
     //region BriefingDate
     /**
-     * @var \DateTimeImmutable|null
+     * @var DateTimeImmutable|null
      *
      * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $briefingDate;
 
-    public function getBriefingDate(): ?\DateTimeImmutable
+    public function getBriefingDate(): ?DateTimeImmutable
     {
         return $this->briefingDate;
     }
 
-    public function setBriefingDate(?\DateTimeImmutable $briefingDate): self
+    public function setBriefingDate(?DateTimeImmutable $briefingDate): self
     {
         $this->briefingDate = $briefingDate;
 
@@ -261,19 +270,19 @@ class Fund
 
     //region FinalJuryDate
     /**
-     * @var \DateTimeImmutable|null
+     * @var DateTimeImmutable|null
      *
      * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $finalJuryDate;
 
-    public function getFinalJuryDate(): ?\DateTimeImmutable
+    public function getFinalJuryDate(): ?DateTimeImmutable
     {
         return $this->finalJuryDate;
     }
 
-    public function setFinalJuryDate(?\DateTimeImmutable $finalJuryDate): self
+    public function setFinalJuryDate(?DateTimeImmutable $finalJuryDate): self
     {
         $this->finalJuryDate = $finalJuryDate;
 
@@ -525,19 +534,19 @@ class Fund
 
     //region RatingBegin
     /**
-     * @var \DateTimeImmutable|null
+     * @var DateTimeImmutable|null
      *
      * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $ratingBegin;
 
-    public function getRatingBegin(): ?\DateTimeImmutable
+    public function getRatingBegin(): ?DateTimeImmutable
     {
         return $this->ratingBegin;
     }
 
-    public function setRatingBegin(?\DateTimeImmutable $ratingBegin): self
+    public function setRatingBegin(?DateTimeImmutable $ratingBegin): self
     {
         $this->ratingBegin = $ratingBegin;
 
@@ -547,19 +556,19 @@ class Fund
 
     //region RatingEnd
     /**
-     * @var \DateTimeImmutable|null
+     * @var DateTimeImmutable|null
      *
      * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $ratingEnd;
 
-    public function getRatingEnd(): ?\DateTimeImmutable
+    public function getRatingEnd(): ?DateTimeImmutable
     {
         return $this->ratingEnd;
     }
 
-    public function setRatingEnd(?\DateTimeImmutable $ratingEnd): self
+    public function setRatingEnd(?DateTimeImmutable $ratingEnd): self
     {
         $this->ratingEnd = $ratingEnd;
 
@@ -660,19 +669,19 @@ class Fund
 
     //region SubmissionBegin
     /**
-     * @var \DateTimeImmutable|null
+     * @var DateTimeImmutable|null
      *
      * @Groups({"fund:read", "fund:write"})
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $submissionBegin;
 
-    public function getSubmissionBegin(): ?\DateTimeImmutable
+    public function getSubmissionBegin(): ?DateTimeImmutable
     {
         return $this->submissionBegin;
     }
 
-    public function setSubmissionBegin(?\DateTimeImmutable $submissionBegin): self
+    public function setSubmissionBegin(?DateTimeImmutable $submissionBegin): self
     {
         $this->submissionBegin = $submissionBegin;
 
@@ -682,19 +691,19 @@ class Fund
 
     //region SubmissionEnd
     /**
-     * @var \DateTimeImmutable|null
+     * @var DateTimeImmutable|null
      *
      * @Groups({"fund:read", "fund:write"})
      * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     private $submissionEnd;
 
-    public function getSubmissionEnd(): ?\DateTimeImmutable
+    public function getSubmissionEnd(): ?DateTimeImmutable
     {
         return $this->submissionEnd;
     }
 
-    public function setSubmissionEnd(?\DateTimeImmutable $submissionEnd): self
+    public function setSubmissionEnd(?DateTimeImmutable $submissionEnd): self
     {
         $this->submissionEnd = $submissionEnd;
 
@@ -707,5 +716,33 @@ class Fund
         $this->applications = new ArrayCollection();
         $this->concretizations = new ArrayCollection();
         $this->juryCriteria = new ArrayCollection();
+    }
+
+    public function canBeActivated(): bool
+    {
+        if ($this->getState() !== self::STATE_INACTIVE) {
+            return false;
+        }
+
+        if (!$this->getSubmissionBegin() || ! $this->getSubmissionEnd()) {
+            return false;
+        }
+
+        if ($this->getSubmissionEnd() <= $this->getSubmissionBegin()) {
+            return false;
+        }
+
+        if ($this->getSubmissionBegin() <= new DateTimeImmutable()) {
+            return false;
+        }
+
+        if (count($this->concretizations) === 0) {
+            return false;
+        }
+
+        // @todo Budget/Min/Max konsistent?
+        // weitere Pflichtangaben?
+
+        return true;
     }
 }

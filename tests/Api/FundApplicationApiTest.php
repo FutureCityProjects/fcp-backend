@@ -327,7 +327,7 @@ class FundApplicationApiTest extends ApiTestCase
             'fund'    => $fundIri,
         ]]);
 
-        self::assertResponseStatusCodeSame(403);
+        self::assertResponseStatusCodeSame(400);
         self::assertResponseHeaderSame('content-type',
             'application/ld+json; charset=utf-8');
 
@@ -335,7 +335,7 @@ class FundApplicationApiTest extends ApiTestCase
             '@context'          => '/contexts/Error',
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Access Denied.',
+            'hydra:description' => 'Item not found for "/funds/2".',
         ]);
     }
 
