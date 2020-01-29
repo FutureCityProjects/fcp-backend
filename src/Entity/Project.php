@@ -147,6 +147,8 @@ class Project
     //region Challenges
     /**
      * @var string
+     *
+     * @todo maxLength Validator mit html unterstützung
      * @Groups({"elastica", "project:read", "project:write"})
      * @ORM\Column(type="text", length=5080, nullable=true)
      */
@@ -223,6 +225,8 @@ class Project
     //region Delimitation
     /**
      * @var string
+     *
+     * @todo maxLength Validator mit html unterstützung
      * @Groups({"elastica", "project:read", "project:write"})
      * @ORM\Column(type="text", length=5080, nullable=true)
      */
@@ -248,6 +252,8 @@ class Project
     //region Description
     /**
      * @var string
+     *
+     * @todo maxLength Validator mit html unterstützung
      * @Groups({"elastica", "project:read", "project:write"})
      * @ORM\Column(type="text", length=5080, nullable=true)
      */
@@ -273,6 +279,8 @@ class Project
     //region Goal
     /**
      * @var string
+     *
+     * @todo maxLength Validator mit html unterstützung
      * @Groups({"elastica", "project:read", "project:write"})
      * @ORM\Column(type="text", length=5080, nullable=true)
      */
@@ -290,6 +298,81 @@ class Project
         } else {
             $this->goal = trim($goal);
         }
+
+        return $this;
+    }
+    //endregion
+
+    //region Impact
+    /**
+     * @var array
+     *
+     * @todo maxLength Validator
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
+     *     @Assert\Length(min=5, max=200, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $impact = null;
+
+    public function getImpact(): ?array
+    {
+        return $this->impact;
+    }
+
+    public function setImpact(array $impact): self
+    {
+        $this->impact = is_array($impact) && count($impact)
+            ? $impact
+            : null;
+
+        return $this;
+    }
+    //endregion
+
+    //region ImplementationTime
+    /**
+     * @var int
+     * @Assert\Range(
+     *     min="0",
+     *     max="120",
+     *     notInRangeMessage="validate.general.outOfRange"
+     * )
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })})
+     * @ORM\Column(type="smallint", nullable=true, options={"unsigned":true})
+     */
+    private ?int $implementationTime = null;
+
+    public function getImplementationTime(): ?int
+    {
+        return $this->implementationTime;
+    }
+
+    public function setImplementationTime(?int $implementationTime): self
+    {
+        $this->implementationTime = $implementationTime;
 
         return $this;
     }
@@ -421,6 +504,49 @@ class Project
     }
     //endregion
 
+    //region Outcome
+    /**
+     * @var array
+     *
+     * @todo maxLength Validator
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
+     *     @Assert\Length(min=5, max=200, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $outcome = null;
+
+    public function getOutcome(): ?array
+    {
+        return $this->outcome;
+    }
+
+    public function setOutcome(array $outcome): self
+    {
+        $this->outcome = is_array($outcome) && count($outcome)
+            ? $outcome
+            : null;
+
+        return $this;
+    }
+    //endregion
+
     //region Picture
     /**
      * @var ProjectPicture
@@ -438,6 +564,42 @@ class Project
     public function setPicture(?ProjectPicture $picture): self
     {
         $this->picture = $picture;
+
+        return $this;
+    }
+    //endregion
+
+    //region ProfileSelfAssessment
+    /**
+     * @var int
+     * @Assert\Choice(
+     *     choices={
+     *         Project::SELF_ASSESSMENT_0_PERCENT,
+     *         Project::SELF_ASSESSMENT_25_PERCENT,
+     *         Project::SELF_ASSESSMENT_50_PERCENT,
+     *         Project::SELF_ASSESSMENT_75_PERCENT,
+     *         Project::SELF_ASSESSMENT_100_PERCENT
+     *     }
+     * )
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })})
+     * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
+     */
+    private int $profileSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
+
+    public function getProfileSelfAssessment(): int
+    {
+        return $this->profileSelfAssessment;
+    }
+
+    public function setProfileSelfAssessment(int $profileSelfAssessment): self
+    {
+        $this->profileSelfAssessment = $profileSelfAssessment;
 
         return $this;
     }
@@ -466,7 +628,7 @@ class Project
     }
     //endregion
 
-    //region ProfileSelfAssessment
+    //region PlanSelfAssessment
     /**
      * @var int
      * @Assert\Choice(
@@ -478,19 +640,25 @@ class Project
      *         Project::SELF_ASSESSMENT_100_PERCENT
      *     }
      * )
-     * @Groups({"project:read", "project:write"})
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })})
      * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
      */
-    private int $profileSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
+    private int $planSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
 
-    public function getProfileSelfAssessment(): int
+    public function getPlanSelfAssessment(): int
     {
-        return $this->profileSelfAssessment;
+        return $this->planSelfAssessment;
     }
 
-    public function setProfileSelfAssessment(int $profileSelfAssessment): self
+    public function setPlanSelfAssessment(int $planSelfAssessment): self
     {
-        $this->profileSelfAssessment = $profileSelfAssessment;
+        $this->planSelfAssessment = $planSelfAssessment;
 
         return $this;
     }
@@ -521,6 +689,49 @@ class Project
     public function setProgress(string $progress): self
     {
         $this->progress = $progress;
+
+        return $this;
+    }
+    //endregion
+
+    //region Results
+    /**
+     * @var array
+     *
+     * @todo maxLength Validator
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
+     *     @Assert\Length(min=5, max=200, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $results = null;
+
+    public function getResults(): ?array
+    {
+        return $this->results;
+    }
+
+    public function setResults(array $results): self
+    {
+        $this->results = is_array($results) && count($results)
+            ? $results
+            : null;
 
         return $this;
     }
@@ -622,9 +833,126 @@ class Project
     }
     //endregion
 
+    //region TargetGroups
+    /**
+     * @var array
+     *
+     * @todo maxLength Validator
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     ),
+     *     @Assert\Length(min=5, max=500, allowEmptyString=true,
+     *         minMessage="validate.general.tooShort",
+     *         maxMessage="validate.general.tooLong"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $targetGroups = null;
+
+    public function getTargetGroups(): ?array
+    {
+        return $this->targetGroups;
+    }
+
+    public function setTargetGroups(array $targetGroups): self
+    {
+        $this->targetGroups = is_array($targetGroups) && count($targetGroups)
+            ? $targetGroups
+            : null;
+
+        return $this;
+    }
+    //endregion
+
+    //region Tasks
+    /**
+     * @var array
+     *
+     * @todo validator for Tasks
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $tasks = null;
+
+    public function getTasks(): ?array
+    {
+        return $this->tasks;
+    }
+
+    public function setTasks(array $tasks): self
+    {
+        $this->tasks = is_array($tasks) && count($tasks)
+            ? $tasks
+            : null;
+
+        return $this;
+    }
+    //endregion
+    
+    //region Utilization
+    /**
+     * @var string
+     *
+     * @todo maxLength Validator mit html unterstützung
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="text", length=5080, nullable=true)
+     */
+    private ?string $utilization = null;
+
+    public function getUtilization(): ?string
+    {
+        return $this->utilization;
+    }
+
+    public function setUtilization(?string $utilization): self
+    {
+        if (mb_strlen(trim(strip_tags($utilization))) === 0) {
+            $this->utilization = "";
+        } else {
+            $this->utilization = trim($utilization);
+        }
+
+        return $this;
+    }
+    //endregion
+
     //region Vision
     /**
      * @var string
+     *
+     * @todo maxLength Validator mit html unterstützung
      * @Groups({"elastica", "project:read", "project:write"})
      * @ORM\Column(type="text", length=5080, nullable=true)
      */
@@ -669,6 +997,45 @@ class Project
     }
     //endregion
 
+    //region WorkPackages
+    /**
+     * @var array
+     *
+     * @todo validator for workPackages
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $workPackages = null;
+
+    public function getWorkPackages(): ?array
+    {
+        return $this->workPackages;
+    }
+
+    public function setWorkPackages(array $workPackages): self
+    {
+        $this->workPackages = is_array($workPackages) && count($workPackages)
+            ? $workPackages
+            : null;
+
+        return $this;
+    }
+    //endregion
+    
     public function __construct()
     {
         $this->applications = new ArrayCollection();

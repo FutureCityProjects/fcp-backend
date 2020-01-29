@@ -8,6 +8,7 @@ use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\NameSlug;
 use App\Entity\Traits\RequiredUniqueName;
 use App\Entity\UploadedFileTypes\ProcessLogo;
+use App\Validator\NormalizerHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -59,16 +60,16 @@ class Process
      *         message="validate.general.notBlank",
      *         normalizer="trim"
      *     ),
-     *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
+     *     @Assert\Length(min=5, max=100, allowEmptyString=true,
      *         minMessage="validate.general.tooShort",
      *         maxMessage="validate.general.tooLong"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=true)
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="json", nullable=true)
      */
-    private $criteria;
+    private ?array $criteria = null;
 
     public function getCriteria(): ?array
     {
@@ -77,7 +78,9 @@ class Process
 
     public function setCriteria(?array $criteria): self
     {
-        $this->criteria = $criteria;
+        $this->criteria = is_array($criteria) && count($criteria)
+            ? $criteria
+            : null;
 
         return $this;
     }
@@ -87,7 +90,16 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
+     * @Assert\Length(min=10, max=65535, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="text", length=65535, nullable=false)
      */
@@ -161,14 +173,15 @@ class Process
      *     ),
      *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
      *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
+     *         maxMessage="validate.general.tooLong",
+     *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank"),
+     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="json", nullable=false)
      */
-    private $goals;
+    private ?array $goals = null;
 
     public function getGoals(): ?array
     {
@@ -177,7 +190,7 @@ class Process
 
     public function setGoals(array $goals): self
     {
-        $this->goals = $goals;
+        $this->goals = count($goals) ? $goals : null;
 
         return $this;
     }
@@ -187,7 +200,16 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
+     * @Assert\Length(min=5, max=65535, allowEmptyString=true,
+     *     minMessage="validate.general.tooShort",
+     *     maxMessage="validate.general.tooLong",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="text", length=65535, nullable=false)
      */

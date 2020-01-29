@@ -275,23 +275,22 @@ class ProjectApiTest extends ApiTestCase
                 'id'       => TestFixtures::ADMIN['id'],
                 'username' => TestFixtures::ADMIN['username'],
             ],
-            'delimitation'          => null,
-            'description'           => null,
-            'id'                    => TestFixtures::IDEA['id'],
-            'inspiration'           => null,
-            'name'                  => null,
-            'profileSelfAssessment' => Project::SELF_ASSESSMENT_0_PERCENT,
-            'progress'              => Project::PROGRESS_IDEA,
-            'resultingProjects'     => [
+            'delimitation'      => null,
+            'description'       => null,
+            'id'                => TestFixtures::IDEA['id'],
+            'inspiration'       => null,
+            'name'              => null,
+            'progress'          => Project::PROGRESS_IDEA,
+            'resultingProjects' => [
                 [
                     'id' => TestFixtures::PROJECT['id'],
                 ]
             ],
-            'shortDescription'      => 'Car-free city center around the year',
-            'slug'                  => null,
-            'state'                 => Project::STATE_ACTIVE,
-            'goal'                  => null,
-            'vision'                => null,
+            'shortDescription'  => 'Car-free city center around the year',
+            'slug'              => null,
+            'state'             => Project::STATE_ACTIVE,
+            'goal'              => null,
+            'vision'            => null,
         ]);
 
         $projectData = $response->toArray();
@@ -316,29 +315,40 @@ class ProjectApiTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Project::class);
 
         self::assertJsonContains([
-            '@id'                   => $iri,
-            'challenges'            => 'challenges',
-            'createdBy'             => [
+            '@id'              => $iri,
+            'challenges'       => 'challenges',
+            'createdBy'        => [
                 'id' => TestFixtures::PROJECT_OWNER['id']
             ],
-            'delimitation'          => 'delimitation',
-            'description'           => 'long description',
-            'id'                    => TestFixtures::PROJECT['id'],
-            'name'                  => TestFixtures::PROJECT['name'],
-            'profileSelfAssessment' => Project::SELF_ASSESSMENT_75_PERCENT,
-            'progress'              => Project::PROGRESS_CREATING_PROFILE,
-            'shortDescription'      => TestFixtures::PROJECT['shortDescription'],
-            'slug'                  => 'car-free-dresden',
-            'state'                 => Project::STATE_ACTIVE,
-            'goal'                  => TestFixtures::PROJECT['goal'],
-            'vision'                => TestFixtures::PROJECT['vision'],
+            'delimitation'     => 'delimitation',
+            'description'      => 'long description',
+            'id'               => TestFixtures::PROJECT['id'],
+            'name'             => TestFixtures::PROJECT['name'],
+            'progress'         => Project::PROGRESS_CREATING_PROFILE,
+            'shortDescription' => TestFixtures::PROJECT['shortDescription'],
+            'slug'             => 'car-free-dresden',
+            'state'            => Project::STATE_ACTIVE,
+            'goal'             => TestFixtures::PROJECT['goal'],
+            'vision'           => TestFixtures::PROJECT['vision'],
         ]);
 
         $projectData = $response->toArray();
         $this->assertSame(TestFixtures::IDEA['id'], $projectData['inspiration']['id']);
+
+        $this->assertArrayNotHasKey('applications', $projectData);
         $this->assertArrayNotHasKey('isLocked', $projectData);
         $this->assertArrayNotHasKey('memberships', $projectData);
-        $this->assertArrayNotHasKey('applications', $projectData);
+        $this->assertArrayNotHasKey('profileSelfAssessment', $projectData);
+        $this->assertArrayNotHasKey('planSelfAssessment', $projectData);
+        $this->assertArrayNotHasKey('impact', $projectData);
+        $this->assertArrayNotHasKey('implementationTime', $projectData);
+        $this->assertArrayNotHasKey('outcome', $projectData);
+        $this->assertArrayNotHasKey('results', $projectData);
+        $this->assertArrayNotHasKey('targetGroups', $projectData);
+        $this->assertArrayNotHasKey('tasks', $projectData);
+        $this->assertArrayNotHasKey('utilization', $projectData);
+        $this->assertArrayNotHasKey('workPackages', $projectData);
+
         $this->assertArrayNotHasKey('firstName', $projectData['createdBy']);
         $this->assertArrayNotHasKey('lastName', $projectData['createdBy']);
     }
@@ -352,6 +362,7 @@ class ProjectApiTest extends ApiTestCase
         $iri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $response = $client->request('GET', $iri);
+        $projectData = $response->toArray();
 
         self::assertMatchesResourceItemJsonSchema(Project::class);
         self::assertJsonContains([
@@ -361,11 +372,26 @@ class ProjectApiTest extends ApiTestCase
                 'id' => TestFixtures::PROJECT_OWNER['id']
             ],
             'name' => TestFixtures::PROJECT['name'],
+            'applications' => [
+                [
+                    '@type' => 'FundApplication',
+                    'id'    => 1,
+                    'fund'  => [
+                        '@type' => 'Fund',
+                        'id'    => TestFixtures::ACTIVE_FUND['id']
+                    ],
+                    'concretizations' => null,
+                ],
+            ],
         ]);
 
-        $projectData = $response->toArray();
         $this->assertSame(TestFixtures::IDEA['id'], $projectData['inspiration']['id']);
+
         $this->assertCount(1, $projectData['applications']);
+        $this->assertArrayNotHasKey('ratings', $projectData['applications'][0]);
+        $this->assertArrayNotHasKey('applications',
+            $projectData['applications'][0]['fund']);
+
         $this->assertCount(2, $projectData['memberships']);
 
         // those properties are only visible to the PO/Admin
@@ -384,8 +410,8 @@ class ProjectApiTest extends ApiTestCase
 
         self::assertMatchesResourceItemJsonSchema(Project::class);
         self::assertJsonContains([
-            '@id' => $iri,
-            'id' => TestFixtures::PROJECT['id'],
+            '@id'  => $iri,
+            'id'   => TestFixtures::PROJECT['id'],
             'name' => 'Car-free Dresden',
         ]);
 
@@ -892,6 +918,7 @@ class ProjectApiTest extends ApiTestCase
         $client->request('PUT', $iri, ['json' => [
             'challenges'            => 'new challenges',
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
+            'impact'                => []
         ]]);
 
         self::assertResponseIsSuccessful();
@@ -901,6 +928,7 @@ class ProjectApiTest extends ApiTestCase
             'description'           => TestFixtures::PROJECT['description'],
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
             'goal'                  => TestFixtures::PROJECT['goal'],
+            'impact'                => null
         ]);
     }
 
@@ -930,6 +958,35 @@ class ProjectApiTest extends ApiTestCase
             '@id'                   => $iri,
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
             'progress'              => Project::PROGRESS_CREATING_PLAN,
+        ]);
+    }
+
+    public function testUpdateProjectPlan(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
+        $client->request('PUT', $iri, ['json' => [
+            'impact'             => ['impact 1', 'impact 2'],
+            'outcome'            => ['outcome 1', 'outcome 2'],
+            'results'            => ['result 1', 'result 2'],
+            'targetGroups'       => ['group 1', 'group 2'],
+            'utilization'        => 'We will sell it',
+            'planSelfAssessment' => Project::SELF_ASSESSMENT_75_PERCENT,
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'                => $iri,
+            'impact'             => ['impact 1', 'impact 2'],
+            'outcome'            => ['outcome 1', 'outcome 2'],
+            'results'            => ['result 1', 'result 2'],
+            'targetGroups'       => ['group 1', 'group 2'],
+            'utilization'        => 'We will sell it',
+            'planSelfAssessment' => Project::SELF_ASSESSMENT_75_PERCENT,
         ]);
     }
 

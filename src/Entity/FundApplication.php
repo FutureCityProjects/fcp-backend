@@ -76,6 +76,15 @@ class FundApplication
     /**
      * @var array|null
      *
+     * @todo maxLength Validator
+     * @Assert\All({
+     *     @Assert\NotBlank(
+     *         allowNull=false,
+     *         message="validate.general.notBlank",
+     *         normalizer="trim"
+     *     )
+     * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
      * @Groups({
      *     "project:read",
      *     "fundApplication:read",
@@ -92,7 +101,9 @@ class FundApplication
 
     public function setConcretizations(?array $concretizations): self
     {
-        $this->concretizations = $concretizations;
+        $this->concretizations = is_array($concretizations) && count($concretizations)
+            ? $concretizations
+            : null;
 
         return $this;
     }
@@ -140,6 +151,7 @@ class FundApplication
      * @Groups({
      *     "fundApplication:read",
      *     "fundApplication:create",
+     *     "project:read",
      * })
      * @MaxDepth(1)
      * @ORM\ManyToOne(targetEntity="Fund", inversedBy="applications")

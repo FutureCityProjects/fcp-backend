@@ -59,51 +59,12 @@ class ProjectInputDataTransformer implements DataTransformerInterface
         $project = $context[AbstractItemNormalizer::OBJECT_TO_POPULATE]
             ?? new Project();
 
-        // creator is optional, we can create projects when a user registers
-        // so the creator is set afterwards by the userInput Transformer
-        if (!$project->getId() && $this->user instanceof UserInterface) {
-            $project->setCreatedBy($this->user);
-        }
-
-        if ($data->challenges !== null) {
-            $project->setChallenges($data->challenges);
-        }
-
-        if ($data->delimitation !== null) {
-            $project->setDelimitation($data->delimitation);
-        }
-
-        if ($data->description !== null) {
-            $project->setDescription($data->description);
-        }
-
-        // inspiration can only be set when the project is created
-        if ($data->inspiration) {
-            $project->setInspiration($data->inspiration);
-
-            // initial value
-            $project->setShortDescription(
-                $data->inspiration->getShortDescription());
-        }
-
-        if ($data->shortDescription !== null) {
-            $project->setShortDescription($data->shortDescription);
-        }
-
         if ($data->isLocked !== null) {
             $project->setIsLocked($data->isLocked);
         }
 
-        if ($data->name !== null) {
-            $project->setName($data->name);
-        }
-
         if ($data->process) {
             $project->setProcess($data->process);
-        }
-
-        if ($data->profileSelfAssessment !== null) {
-            $project->setProfileSelfAssessment($data->profileSelfAssessment);
         }
 
         if ($data->progress) {
@@ -114,12 +75,19 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $project->setState($data->state);
         }
 
-        if ($data->goal !== null) {
-            $project->setGoal($data->goal);
+        // creator is optional, we can create projects when a user registers
+        // so the creator is set afterwards by the userInput Transformer
+        if (!$project->getId() && $this->user instanceof UserInterface) {
+            $project->setCreatedBy($this->user);
         }
 
-        if ($data->vision !== null) {
-            $project->setVision($data->vision);
+        // inspiration can only be set when the project is created
+        if ($data->inspiration) {
+            $project->setInspiration($data->inspiration);
+
+            // initial value
+            $project->setShortDescription(
+                $data->inspiration->getShortDescription());
         }
 
         // When a user creates a new project set him as owner.
@@ -147,6 +115,9 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $this->validator->validate($membership, $context);
         }
 
+        $this->setProfileData($data, $project);
+        $this->setPlanData($data, $project);
+
         return $project;
     }
 
@@ -160,5 +131,79 @@ class ProjectInputDataTransformer implements DataTransformerInterface
         }
 
         return Project::class === $to && null !== ($context['input']['class'] ?? null);
+    }
+
+    protected function setProfileData(ProjectInput $data, Project $project)
+    {
+        if ($data->challenges !== null) {
+            $project->setChallenges($data->challenges);
+        }
+
+        if ($data->delimitation !== null) {
+            $project->setDelimitation($data->delimitation);
+        }
+
+        if ($data->description !== null) {
+            $project->setDescription($data->description);
+        }
+
+        if ($data->goal !== null) {
+            $project->setGoal($data->goal);
+        }
+
+        if ($data->name !== null) {
+            $project->setName($data->name);
+        }
+
+        if ($data->profileSelfAssessment !== null) {
+            $project->setProfileSelfAssessment($data->profileSelfAssessment);
+        }
+
+        if ($data->shortDescription !== null) {
+            $project->setShortDescription($data->shortDescription);
+        }
+
+        if ($data->vision !== null) {
+            $project->setVision($data->vision);
+        }
+    }
+
+    protected function setPlanData(ProjectInput $data, Project $project)
+    {
+        if ($data->impact !== null) {
+            $project->setImpact($data->impact);
+        }
+
+        if ($data->implementationTime !== null) {
+            $project->setImplementationTime($data->implementationTime);
+        }
+
+        if ($data->outcome !== null) {
+            $project->setOutcome($data->outcome);
+        }
+
+        if ($data->planSelfAssessment !== null) {
+            $project->setPlanSelfAssessment($data->planSelfAssessment);
+        }
+
+        if ($data->results !== null) {
+            $project->setResults($data->results);
+        }
+
+        if ($data->utilization !== null) {
+            $project->setUtilization($data->utilization);
+        }
+
+        if ($data->targetGroups !== null) {
+            $project->setTargetGroups($data->targetGroups);
+        }
+
+        if ($data->tasks !== null) {
+            $project->setTasks($data->tasks);
+        }
+
+        if ($data->workPackages !== null) {
+            $project->setWorkPackages($data->workPackages);
+        }
     }
 }

@@ -204,6 +204,7 @@ class Fund
     /**
      * @var array|null
      *
+     * @todo maxLength Validator
      * @Assert\All({
      *     @Assert\NotBlank(
      *         allowNull=false,
@@ -215,10 +216,11 @@ class Fund
      *         maxMessage="validate.general.tooLong"
      *     )
      * })
+     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
      * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="json", nullable=true)
      */
-    private $criteria;
+    private ?array $criteria = null;
 
     public function getCriteria(): ?array
     {
@@ -227,7 +229,9 @@ class Fund
 
     public function setCriteria(?array $criteria): self
     {
-        $this->criteria = $criteria;
+        $this->criteria = is_array($criteria) && count($criteria)
+            ? $criteria
+            : null;
 
         return $this;
     }
@@ -245,7 +249,8 @@ class Fund
      * )
      * @Assert\Length(min=20, max=65535, allowEmptyString=true,
      *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
+     *     maxMessage="validate.general.tooLong",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @ORM\Column(type="text", length=65535, nullable=false)
      */
@@ -298,7 +303,8 @@ class Fund
      *     "fund:read",
      *     "fundApplication:read",
      *     "fundConcretization:read",
-     *     "process:read"
+     *     "process:read",
+     *     "project:read",
      * })
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -324,7 +330,8 @@ class Fund
      * )
      * @Assert\Length(min=20, max=65535, allowEmptyString=true,
      *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
+     *     maxMessage="validate.general.tooLong",
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @ORM\Column(type="text", length=65535, nullable=true)
      */
@@ -486,8 +493,11 @@ class Fund
     /**
      * @var string
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank",
-     *     normalizer="trim")
+     * @Assert\NotBlank(
+     *     allowNull=false,
+     *     message="validate.general.notBlank",
+     *     normalizer="trim"
+     * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $name = null;
@@ -620,7 +630,8 @@ class Fund
      * )
      * @Assert\Length(min=10, max=255, allowEmptyString=true,
      *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
+     *     maxMessage="validate.general.tooLong",
+     *     normalizer="trim"
      * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */

@@ -325,37 +325,6 @@ class ProcessApiTest extends ApiTestCase
         ]);
     }
 
-    public function testCreateWithEmptyCriteriaFails(): void
-    {
-        static::createAuthenticatedClient([
-            'email' => TestFixtures::PROCESS_OWNER['email']
-        ])->request('POST', '/processes', ['json' => [
-            'criteria'    => [], // should be null to work
-            'description' => 'just for fun',
-            'imprint'     => 'The Testers',
-            'name'        => 'Another test',
-            'region'      => 'Berlin',
-            'goals'       => ['single goal'],
-        ]]);
-
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
-        self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'criteria: This value should not be blank.',
-            'violations' => [
-                [
-                    'propertyPath' => 'criteria',
-                    'message'      => 'This value should not be blank.'
-                ]
-            ],
-        ]);
-    }
-
     public function testUpdateProcess(): void
     {
         $client = static::createAuthenticatedClient([
@@ -450,7 +419,7 @@ class ProcessApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(Process::class, ['id' => 2]);
         $client->request('PUT', $iri, ['json' => [
-            'description' => 'something',
+            'description' => 'something with 20 characters',
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process äüöß',
             'region'      => 'Paris',
@@ -477,11 +446,11 @@ class ProcessApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(Process::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'description' => 'something',
+            'description' => 'something with 20 characters',
             'imprint'     => 'The Processor',
             'name'        => '',
             'region'      => 'Paris',
-            'goals'     => ['some goals', 'others'],
+            'goals'       => ['some goals', 'others'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);

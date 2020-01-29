@@ -46,18 +46,13 @@ class FundApplicationVoter extends Voter
                     return false;
                 }
 
-                // @todo Abgleich mit Pflichtenheft
                 if ($subject->getFund()->getState() !== Fund::STATE_ACTIVE) {
-                    dump('Fund nicht aktiv');
                     return false;
                 }
 
-                // @todo only possible when project state allows
+                // @todo only possible when project state allows?
 
-                // @todo Abgleich mit Pflichtenheft
-                $isOwner = $subject->getProject()->userIsOwner($user);
-                dump('User is owner? '.($isOwner ? 'ja':'ne'));
-                return $isOwner;
+                return $subject->getProject()->userIsOwner($user);
                 break;
 
             case 'EDIT':
