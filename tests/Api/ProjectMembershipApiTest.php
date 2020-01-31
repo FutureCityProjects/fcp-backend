@@ -239,7 +239,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'role: This value should not be null.',
+            'hydra:description' => 'role: validate.general.notBlank',
         ]);
     }
 
@@ -391,7 +391,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'project: This value should not be null.',
+            'hydra:description' => 'project: validate.general.notBlank',
         ]);
     }
 

@@ -199,7 +199,7 @@ class FundApplicationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'fund: This value should not be null.',
+            'hydra:description' => 'fund: validate.general.notBlank',
         ]);
     }
 
@@ -225,7 +225,7 @@ class FundApplicationApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'project: This value should not be null.',
+            'hydra:description' => 'project: validate.general.notBlank',
         ]);
     }
 

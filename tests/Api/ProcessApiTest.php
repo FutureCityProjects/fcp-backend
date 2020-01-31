@@ -181,7 +181,7 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            'hydra:description' => 'name: validate.general.notBlank',
         ]);
     }
 
@@ -201,6 +201,7 @@ class ProcessApiTest extends ApiTestCase
         self::assertResponseHeaderSame('content-type',
             'application/ld+json; charset=utf-8');
 
+        // @todo translatable message
         self::assertJsonContains([
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
@@ -423,7 +424,7 @@ class ProcessApiTest extends ApiTestCase
             'imprint'     => 'The Processor',
             'name'        => 'Test-Process äüöß',
             'region'      => 'Paris',
-            'goals'     => ['some goals', 'others'],
+            'goals'       => ['some goals', 'others'],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -461,7 +462,7 @@ class ProcessApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            'hydra:description' => 'name: validate.general.notBlank',
         ]);
     }
 

@@ -110,11 +110,8 @@ class User implements UserInterface
      * User names may not be in the format "deleted_{0-9}" as this is reserved
      * for deleted users (second regex).
      *
-     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
-     * @Assert\Length(min=2, max=20,allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
-     * )
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
+     * @Assert\Length(min=2, max=20,allowEmptyString=true, normalizer="trim")
      * @Assert\Regex(
      *     pattern="/^[a-zA-Z]+[a-zA-Z0-9._-]*[a-zA-Z][a-zA-Z0-9._-]*$/",
      *     message="validate.user.username.notValid"

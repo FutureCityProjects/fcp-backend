@@ -649,7 +649,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'progress: This value should not be null.',
+            'hydra:description' => 'progress: validate.general.notBlank',
         ]);
     }
 
@@ -676,7 +676,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'process: This value should not be null.',
+            'hydra:description' => 'process: validate.general.notBlank',
         ]);
     }
 
@@ -701,7 +701,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'shortDescription: This value should not be null.',
+            'hydra:description' => 'shortDescription: validate.general.notBlank',
         ]);
     }
 

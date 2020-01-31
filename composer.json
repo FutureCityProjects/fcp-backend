@@ -17,6 +17,7 @@
         "symfony/mailer": "4.4.*",
         "symfony/mercure-bundle": "*",
         "symfony/messenger": "4.4.*",
+        "symfony/translation": "4.4.*",
         "symfony/validator": "4.4.*",
         "symfony/yaml": "4.4.*",
         "tuupola/base62": "^2.0",

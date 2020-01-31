@@ -162,7 +162,7 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'fund: This value should not be null.',
+            'hydra:description' => 'fund: validate.general.notBlank',
         ]);
     }
 
@@ -186,7 +186,7 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            'hydra:description' => 'name: validate.general.notBlank',
         ]);
     }
 
@@ -365,7 +365,7 @@ class JuryCriterionApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'name: This value should not be blank.',
+            'hydra:description' => 'name: validate.general.notBlank',
         ]);
     }
 

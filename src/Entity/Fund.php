@@ -5,6 +5,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Controller\ActivateFundAction;
+use App\Entity\Traits\NameFunctions;
 use App\Entity\Traits\NameSlug;
 use App\Entity\UploadedFileTypes\FundLogo;
 use App\Validator\NormalizerHelper;
@@ -208,15 +209,13 @@ class Fund
      * @Assert\All({
      *     @Assert\NotBlank(
      *         allowNull=false,
-     *         message="validate.general.notBlank",
      *         normalizer="trim"
      *     ),
      *     @Assert\Length(min=5, max=280, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
+     *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="json", nullable=true)
      */
@@ -241,17 +240,13 @@ class Fund
     /**
      * @var string
      *
-     * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank",
+     * @Assert\NotBlank(allowNull=false,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Assert\Length(min=20, max=65535, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
+     * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="text", length=65535, nullable=false)
      */
     private $description;
@@ -325,12 +320,9 @@ class Fund
      * @Groups({"elastica", "fund:read", "fund:write"})
      * @Assert\NotBlank(
      *     allowNull=true,
-     *     message="validate.general.notBlank",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Assert\Length(min=20, max=65535, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @ORM\Column(type="text", length=65535, nullable=true)
@@ -492,37 +484,21 @@ class Fund
     //region Name
     /**
      * @var string
+     *
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank",
-     *     normalizer="trim"
-     * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $name = null;
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(?string $name): self
-    {
-        $this->name = trim($name);
-
-        return $this;
-    }
+    use NameFunctions;
     //endregion
 
     //region Process
     /**
      * @var Process
      *
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank"
-     * )
+     * @Assert\NotBlank(allowNull=false)
      * @Groups({"fund:read", "fund:create"})
      * @ORM\ManyToOne(targetEntity="Process", inversedBy="funds")
      * @ORM\JoinColumn(nullable=false)
@@ -591,16 +567,8 @@ class Fund
      * @var string
      *
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank",
-     *     normalizer="trim"
-     * )
-     * @Assert\Length(min=5, max=255, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
-     *     normalizer="trim"
-     * )
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
+     * @Assert\Length(min=5, max=255, allowEmptyString=true, normalizer="trim")
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $region;
@@ -622,17 +590,14 @@ class Fund
     /**
      * @var string
      *
-     * @Groups({"elastica", "fund:read", "fund:write"})
      * @Assert\NotBlank(
      *     allowNull=false,
-     *     message="validate.general.notBlank",
      *     normalizer="trim"
      * )
      * @Assert\Length(min=10, max=255, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
      *     normalizer="trim"
      * )
+     * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private $sponsor;

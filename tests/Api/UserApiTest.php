@@ -544,7 +544,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'email: This value should not be blank.',
+            'hydra:description' => 'email: validate.general.notBlank',
         ]);
     }
 
@@ -889,7 +889,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'validationUrl: This value should not be blank.',
+            'hydra:description' => 'validationUrl: validate.general.notBlank',
         ]);
     }
 
@@ -1582,7 +1582,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'validationUrl: This value should not be blank.',
+            'hydra:description' => 'validationUrl: validate.general.notBlank',
         ]);
     }
 
@@ -1817,7 +1817,7 @@ class UserApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'validationUrl: This value should not be blank.',
+            'hydra:description' => 'validationUrl: validate.general.notBlank',
         ]);
     }
 

@@ -127,7 +127,7 @@ class AuthApiTest extends ApiTestCase
 
         self::assertJsonContains([
             'code'    => 401,
-            'message' => 'Invalid credentials.',
+            'message' => 'user.invalidCredentials',
         ]);
     }
 
@@ -143,7 +143,7 @@ class AuthApiTest extends ApiTestCase
 
         self::assertJsonContains([
             'code'    => 401,
-            'message' => 'Invalid credentials.',
+            'message' => 'user.invalidCredentials',
         ]);
     }
 
@@ -166,7 +166,7 @@ class AuthApiTest extends ApiTestCase
 
         self::assertJsonContains([
             'code'    => 401,
-            'message' => 'Account is not activated.',
+            'message' => 'user.notActivated',
         ]);
     }
 
@@ -189,7 +189,7 @@ class AuthApiTest extends ApiTestCase
 
         self::assertJsonContains([
             'code'    => 401,
-            'message' => 'Account is not validated.',
+            'message' => 'user.notValidated',
         ]);
     }
 

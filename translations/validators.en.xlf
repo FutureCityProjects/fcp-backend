@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="This value should not be blank.">
+                <source>This value should not be blank.</source>
+                <target>validate.general.notBlank</target>
+            </trans-unit>
+            <trans-unit id="This value should not be null.">
+                <source>This value should not be null.</source>
+                <target>validate.general.notBlank</target>
+            </trans-unit>
+            <trans-unit id="This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.">
+                <source>This value is too short. It should have {{ limit }} character or more.|This value is too short. It should have {{ limit }} characters or more.</source>
+                <target>validate.general.tooShort</target>
+            </trans-unit>
+            <trans-unit id="This value is too long. It should have {{ limit }} character or less.|This value is too long. It should have {{ limit }} characters or less.">
+                <source>This value is too long. It should have {{ limit }} character or less.|This value is too long. It should have {{ limit }} characters or less.</source>
+                <target>validate.general.tooLong</target>
+            </trans-unit>
+            <trans-unit id="This value should be between {{ min }} and {{ max }}.">
+                <source>This value should be between {{ min }} and {{ max }}.</source>
+                <target>validate.general.outOfRange</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

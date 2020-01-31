@@ -11,6 +11,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
 use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\CreatedAtFunctions;
 use App\Entity\Traits\DeletedAtFunctions;
+use App\Entity\Traits\NameFunctions;
 use App\Entity\UploadedFileTypes\ProjectPicture;
 use App\Entity\UploadedFileTypes\ProjectVisualization;
 use App\Validator\Constraints as AppAssert;
@@ -311,15 +312,13 @@ class Project
      * @Assert\All({
      *     @Assert\NotBlank(
      *         allowNull=false,
-     *         message="validate.general.notBlank",
      *         normalizer="trim"
      *     ),
      *     @Assert\Length(min=5, max=200, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
+     *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -349,11 +348,8 @@ class Project
     //region ImplementationTime
     /**
      * @var int
-     * @Assert\Range(
-     *     min="0",
-     *     max="120",
-     *     notInRangeMessage="validate.general.outOfRange"
-     * )
+     *
+     * @Assert\Range(min="0", max="120")
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -491,17 +487,7 @@ class Project
      */
     private ?string $name = null;
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(?string $name): self
-    {
-        $this->name = trim($name);
-
-        return $this;
-    }
+    use NameFunctions;
     //endregion
 
     //region Outcome
@@ -512,15 +498,13 @@ class Project
      * @Assert\All({
      *     @Assert\NotBlank(
      *         allowNull=false,
-     *         message="validate.general.notBlank",
      *         normalizer="trim"
      *     ),
      *     @Assert\Length(min=5, max=200, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
+     *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -702,15 +686,13 @@ class Project
      * @Assert\All({
      *     @Assert\NotBlank(
      *         allowNull=false,
-     *         message="validate.general.notBlank",
      *         normalizer="trim"
      *     ),
      *     @Assert\Length(min=5, max=200, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
+     *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -837,19 +819,13 @@ class Project
     /**
      * @var array
      *
-     * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         message="validate.general.notBlank",
-     *         normalizer="trim"
-     *     ),
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      *     @Assert\Length(min=5, max=500, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
+     *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -882,13 +858,9 @@ class Project
      *
      * @todo validator for Tasks
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         message="validate.general.notBlank",
-     *         normalizer="trim"
-     *     )
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim")
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -1003,13 +975,9 @@ class Project
      *
      * @todo validator for workPackages
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         message="validate.general.notBlank",
-     *         normalizer="trim"
-     *     )
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim")
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",

@@ -636,6 +636,34 @@ class FundApiTest extends ApiTestCase
         ]);
     }
 
+    public function testCreateWithTooShortDescriptionFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+        $client->request('POST', '/funds', ['json' => [
+            'name'    => 'Test',
+            'process' => $processIri,
+            'region'  => 'Berlin',
+            'sponsor' => 'Bundesministerium',
+
+            // only 19 chars w/o tags and w/ trim
+            'description' => ' <p>0123465789012345678</p> '
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'description: validate.general.tooShort',
+        ]);
+    }
+
     public function testCreateWithoutRegionFails(): void
     {
         $client = static::createAuthenticatedClient([
@@ -658,6 +686,60 @@ class FundApiTest extends ApiTestCase
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'region: validate.general.notBlank',
+        ]);
+    }
+
+    public function testCreateWithTooShortRegionFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+        $client->request('POST', '/funds', ['json' => [
+            'description' => 'description with 20 characters',
+            'process'     => $processIri,
+            'name'        => 'Berlin',
+            'region'      => 'DD',
+            'sponsor'     => 'Bundesministerium für Forschung',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'region: validate.general.tooShort',
+        ]);
+    }
+
+    public function testCreateWithTooLongRegionFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROCESS_OWNER['email']
+        ]);
+        $processIri = $this->findIriBy(Process::class, ['id' => 1]);
+
+        $hash = hash('sha512', '1', false);
+        $client->request('POST', '/funds', ['json' => [
+            'description' => 'description with 20 characters',
+            'process'     => $processIri,
+            'name'        => 'Berlin',
+            'region'      => $hash.$hash, // 256 vs 255 allowed
+            'sponsor'     => 'Bundesministerium für Forschung',
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'region: validate.general.tooLong',
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\UploadedFileTypes\ConcretizationImage;
+use App\Validator\NormalizerHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -77,9 +78,8 @@ class FundConcretization
     /**
      * @var string|null
      *
-     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
+     * @Assert\Length(min=10, max=65535, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({
      *     "fund:read",
@@ -160,16 +160,12 @@ class FundConcretization
     /**
      * @var int|null
      *
+     * @Assert\Range(min = 1, max = 2000)
      * @Groups({
      *     "fund:read",
      *     "fundConcretization:read",
      *     "fundConcretization:write",
      * })
-     * @Assert\Range(
-     *      min = 1,
-     *      max = 2000,
-     *      notInRangeMessage="validate.general.outOfRange"
-     * )
      * @ORM\Column(type="smallint", nullable=false, options={"unsigned": true})
      */
     private int $maxLength = 280;
@@ -191,20 +187,13 @@ class FundConcretization
     /**
      * @var string
      *
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
+     * @Assert\Length(min=5, max=255, allowEmptyString=true, normalizer="trim")
      * @Groups({
      *     "fund:read",
      *     "fundConcretization:read",
      *     "fundConcretization:write",
      * })
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank",
-     *     normalizer="trim"
-     * )
-     * @Assert\Length(min=5, max=255, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
-     * )
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $question = null;

@@ -5,8 +5,8 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Traits\AutoincrementId;
+use App\Entity\Traits\NameFunctions;
 use App\Entity\Traits\NameSlug;
-use App\Entity\Traits\RequiredUniqueName;
 use App\Entity\UploadedFileTypes\ProcessLogo;
 use App\Validator\NormalizerHelper;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -47,7 +47,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Process
 {
     use AutoincrementId;
-    use RequiredUniqueName;
     use NameSlug;
 
     //region Criteria
@@ -55,17 +54,10 @@ class Process
      * @var array|null
      *
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         message="validate.general.notBlank",
-     *         normalizer="trim"
-     *     ),
-     *     @Assert\Length(min=5, max=100, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong"
-     *     )
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
+     *     @Assert\Length(min=5, max=100, allowEmptyString=true, normalizer="trim"),
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="json", nullable=true)
      */
@@ -92,12 +84,9 @@ class Process
      *
      * @Assert\NotBlank(
      *     allowNull=false,
-     *     message="validate.general.notBlank",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Assert\Length(min=10, max=65535, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({"elastica", "process:read", "process:write"})
@@ -168,16 +157,13 @@ class Process
      * @Assert\All({
      *     @Assert\NotBlank(
      *         allowNull=false,
-     *         message="validate.general.notBlank",
      *         normalizer="trim"
      *     ),
      *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
-     *         minMessage="validate.general.tooShort",
-     *         maxMessage="validate.general.tooLong",
      *         normalizer="trim"
      *     )
      * })
-     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=false)
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="json", nullable=false)
      */
@@ -202,12 +188,9 @@ class Process
      *
      * @Assert\NotBlank(
      *     allowNull=false,
-     *     message="validate.general.notBlank",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Assert\Length(min=5, max=65535, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({"elastica", "process:read", "process:write"})
@@ -255,6 +238,19 @@ class Process
     }
     //endregion
 
+    //region Name
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     * @Groups({"process:read", "process:write", "elastica"})
+     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
+     */
+    private ?string $name = null;
+
+    use NameFunctions;
+    //endregion
+
     //region Projects
     /**
      * @Groups({"process:read"})
@@ -298,11 +294,7 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank",
-     *     normalizer="trim"
-     * ),
+     * @Assert\NotBlank(allowNull=false, normalizer="trim"),
      * @Groups({"elastica", "process:read", "process:write"})
      * @ORM\Column(type="string", length=255, nullable=false)
      */

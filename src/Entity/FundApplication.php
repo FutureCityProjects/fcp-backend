@@ -78,13 +78,9 @@ class FundApplication
      *
      * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         message="validate.general.notBlank",
-     *         normalizer="trim"
-     *     )
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim")
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:read",
      *     "fundApplication:read",

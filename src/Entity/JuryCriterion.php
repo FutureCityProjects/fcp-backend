@@ -91,21 +91,13 @@ class JuryCriterion
     /**
      * @var string
      *
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
+     * @Assert\Length(min=10, max=5000, allowEmptyString=true, normalizer="trim")
      * @Groups({
      *     "fund:read",
      *     "juryCriterion:read",
      *     "juryCriterion:write",
      * })
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     message="validate.general.notBlank",
-     *     normalizer="trim"
-     * )
-     * @Assert\Length(min=10, max=5000, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong",
-     *     normalizer="trim"
-     * )
      * @ORM\Column(type="string", length=5000, nullable=false)
      */
     private ?string $question = null;

@@ -65,16 +65,16 @@ class ProjectMembership
     //region Motivation
     /**
      * @var string
+     *
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
+     * @Assert\Length(min=10, max=1000, allowEmptyString=true,
+     *     normalizer="trim")
      * @Groups({
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
      *     "user:read"
      * })
-     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
-     * @Assert\Length(min=10, max=1000, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong")
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
     private ?string $motivation = null;
@@ -122,12 +122,6 @@ class ProjectMembership
     //region Role
     /**
      * @var string
-     * @Groups({
-     *     "project:read",
-     *     "projectMembership:read",
-     *     "projectMembership:write",
-     *     "user:read"
-     * })
      * @Assert\Choice(
      *     choices={
      *         ProjectMembership::ROLE_APPLICANT,
@@ -135,6 +129,12 @@ class ProjectMembership
      *         ProjectMembership::ROLE_OWNER
      *     }
      * )
+     * @Groups({
+     *     "project:read",
+     *     "projectMembership:read",
+     *     "projectMembership:write",
+     *     "user:read"
+     * })
      * @ORM\Column(type="string", length=50, nullable=false)
      */
     private ?string $role = null;
@@ -155,16 +155,15 @@ class ProjectMembership
     //region Skills
     /**
      * @var string
+     *
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
+     * @Assert\Length(min=10, max=1000, allowEmptyString=true, normalizer="trim")
      * @Groups({
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
      *     "user:read"
      * })
-     * @Assert\NotBlank(allowNull=false, message="validate.general.notBlank")
-     * @Assert\Length(min=10, max=1000, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong")
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
     private ?string $skills = null;
@@ -185,13 +184,14 @@ class ProjectMembership
     //region Tasks
     /**
      * @var string
+     *
+     * @Assert\NotBlank(allowNull=true)
      * @Groups({
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
      *     "user:read"
      * })
-     * @Assert\NotBlank(allowNull=true, message="validate.general.notBlank")
      * @ORM\Column(type="text", length=1000, nullable=true)
      */
     private ?string $tasks = null;
@@ -216,8 +216,7 @@ class ProjectMembership
      * @Assert\NotBlank(allowNull=true, groups={"user:register"})
      * @Assert\NotBlank(
      *     allowNull=false,
-     *     groups={"projectMembership:create"},
-     *     message="validate.general.notBlank"
+     *     groups={"projectMembership:create"}
      * )
      * @Groups({
      *     "project:read",
