@@ -79,10 +79,15 @@ class UserInputDataTransformer implements DataTransformerInterface,
         }
 
         foreach($data->createdProjects as $projectData) {
+            // the normalizer already created ProjectInputs from the JSON,
+            // now convert to real projects
             $project = $this->projectTransformer()
                 ->transform($projectData, Project::class, $context);
 
-            // @todo the ProjectValidator is not called automatically, why?
+            // we don't have an @Assert\Valid on the users createdProjects
+            // property as we don't want to validate all projects when only the
+            // user data changes -> validate the project here, the
+            // projectTransformer above only validated the ProjectInput
             $this->validator()->validate($project, $context);
 
             // createdProjects can only be set when a user registers ->

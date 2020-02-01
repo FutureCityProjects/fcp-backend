@@ -347,7 +347,9 @@ class FundApplicationApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'concretizations' => ['more specifics'],
+            'concretizations' => [
+                1 => 'more specifics'
+            ],
         ]]);
 
         self::assertResponseStatusCodeSame(200);
@@ -357,7 +359,7 @@ class FundApplicationApiTest extends ApiTestCase
 
         self::assertJsonContains([
             'concretizations' => [
-                'more specifics',
+                1 => 'more specifics',
             ],
             'concretizationSelfAssessment' => FundApplication::SELF_ASSESSMENT_0_PERCENT,
             'fund'        => [
@@ -413,7 +415,7 @@ class FundApplicationApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateOfFundFails(): void
+    public function testUpdateOfFundIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -424,7 +426,7 @@ class FundApplicationApiTest extends ApiTestCase
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
 
         $client->request('PUT', $iri, ['json' => [
-            'concretizations' => ['no more specifics'],
+            'concretizations' => [1 => 'no more specifics'],
             'fund'            => $fundIri,
         ]]);
 
@@ -433,7 +435,7 @@ class FundApplicationApiTest extends ApiTestCase
         // concretizations got updated but fund didn't
         self::assertJsonContains([
             'concretizations' => [
-                'no more specifics',
+                1 => 'no more specifics',
             ],
             'fund'        => [
                 '@type' => 'Fund',
@@ -442,7 +444,7 @@ class FundApplicationApiTest extends ApiTestCase
         ]);
     }
 
-    public function testUpdateOfProjectFails(): void
+    public function testUpdateOfProjectIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([
             'email' => TestFixtures::PROJECT_MEMBER['email']
@@ -452,7 +454,7 @@ class FundApplicationApiTest extends ApiTestCase
             ['id' => TestFixtures::IDEA['id']]);
         $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
         $client->request('PUT', $iri, ['json' => [
-            'concretizations' => ['no more specifics'],
+            'concretizations' => [1 => 'no more specifics'],
             'project'         => $projectIri,
         ]]);
 
@@ -461,7 +463,7 @@ class FundApplicationApiTest extends ApiTestCase
         // concretizations got updated but project didn't
         self::assertJsonContains([
             'concretizations' => [
-                'no more specifics',
+                1 => 'no more specifics',
             ],
             'project'        => [
                 'id'    => TestFixtures::PROJECT['id'],
@@ -560,6 +562,72 @@ class FundApplicationApiTest extends ApiTestCase
             '@type'             => 'hydra:Error',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testSettingInvalidConcretizationIdFails()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
+        $client->request('PUT', $iri, ['json' => [
+            'concretizations' => [
+                // concretization with ID 2 belongs to another fund
+                2 => 'more specifics'
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'concretizations[2]: validate.fundApplication.invalidConcretization',
+            'violations'        => [
+                [
+                    'propertyPath' => 'concretizations[2]',
+                    'message'      => 'validate.fundApplication.invalidConcretization'
+                ]
+            ],
+        ]);
+    }
+
+    public function testSettingTooLongConcretizationFails()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(FundApplication::class, ['id' => 1]);
+
+        $hash = hash('sha512', '1', false);
+        $client->request('PUT', $iri, ['json' => [
+            'concretizations' => [
+                // 384 characters vs 280 allowed
+                1 => $hash.$hash.$hash
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'concretizations[1]: validate.general.tooLong',
+            'violations'        => [
+                [
+                    'propertyPath' => 'concretizations[1]',
+                    'message'      => 'validate.general.tooLong'
+                ]
+            ],
         ]);
     }
 

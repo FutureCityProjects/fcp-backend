@@ -90,6 +90,7 @@ class Project
     public const PROGRESS_CREATING_PROFILE = 'creating_profile';
     public const PROGRESS_CREATING_PLAN = 'creating_plan';
     public const PROGRESS_CREATING_APPLICATION = 'creating_application';
+    public const PROGRESS_SUBMITTING_APPLICATION = 'submitting_application';
     public const PROGRESS_APPLICATION_SUBMITTED = 'application_submitted';
 
     public const SELF_ASSESSMENT_0_PERCENT   = 0;
@@ -1056,29 +1057,4 @@ class Project
         return false;
     }
 
-    /**
-     * Checks if all required profile fields are set and the self assessment
-     * is 100%, if yes return true, else false.
-     *
-     * @return bool
-     */
-    public function isProfileComplete() : bool
-    {
-        if (!$this->name
-            || !$this->shortDescription
-            || !$this->challenges
-            || !$this->goal
-            || !$this->vision
-            || !$this->description
-            || !$this->delimitation
-        ) {
-            return false;
-        }
-
-        if ($this->profileSelfAssessment !== self::SELF_ASSESSMENT_100_PERCENT) {
-            return false;
-        }
-
-        return true;
-    }
 }

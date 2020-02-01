@@ -243,11 +243,11 @@ class Fund
      * @Assert\NotBlank(allowNull=false,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
-     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
+     * @Assert\Length(min=20, max=10000, allowEmptyString=true,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @ORM\Column(type="text", length=65535, nullable=false)
+     * @ORM\Column(type="text", length=30000, nullable=false)
      */
     private $description;
 
@@ -350,6 +350,8 @@ class Fund
     /**
      * @var int
      *
+     * @Assert\Type(type="integer")
+     * @Assert\Range(min="1", max="100")
      * @Groups({"fund:po-read", "fund:write", "fund:juror-read"})
      * @ORM\Column(type="smallint", nullable=false, options={"default":2, "unsigned":true})
      */

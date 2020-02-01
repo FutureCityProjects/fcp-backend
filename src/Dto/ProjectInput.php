@@ -132,6 +132,9 @@ class ProjectInput
     public ?array $targetGroups = null;
 
     /**
+     * @var ProjectTaskInput[]|null
+     *
+     * @Assert\Valid
      * @Groups({"project:write"})
      */
     public ?array $tasks = null;
@@ -142,6 +145,9 @@ class ProjectInput
     public ?string $utilization = null;
 
     /**
+     * @var WorkPackageInput[]|null
+     *
+     * @Assert\Valid
      * @Groups({"project:write"})
      */
     public ?array $workPackages = null;

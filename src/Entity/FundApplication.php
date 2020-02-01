@@ -76,11 +76,13 @@ class FundApplication
     /**
      * @var array|null
      *
-     * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(allowNull=false, normalizer="trim")
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      * })
      * @Assert\NotBlank(allowNull=true)
+     * @Assert\Callback(
+     *     callback={"App\Validator\FundApplicationValidator", "validateConcretizations"}
+     * )
      * @Groups({
      *     "project:read",
      *     "fundApplication:read",

@@ -22,6 +22,14 @@
                 <source>This value should be between {{ min }} and {{ max }}.</source>
                 <target>validate.general.outOfRange</target>
             </trans-unit>
+            <trans-unit id="This value should be a valid number.">
+                <source>This value should be a valid number.</source>
+                <target>validate.general.noValidNumber</target>
+            </trans-unit>
+            <trans-unit id="This value should be of type {{ type }}.">
+                <source>This value should be of type {{ type }}.</source>
+                <target>validate.general.invalidType</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

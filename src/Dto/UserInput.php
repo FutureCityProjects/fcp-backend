@@ -10,11 +10,8 @@ class UserInput
 {
     /**
      * @var string
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     groups={"user:resetPassword"},
-     *     message="validate.general.notBlank"
-     * )
+     *
+     * @Assert\NotBlank(allowNull=false, groups={"user:resetPassword"})
      * @Groups({
      *     "user:admin-write",
      *     "user:po-write",
@@ -26,11 +23,8 @@ class UserInput
 
     /**
      * @var string
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     groups={"user:changeEmail"},
-     *     message="validate.general.notBlank"
-     * )
+     *
+     * @Assert\NotBlank(allowNull=false, groups={"user:changeEmail"})
      * @Groups({
      *     "user:admin-write",
      *     "user:po-write",
@@ -43,10 +37,7 @@ class UserInput
     /**
      * @var string
      * @Groups({"user:write"})
-     * @Assert\Length(min=6, max=200, allowEmptyString=true,
-     *     minMessage="validate.general.tooShort",
-     *     maxMessage="validate.general.tooLong"
-     * )
+     * @Assert\Length(min=6, max=200, allowEmptyString=true)
      */
     public ?string $password = null;
 
@@ -81,6 +72,9 @@ class UserInput
     public ?string $lastName = null;
 
     /**
+     * no need for @Assert\Valid, the ProjectInputs are validated anyways by
+     * the ProjectInputDataTransformer called by the UserInputDataTransformer
+     *
      * @var ProjectInput[]
      * @Assert\All({
      *     @Assert\NotBlank,
