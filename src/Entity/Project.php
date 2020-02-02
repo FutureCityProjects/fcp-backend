@@ -15,6 +15,7 @@ use App\Entity\Traits\NameFunctions;
 use App\Entity\UploadedFileTypes\ProjectPicture;
 use App\Entity\UploadedFileTypes\ProjectVisualization;
 use App\Validator\Constraints as AppAssert;
+use App\Validator\NormalizerHelper;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -78,6 +79,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\EntityListeners({"App\Entity\Listener\ProjectListener"})
  * @ORM\Table(indexes={
  *     @ORM\Index(name="state_idx", columns={"state"})
+ * }, uniqueConstraints={
+ *     @ORM\UniqueConstraint(name="name_process", columns={"name", "process_id"})
  * })
  */
 class Project
@@ -150,9 +153,11 @@ class Project
     /**
      * @var string
      *
-     * @todo maxLength Validator mit html unterstützung
+     * @Assert\Length(min=10, max=2000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
+     * @ORM\Column(type="text", length=6000, nullable=true)
      */
     private ?string $challenges = null;
 
@@ -163,8 +168,8 @@ class Project
 
     public function setChallenges(?string $challenges): self
     {
-        if (mb_strlen(trim(strip_tags($challenges))) === 0) {
-            $this->challenges = "";
+        if (NormalizerHelper::getTextLength($challenges) === 0) {
+            $this->challenges = null;
         } else {
             $this->challenges = trim($challenges);
         }
@@ -228,9 +233,11 @@ class Project
     /**
      * @var string
      *
-     * @todo maxLength Validator mit html unterstützung
+     * @Assert\Length(min=10, max=2000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
+     * @ORM\Column(type="text", length=6000, nullable=true)
      */
     private ?string $delimitation = null;
 
@@ -241,8 +248,8 @@ class Project
 
     public function setDelimitation(?string $delimitation): self
     {
-        if (mb_strlen(trim(strip_tags($delimitation))) === 0) {
-            $this->delimitation = "";
+        if (NormalizerHelper::getTextLength($delimitation) === 0) {
+            $this->delimitation = null;
         } else {
             $this->delimitation = trim($delimitation);
         }
@@ -255,9 +262,11 @@ class Project
     /**
      * @var string
      *
-     * @todo maxLength Validator mit html unterstützung
+     * @Assert\Length(min=20, max=2000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
+     * @ORM\Column(type="text", length=6000, nullable=true)
      */
     private ?string $description = null;
 
@@ -268,8 +277,8 @@ class Project
 
     public function setDescription(?string $description): self
     {
-        if (mb_strlen(trim(strip_tags($description))) === 0) {
-            $this->description = "";
+        if (NormalizerHelper::getTextLength($description) === 0) {
+            $this->description = null;
         } else {
             $this->description = trim($description);
         }
@@ -282,9 +291,11 @@ class Project
     /**
      * @var string
      *
-     * @todo maxLength Validator mit html unterstützung
+     * @Assert\Length(min=10, max=1000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
+     * @ORM\Column(type="text", length=3000, nullable=true)
      */
     private ?string $goal = null;
 
@@ -295,8 +306,8 @@ class Project
 
     public function setGoal(?string $goal): self
     {
-        if (mb_strlen(trim(strip_tags($goal))) === 0) {
-            $this->goal = "";
+        if (NormalizerHelper::getTextLength($goal) === 0) {
+            $this->goal = null;
         } else {
             $this->goal = trim($goal);
         }
@@ -309,12 +320,8 @@ class Project
     /**
      * @var array
      *
-     * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         normalizer="trim"
-     *     ),
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      *     @Assert\Length(min=5, max=200, allowEmptyString=true,
      *         normalizer="trim"
      *     )
@@ -483,8 +490,10 @@ class Project
     //region Name
     /**
      * @var string
+     *
+     * @Assert\Length(min=5, max=100, allowEmptyString=true, normalizer="trim")
      * @Groups({"elastica", "project:read", "project:write", "user:read"})
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=100, nullable=true)
      */
     private ?string $name = null;
 
@@ -495,12 +504,8 @@ class Project
     /**
      * @var array
      *
-     * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         normalizer="trim"
-     *     ),
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      *     @Assert\Length(min=5, max=200, allowEmptyString=true,
      *         normalizer="trim"
      *     )
@@ -683,12 +688,8 @@ class Project
     /**
      * @var array
      *
-     * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         normalizer="trim"
-     *     ),
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      *     @Assert\Length(min=5, max=200, allowEmptyString=true,
      *         normalizer="trim"
      *     )
@@ -740,10 +741,7 @@ class Project
     /**
      * @var string
      * @Groups({"elastica", "project:read", "project:write", "user:register"})
-     * @Assert\Length(min=10, max=280, allowEmptyString=false,
-     *     minMessage="This value is too short.",
-     *     maxMessage="This value is too long."
-     * )
+     * @Assert\Length(min=10, max=280, allowEmptyString=false)
      * @ORM\Column(type="string", length=280, nullable=false)
      */
     private ?string $shortDescription = null;
@@ -857,11 +855,13 @@ class Project
     /**
      * @var array
      *
-     * @todo validator for Tasks
      * @Assert\All({
      *     @Assert\NotBlank(allowNull=false, normalizer="trim")
      * })
      * @Assert\NotBlank(allowNull=true)
+     * @Assert\Callback(
+     *     callback={"App\Validator\ProjectValidator", "validateTasks"}
+     * )
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -892,7 +892,9 @@ class Project
     /**
      * @var string
      *
-     * @todo maxLength Validator mit html unterstützung
+     * @Assert\Length(min=20, max=2000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",
@@ -900,7 +902,7 @@ class Project
      *     "project:admin-read",
      *     "project:write",
      * })
-     * @ORM\Column(type="text", length=5080, nullable=true)
+     * @ORM\Column(type="text", length=6000, nullable=true)
      */
     private ?string $utilization = null;
 
@@ -911,8 +913,8 @@ class Project
 
     public function setUtilization(?string $utilization): self
     {
-        if (mb_strlen(trim(strip_tags($utilization))) === 0) {
-            $this->utilization = "";
+        if (NormalizerHelper::getTextLength($utilization) === 0) {
+            $this->utilization = null;
         } else {
             $this->utilization = trim($utilization);
         }
@@ -925,9 +927,11 @@ class Project
     /**
      * @var string
      *
-     * @todo maxLength Validator mit html unterstützung
+     * @Assert\Length(min=10, max=2000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "project:read", "project:write"})
-     * @ORM\Column(type="text", length=5080, nullable=true)
+     * @ORM\Column(type="text", length=6000, nullable=true)
      */
     private ?string $vision = null;
 
@@ -938,8 +942,8 @@ class Project
 
     public function setVision(?string $vision): self
     {
-        if (mb_strlen(trim(strip_tags($vision))) === 0) {
-            $this->vision = "";
+        if (NormalizerHelper::getTextLength($vision) === 0) {
+            $this->vision = null;
         } else {
             $this->vision = trim($vision);
         }
@@ -974,11 +978,13 @@ class Project
     /**
      * @var array
      *
-     * @todo validator for workPackages
      * @Assert\All({
      *     @Assert\NotBlank(allowNull=false, normalizer="trim")
      * })
      * @Assert\NotBlank(allowNull=true)
+     * @Assert\Callback(
+     *     callback={"App\Validator\ProjectValidator", "validateWorkPackages"}
+     * )
      * @Groups({
      *     "project:owner-read",
      *     "project:member-read",

@@ -86,7 +86,7 @@ class ProjectMembership
 
     public function setMotivation(?string $motivation): self
     {
-        $this->motivation = $motivation;
+        $this->motivation = trim($motivation);
 
         return $this;
     }
@@ -175,7 +175,7 @@ class ProjectMembership
 
     public function setSkills(?string $skills): self
     {
-        $this->skills = $skills;
+        $this->skills = trim($skills);
 
         return $this;
     }
@@ -203,7 +203,7 @@ class ProjectMembership
 
     public function setTasks(?string $tasks): self
     {
-        $this->tasks = $tasks;
+        $this->tasks = trim($tasks);
 
         return $this;
     }

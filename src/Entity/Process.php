@@ -82,17 +82,16 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank(
-     *     allowNull=false,
+     * @Assert\NotBlank(allowNull=false,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
-     * @Assert\Length(min=10, max=65535, allowEmptyString=true,
+     * @Assert\Length(min=10, max=20000, allowEmptyString=true,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\Column(type="text", length=65535, nullable=false)
+     * @ORM\Column(type="text", length=60000, nullable=false)
      */
-    private $description;
+    private ?string $description = null;
 
     public function getDescription(): ?string
     {
@@ -101,7 +100,7 @@ class Process
 
     public function setDescription(string $description): self
     {
-        if (mb_strlen(trim(strip_tags($description))) === 0) {
+        if (NormalizerHelper::getTextLength($description) === 0) {
             $this->description = "";
         } else {
             $this->description = trim($description);
@@ -155,10 +154,7 @@ class Process
      * @var array
      *
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         normalizer="trim"
-     *     ),
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      *     @Assert\Length(min=5, max=1000, allowEmptyString=true,
      *         normalizer="trim"
      *     )
@@ -186,17 +182,16 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank(
-     *     allowNull=false,
+     * @Assert\NotBlank(allowNull=false,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
-     * @Assert\Length(min=5, max=65535, allowEmptyString=true,
+     * @Assert\Length(min=5, max=20000, allowEmptyString=true,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({"elastica", "process:read", "process:write"})
-     * @ORM\Column(type="text", length=65535, nullable=false)
+     * @ORM\Column(type="text", length=60000, nullable=false)
      */
-    private $imprint;
+    private ?string $imprint = null;
 
     public function getImprint(): ?string
     {
@@ -205,7 +200,7 @@ class Process
 
     public function setImprint(string $imprint): self
     {
-        if (mb_strlen(trim(strip_tags($imprint))) === 0) {
+        if (NormalizerHelper::getTextLength($imprint) === 0) {
             $this->imprint = "";
         } else {
             $this->imprint = trim($imprint);
@@ -242,7 +237,7 @@ class Process
     /**
      * @var string
      *
-     * @Assert\NotBlank
+     * @Assert\NotBlank(allowNull=false, normalizer="trim"),
      * @Groups({"process:read", "process:write", "elastica"})
      * @ORM\Column(type="string", length=255, nullable=false, unique=true)
      */

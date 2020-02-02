@@ -95,13 +95,13 @@ class TestFixtures extends Fixture implements FixtureGroupInterface
         'id'                    => 2, // because we persist it second
         'challenges'            => 'challenges',
         'delimitation'          => 'delimitation',
-        'description'           => 'long description',
+        'description'           => 'description with 20 characters',
         'name'                  => 'Car-free Dresden',
         'profileSelfAssessment' => Project::SELF_ASSESSMENT_75_PERCENT,
         'progress'              => Project::PROGRESS_CREATING_PROFILE,
         'shortDescription'      => 'Car-free city center of Dresden',
-        'goal'                  => 'goal',
-        'vision'                => 'vision',
+        'goal'                  => 'goal with 10 characters',
+        'vision'                => 'vision with 10 characters',
     ];
 
     public const LOCKED_PROJECT = [

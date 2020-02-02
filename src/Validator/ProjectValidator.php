@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Validator;
 
+use App\Entity\Helper\ProjectHelper;
 use App\Entity\Project;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 class ProjectValidator
@@ -58,5 +60,55 @@ class ProjectValidator
                 ->addViolation();
         }
         */
+    }
+
+    public static function validateTasks($value, ExecutionContextInterface $context, $payload)
+    {
+        /** @var Project $project */
+        $project = $context->getObject();
+
+        if (!$project instanceof Project) {
+            throw new UnexpectedTypeException($project, Project::class);
+        }
+
+        if (empty($value)) {
+            return;
+        }
+
+        $helper = new ProjectHelper($project);
+
+        if ($helper->hasDuplicateTaskIDs()) {
+            $context->buildViolation('validate.project.duplicateTaskIDs')
+                ->addViolation();
+            return;
+        }
+    }
+
+    public static function validateWorkPackages($value, ExecutionContextInterface $context, $payload)
+    {
+        /** @var Project $project */
+        $project = $context->getObject();
+
+        if (!$project instanceof Project) {
+            throw new UnexpectedTypeException($project, Project::class);
+        }
+
+        if (empty($value)) {
+            return;
+        }
+
+        $helper = new ProjectHelper($project);
+
+        if ($helper->hasDuplicatePackageIDs()) {
+            $context->buildViolation('validate.project.duplicatePackageIDs')
+                ->addViolation();
+            return;
+        }
+
+        if ($helper->hasDuplicatePackageNames()) {
+            $context->buildViolation('validate.project.duplicatePackageNames')
+                ->addViolation();
+            return;
+        }
     }
 }

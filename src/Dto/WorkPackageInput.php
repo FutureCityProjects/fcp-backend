@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class WorkPackageInput
 {
     /**
-     * @var string
+     * @var string|null
      *
      * @Assert\NotBlank(allowNull=false)
      * @Assert\Length(min=6, max=200, allowEmptyString=true)
@@ -18,7 +18,7 @@ class WorkPackageInput
     public ?string $description = null;
 
     /**
-     * @var string
+     * @var string|null
      *
      * @Assert\NotBlank(allowNull=false)
      * @Assert\Length(min=6, max=200, allowEmptyString=true)
@@ -27,7 +27,7 @@ class WorkPackageInput
     public ?string $id = null;
 
     /**
-     * @var string
+     * @var string|null
      *
      * @Assert\NotBlank(allowNull=true)
      * @Assert\Length(min=2, max=200, allowEmptyString=true)
@@ -36,7 +36,7 @@ class WorkPackageInput
     public ?string $mainResponsibility = null;
 
     /**
-     * @var string
+     * @var string|null
      *
      * @Assert\NotBlank(allowNull=false)
      * @Assert\Length(min=4, max=200, allowEmptyString=true)

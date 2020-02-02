@@ -1120,8 +1120,7 @@ class FundApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'region: validate.general.notBlank'
-                ."\nregion: validate.general.tooShort",
+            'hydra:description' => 'region: validate.general.notBlank',
         ]);
     }
 

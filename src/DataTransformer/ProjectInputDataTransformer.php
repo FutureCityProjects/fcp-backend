@@ -199,11 +199,17 @@ class ProjectInputDataTransformer implements DataTransformerInterface
         }
 
         if ($data->tasks !== null) {
-            $project->setTasks($data->tasks);
+            $tasks = array_map(function($input) {
+                return (array)$input;
+            }, $data->tasks);
+            $project->setTasks($tasks);
         }
 
         if ($data->workPackages !== null) {
-            $project->setWorkPackages($data->workPackages);
+            $packages = array_map(function($input) {
+                return (array)$input;
+            }, $data->workPackages);
+            $project->setWorkPackages($packages);
         }
     }
 }

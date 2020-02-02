@@ -61,8 +61,10 @@ class ProjectHelper
             return false;
         }
 
-        if ($this->hasPackageWithoutTasks() || $this->hasTasksWithoutPackage()) {
-            return false;
+        if ($this->hasWorkPackages()) {
+            if ($this->hasPackageWithoutTasks() || $this->hasTasksWithoutPackage()) {
+                return false;
+            }
         }
 
         // @todo check resources
@@ -90,9 +92,20 @@ class ProjectHelper
         ) {
             return false;
         }
+        
+        // the fund has no concretizations -> nothing more to check
+        $fundConcretizations = $application->getFund()->getConcretizations();
+        if (!$fundConcretizations->count()) {
+            return true;
+        }
+        
+        $concretizations = $application->getConcretizations();
+        if ($concretizations === null || count($concretizations) === 0) {
+            return false;
+        }
 
-        $concretizationIds = array_keys($application->getConcretizations());
-        foreach($application->getFund()->getConcretizations() as $concretization) {
+        $concretizationIds = array_keys($concretizations);
+        foreach($fundConcretizations as $concretization) {
             if (!in_array($concretization->getId(), $concretizationIds)) {
                 return false;
             }
@@ -200,6 +213,18 @@ class ProjectHelper
         }, $wp);
     }
 
+    public function getWorkPackageNames(): array
+    {
+        $wp = $this->project->getWorkPackages();
+        if ($wp === null || count($wp) === 0) {
+            return [];
+        }
+
+        return array_map(function ($package) {
+            return $package['name'] ?? null;
+        }, $wp);
+    }
+
     public function getWorkPackageIDsFromTaks(): array
     {
         $tasks = $this->project->getTasks();
@@ -216,6 +241,12 @@ class ProjectHelper
     {
         $ids = $this->getWorkPackageIDs();
         return count(array_unique($ids)) !== count($ids);
+    }
+
+    public function hasDuplicatePackageNames(): bool
+    {
+        $names = $this->getWorkPackageNames();
+        return count(array_unique($names)) !== count($names);
     }
 
     public function hasPackageWithoutTasks(): bool

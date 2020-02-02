@@ -205,12 +205,8 @@ class Fund
     /**
      * @var array|null
      *
-     * @todo maxLength Validator
      * @Assert\All({
-     *     @Assert\NotBlank(
-     *         allowNull=false,
-     *         normalizer="trim"
-     *     ),
+     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
      *     @Assert\Length(min=5, max=280, allowEmptyString=true,
      *         normalizer="trim"
      *     )
@@ -249,7 +245,7 @@ class Fund
      * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="text", length=30000, nullable=false)
      */
-    private $description;
+    private ?string $description = null;
 
     public function getDescription(): ?string
     {
@@ -258,7 +254,7 @@ class Fund
 
     public function setDescription(string $description): self
     {
-        if (mb_strlen(trim(strip_tags($description))) === 0) {
+        if (NormalizerHelper::getTextLength($description) === 0) {
             $this->description = "";
         } else {
             $this->description = trim($description);
@@ -317,17 +313,16 @@ class Fund
     /**
      * @var string|null
      *
+     * @Assert\NotBlank(allowNull=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
+     * @Assert\Length(min=20, max=20000, allowEmptyString=true,
+     *     normalizer={NormalizerHelper::class, "stripHtml"}
+     * )
      * @Groups({"elastica", "fund:read", "fund:write"})
-     * @Assert\NotBlank(
-     *     allowNull=true,
-     *     normalizer={NormalizerHelper::class, "stripHtml"}
-     * )
-     * @Assert\Length(min=20, max=65535, allowEmptyString=true,
-     *     normalizer={NormalizerHelper::class, "stripHtml"}
-     * )
-     * @ORM\Column(type="text", length=65535, nullable=true)
+     * @ORM\Column(type="text", length=60000, nullable=true)
      */
-    private $imprint;
+    private ?string $imprint = null;
 
     public function getImprint(): ?string
     {
@@ -336,8 +331,8 @@ class Fund
 
     public function setImprint(?string $imprint): self
     {
-        if (mb_strlen(trim(strip_tags($imprint))) === 0) {
-            $this->imprint = "";
+        if (NormalizerHelper::getTextLength($imprint) === 0) {
+            $this->imprint = null;
         } else {
             $this->imprint = trim($imprint);
         }
@@ -568,12 +563,12 @@ class Fund
     /**
      * @var string
      *
-     * @Groups({"elastica", "fund:read", "fund:write"})
      * @Assert\NotBlank(allowNull=false, normalizer="trim")
      * @Assert\Length(min=5, max=255, allowEmptyString=true, normalizer="trim")
+     * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="string", length=255, nullable=false)
      */
-    private $region;
+    private ?string $region = null;
 
     public function getRegion(): ?string
     {
@@ -582,7 +577,7 @@ class Fund
 
     public function setRegion(string $region): self
     {
-        $this->region = $region;
+        $this->region = trim($region);
 
         return $this;
     }
@@ -592,17 +587,14 @@ class Fund
     /**
      * @var string
      *
-     * @Assert\NotBlank(
-     *     allowNull=false,
-     *     normalizer="trim"
-     * )
+     * @Assert\NotBlank(allowNull=false, normalizer="trim")
      * @Assert\Length(min=10, max=255, allowEmptyString=true,
      *     normalizer="trim"
      * )
      * @Groups({"elastica", "fund:read", "fund:write"})
      * @ORM\Column(type="string", length=255, nullable=false)
      */
-    private $sponsor;
+    private ?string $sponsor = null;
 
     public function getSponsor(): ?string
     {
