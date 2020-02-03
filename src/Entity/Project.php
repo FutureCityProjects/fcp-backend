@@ -262,7 +262,7 @@ class Project
     /**
      * @var string
      *
-     * @Assert\Length(min=20, max=2000, allowEmptyString=true,
+     * @Assert\Length(max=2000, allowEmptyString=true,
      *     normalizer={NormalizerHelper::class, "stripHtml"}
      * )
      * @Groups({"elastica", "project:read", "project:write"})

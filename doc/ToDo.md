@@ -1,7 +1,7 @@
 # Anstehend
 * testen: budget/min/max werden auf null gesetzt bei 0
 * testen: autotrim?
-* neuen empty validator: striptags + trim
+* Fund nicht bearbeiten lassen wenn aktiv
 * Doctrine\FundDeletedExtension? Können Funds gelöscht werden?
 * Logo in der Mail austauschen
 * onRefresh: Error: "Unable to load an user with property "username" = "jakob.schumann". If the user identity has changed, you must renew the token. Otherwise, verify that the "lexik_jwt_authentication.user_identity_field" config option is correctly set."

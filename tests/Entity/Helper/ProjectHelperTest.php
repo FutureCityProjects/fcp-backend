@@ -34,7 +34,7 @@ class ProjectHelperTest extends KernelTestCase
         return $this->entityManager->getRepository(Project::class);
     }
 
-    public function testIsProfileComplete(): void
+    public function testIsPlanAvailable(): void
     {
         /** @var Project $project */
         $project = $this->getProjectRepository()
@@ -43,92 +43,57 @@ class ProjectHelperTest extends KernelTestCase
 
         $helper = new ProjectHelper($project);
 
-        $this->assertFalse($helper->isProfileComplete());
+        $this->assertFalse($helper->isPlanAvailable());
 
         $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
-        $this->assertFalse($helper->isProfileComplete());
+        $this->assertFalse($helper->isPlanAvailable());
 
         $project->setVision('vision');
-        $this->assertTrue($helper->isProfileComplete());
+        $this->assertTrue($helper->isPlanAvailable());
 
         $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_0_PERCENT);
-        $this->assertFalse($helper->isProfileComplete());
+        $this->assertFalse($helper->isPlanAvailable());
+
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setState(Project::STATE_DEACTIVATED);
+        $this->assertFalse($helper->isPlanAvailable());
     }
 
-    public function testIsPlanComplete(): void
+    public function testIsApplicationAvailable(): void
     {
         /** @var Project $project */
         $project = $this->getProjectRepository()
             ->find(TestFixtures::PROJECT['id']);
 
         $helper = new ProjectHelper($project);
-        $this->assertFalse($helper->isPlanComplete());
+        $this->assertFalse($helper->isApplicationAvailable());
 
         $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
-        $this->assertFalse($helper->isPlanComplete());
+        $this->assertFalse($helper->isApplicationAvailable());
 
-        $project->setUtilization("text");
-        $this->assertFalse($helper->isPlanComplete());
+        $application = $project->getApplications()[0];
+        $application->setState(FundApplication::STATE_DETAILING);
+        $this->assertTrue($helper->isApplicationAvailable());
 
-        $project->setImpact([['text']]);
-        $this->assertFalse($helper->isPlanComplete());
+        $project->setState(Project::STATE_DEACTIVATED);
+        $this->assertFalse($helper->isPlanAvailable());
 
-        $project->setOutcome([['text']]);
-        $this->assertFalse($helper->isPlanComplete());
-
-        $project->setResults([['text']]);
-        $this->assertFalse($helper->isPlanComplete());
-
-        $project->setTargetGroups([['text']]);
-        $this->assertFalse($helper->isPlanComplete());
-
-        $project->setTasks([['description' => 'text', 'id' => '1']]);
-        $this->assertTrue($helper->isPlanComplete());
-
-        // an empty workPackage is not allowed, also a task without a package
-        $project->setWorkPackages([['name' => 'text', 'id' => '1']]);
-        $this->assertFalse($helper->isPlanComplete());
-
-        $project->setTasks([
-            ['description' => 'text', 'id' => '1', 'workPackage' => '1']
-        ]);
-        $this->assertTrue($helper->isPlanComplete());
-
-        $project->setTasks([
-            ['description' => 'text', 'id' => '1', 'workPackage' => '1'],
-            ['description' => 'text', 'id' => '2']
-        ]);
-        $this->assertFalse($helper->isPlanComplete());
-
-        // @todo test ressources
+        $project->setState(Project::STATE_ACTIVE);
+        $project->removeApplication($application);
+        $this->assertFalse($helper->isApplicationAvailable());
     }
 
-    public function testIsApplicationComplete(): void
+    public function testIsSubmissionAvailable(): void
     {
         /** @var Project $project */
         $project = $this->getProjectRepository()
             ->find(TestFixtures::PROJECT['id']);
-        $application = $project->getApplications()[0];
 
         $helper = new ProjectHelper($project);
 
-        $this->assertFalse($helper->isApplicationComplete());
+        // @todo ausdefinieren
 
-        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
-        $this->assertFalse($helper->isApplicationComplete());
-
-        $application->setConcretizations([99 => ['text']]);
-        $this->assertFalse($helper->isApplicationComplete());
-
-        $application->setConcretizations([1 => ['text']]);
-        $this->assertTrue($helper->isApplicationComplete());
-
-        $application->setConcretizations(null);
-        $application->setState(FundApplication::STATE_SUBMITTED);
-        $this->assertTrue($helper->isApplicationComplete());
-
-        $project->removeApplication($application);
-        $this->assertFalse($helper->isApplicationComplete());
+        $this->assertFalse($helper->isSubmissionAvailable());
     }
 
     public function testIsApplicationSubmitted(): void
@@ -140,10 +105,10 @@ class ProjectHelperTest extends KernelTestCase
 
         $helper = new ProjectHelper($project);
 
-        $this->assertFalse($helper->isApplicationComplete());
+        $this->assertFalse($helper->isApplicationSubmitted());
 
         $application->setState(FundApplication::STATE_SUBMITTED);
-        $this->assertTrue($helper->isApplicationComplete());
+        $this->assertTrue($helper->isApplicationSubmitted());
     }
 
     public function testHasDuplicateTaskIDs(): void

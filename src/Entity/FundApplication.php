@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Validator\NormalizerHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -53,6 +54,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(
  *     repositoryClass="Gedmo\Sortable\Entity\Repository\SortableRepository"
  * )
+ * @ORM\EntityListeners({"App\Entity\Listener\FundApplicationListener"})
  * @ORM\Table(indexes={
  *     @ORM\Index(name="order_idx", columns={"jury_order"}),
  *     @ORM\Index(name="state_idx", columns={"state"})
@@ -63,8 +65,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class FundApplication
 {
-    const STATE_OPEN      = 'open';
-    const STATE_SUBMITTED = 'submitted';
+    const STATE_CONCRETIZATION = 'concretization';
+    const STATE_DETAILING      = 'detailing';
+    const STATE_SUBMITTED      = 'submitted';
 
     const SELF_ASSESSMENT_0_PERCENT   = 0;
     const SELF_ASSESSMENT_25_PERCENT  = 25;
@@ -76,9 +79,6 @@ class FundApplication
     /**
      * @var array|null
      *
-     * @Assert\All({
-     *     @Assert\NotBlank(allowNull=false, normalizer="trim"),
-     * })
      * @Assert\NotBlank(allowNull=true)
      * @Assert\Callback(
      *     callback={"App\Validator\FundApplicationValidator", "validateConcretizations"}
@@ -99,9 +99,16 @@ class FundApplication
 
     public function setConcretizations(?array $concretizations): self
     {
-        $this->concretizations = is_array($concretizations) && count($concretizations)
-            ? $concretizations
-            : null;
+        if (is_array($concretizations) && count($concretizations)) {
+            $this->concretizations = array_map(function($c) {
+                return !is_string($c) || NormalizerHelper::getTextLength($c) === 0
+                    ? null
+                    : trim($c);
+            }, $concretizations);
+        }
+        else {
+            $this->concretizations = null;
+        }
 
         return $this;
     }
@@ -330,7 +337,7 @@ class FundApplication
      * })
      * @ORM\Column(type="string", length=50, nullable=false)
      */
-    private $state = self::STATE_OPEN;
+    private $state = self::STATE_CONCRETIZATION;
 
     public function getState(): ?string
     {

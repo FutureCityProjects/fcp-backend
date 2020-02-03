@@ -24,17 +24,17 @@ class ProjectListener
 
         $helper = new ProjectHelper($project);
 
-        if (!$helper->isProfileComplete()) {
+        if (!$helper->isPlanAvailable()) {
             $project->setProgress(Project::PROGRESS_CREATING_PROFILE);
             return;
         }
 
-        if (!$helper->isPlanComplete()) {
+        if (!$helper->isApplicationAvailable()) {
             $project->setProgress(Project::PROGRESS_CREATING_PLAN);
             return;
         }
 
-        if (!$helper->isApplicationComplete()) {
+        if (!$helper->isSubmissionAvailable()) {
             $project->setProgress(Project::PROGRESS_CREATING_APPLICATION);
             return;
         }

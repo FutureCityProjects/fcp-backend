@@ -34,7 +34,9 @@ class FundApplicationValidator
                 $found = true;
                 $normalized = NormalizerHelper::stripHtml($text);
 
-                if (mb_strlen($normalized) > $concretization->getMaxLength()) {
+                if ($normalized
+                    && mb_strlen($normalized) > $concretization->getMaxLength()
+                ) {
                     $context->buildViolation('validate.general.tooLong')
                         ->atPath("[$index]")
                         ->addViolation();

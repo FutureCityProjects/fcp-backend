@@ -110,7 +110,7 @@ class FundApplicationApiTest extends ApiTestCase
                 '@id'   => $projectIri,
                 '@type' => 'Project',
             ],
-            'state'                        => FundApplication::STATE_OPEN,
+            'state'                        => FundApplication::STATE_CONCRETIZATION,
             'concretizations'              => null,
             'concretizationSelfAssessment' => FundApplication::SELF_ASSESSMENT_0_PERCENT,
         ]);

@@ -21,8 +21,12 @@ class ProjectHelper
      *
      * @return bool
      */
-    public function isProfileComplete() : bool
+    public function isPlanAvailable() : bool
     {
+        if ($this->project->getState() === Project::STATE_DEACTIVATED) {
+            return false;
+        }
+
         if ($this->project->getProfileSelfAssessment()
             !== Project::SELF_ASSESSMENT_100_PERCENT
         ) {
@@ -43,78 +47,42 @@ class ProjectHelper
         return true;
     }
 
-    public function isPlanComplete(): bool
+    public function isApplicationAvailable(): bool
     {
+        if ($this->project->getState() === Project::STATE_DEACTIVATED) {
+            return false;
+        }
+
         if ($this->project->getPlanSelfAssessment()
             !== Project::SELF_ASSESSMENT_100_PERCENT
         ) {
             return false;
         }
 
-        if (!$this->project->getUtilization()
-            || !count((array)$this->project->getImpact())
-            || !count((array)$this->project->getOutcome())
-            || !count((array)$this->project->getResults())
-            || !count((array)$this->project->getTargetGroups())
-            || !count((array)$this->project->getTasks())
-        ) {
+        // @todo support multiple applications
+        if ($this->project->getApplications()->count() === 0) {
+            return false;
+        }
+        $application = $this->project->getApplications()[0];
+
+        // concretizations have not been filled in
+        if ($application->getState() !== FundApplication::STATE_DETAILING) {
             return false;
         }
 
+        return true;
+    }
+
+    public function isSubmissionAvailable(): bool
+    {
         if ($this->hasWorkPackages()) {
             if ($this->hasPackageWithoutTasks() || $this->hasTasksWithoutPackage()) {
                 return false;
             }
         }
 
-        // @todo check resources
-
-        return true;
-    }
-
-    public function isApplicationComplete(): bool
-    {
-        if (count($this->project->getApplications()) === 0) {
-            return false;
-        }
-
-        // @todo support multiple applications
-        $application = $this->project->getApplications()[0];
-
-        // it should not be possible to edit a submitted application
-        // -> no need to check all fields again
-        if ($application->getState() === FundApplication::STATE_SUBMITTED) {
-            return true;
-        }
-
-        if ($application->getConcretizationSelfAssessment()
-            !== FundApplication::SELF_ASSESSMENT_100_PERCENT
-        ) {
-            return false;
-        }
-        
-        // the fund has no concretizations -> nothing more to check
-        $fundConcretizations = $application->getFund()->getConcretizations();
-        if (!$fundConcretizations->count()) {
-            return true;
-        }
-        
-        $concretizations = $application->getConcretizations();
-        if ($concretizations === null || count($concretizations) === 0) {
-            return false;
-        }
-
-        $concretizationIds = array_keys($concretizations);
-        foreach($fundConcretizations as $concretization) {
-            if (!in_array($concretization->getId(), $concretizationIds)) {
-                return false;
-            }
-        }
-
-        // @todo check other requirements?
-
-        // is not submitted but can be submitted
-        return true;
+        // @todo wie im Pflichtenheft unter Einreichen 2.2
+        return false;
     }
 
     public function isApplicationSubmitted(): bool
