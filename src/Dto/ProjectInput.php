@@ -152,4 +152,46 @@ class ProjectInput
      */
     public ?array $workPackages = null;
     //endregion
+
+    //region application data
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $contactEmail = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $contactName = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $contactPhone = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $holderAddressInfo = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $holderCity = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $holderName = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $holderStreet = null;
+
+    /**
+     * @Groups({"project:write"})
+     */
+    public ?string $holderZipCode = null;
+    //endregion
 }

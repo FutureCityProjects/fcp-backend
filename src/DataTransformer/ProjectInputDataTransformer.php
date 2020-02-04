@@ -117,6 +117,7 @@ class ProjectInputDataTransformer implements DataTransformerInterface
 
         $this->setProfileData($data, $project);
         $this->setPlanData($data, $project);
+        $this->setApplicationData($data, $project);
 
         return $project;
     }
@@ -199,17 +200,52 @@ class ProjectInputDataTransformer implements DataTransformerInterface
         }
 
         if ($data->tasks !== null) {
-            $tasks = array_map(function($input) {
+            $tasks = array_map(function ($input) {
                 return (array)$input;
             }, $data->tasks);
             $project->setTasks($tasks);
         }
 
         if ($data->workPackages !== null) {
-            $packages = array_map(function($input) {
+            $packages = array_map(function ($input) {
                 return (array)$input;
             }, $data->workPackages);
             $project->setWorkPackages($packages);
+        }
+    }
+
+    protected function setApplicationData(ProjectInput $data, Project $project)
+    {
+        if ($data->contactEmail !== null) {
+            $project->setContactEmail($data->contactEmail);
+        }
+
+        if ($data->contactName !== null) {
+            $project->setContactName($data->contactName);
+        }
+
+        if ($data->contactPhone !== null) {
+            $project->setContactPhone($data->contactPhone);
+        }
+
+        if ($data->holderAddressInfo !== null) {
+            $project->setHolderAddressInfo($data->holderAddressInfo);
+        }
+
+        if ($data->holderCity !== null) {
+            $project->setHolderCity($data->holderCity);
+        }
+
+        if ($data->holderName !== null) {
+            $project->setHolderName($data->holderName);
+        }
+
+        if ($data->holderStreet !== null) {
+            $project->setHolderStreet($data->holderStreet);
+        }
+
+        if ($data->holderZipCode !== null) {
+            $project->setHolderZipCode($data->holderZipCode);
         }
     }
 }

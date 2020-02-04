@@ -1688,6 +1688,38 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
+    public function testSettingApplicationData(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'contactEmail'      => 'contact@zukunftsstadt.de',
+            'contactName'       => 'Kontaktperson',
+            'contactPhone'      => '01234-1234512',
+            'holderAddressInfo' => 'Im Hinterhaus',
+            'holderCity'        => 'Dresden',
+            'holderName'        => 'Projektträger',
+            'holderStreet'      => 'Waldweg 1',
+            'holderZipCode'     => '01234',
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'               => $iri,
+            'contactEmail'      => 'contact@zukunftsstadt.de',
+            'contactName'       => 'Kontaktperson',
+            'contactPhone'      => '01234-1234512',
+            'holderAddressInfo' => 'Im Hinterhaus',
+            'holderCity'        => 'Dresden',
+            'holderName'        => 'Projektträger',
+            'holderStreet'      => 'Waldweg 1',
+            'holderZipCode'     => '01234',
+        ]);
+    }
+
     public function testLockingWithoutPrivilegeIsIgnored(): void
     {
         $client = static::createAuthenticatedClient([

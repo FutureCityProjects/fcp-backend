@@ -66,6 +66,30 @@ class ProjectTest extends KernelTestCase
         $project->setCreatedBy($user);
         $project->setInspiration($idea);
         $project->setProgress(Project::PROGRESS_CREATING_PROFILE);
+
+        // plan data
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_50_PERCENT);
+        $project->setTasks([
+            ['id' => '123456', 'description' => 'text']
+        ]);
+        $project->setWorkPackages([
+            ['id' => '123456', 'description' => 'text', 'name' => 'AP1']
+        ]);
+        $project->setOutcome(['outcome1', 'outcome2']);
+        $project->setImpact(['impact1', 'impact2']);
+        $project->setResults(['result1', 'result2']);
+        $project->setTargetGroups(['group1', 'group2']);
+        $project->setUtilization('utilization');
+
+        // application data
+        $project->setContactEmail('contact@zukunftsstadt.de');
+        $project->setContactName('Projektträger');
+        $project->setContactPhone('01234-12345667');
+        $project->setHolderAddressInfo('im Hinterhaus');
+        $project->setHolderStreet('Waldweg 1');
+        $project->setHolderCity('Dresden');
+        $project->setHolderZipCode('01234');
+
         $process->addProject($project);
 
         $this->entityManager->persist($project);
@@ -85,6 +109,29 @@ class ProjectTest extends KernelTestCase
 
         $this->assertSame($user->getId(), $found->getCreatedBy()->getId());
         $this->assertSame($idea->getId(), $found->getInspiration()->getId());
+
+        // plan data
+        $this->assertSame(Project::SELF_ASSESSMENT_50_PERCENT, $project->getPlanSelfAssessment());
+        $this->assertSame([
+            ['id' => '123456', 'description' => 'text']
+        ], $project->getTasks());
+        $this->assertSame([
+            ['id' => '123456', 'description' => 'text', 'name' => 'AP1']
+        ], $project->getWorkPackages());
+        $this->assertSame(['outcome1', 'outcome2'], $project->getOutcome());
+        $this->assertSame(['impact1', 'impact2'], $project->getImpact());
+        $this->assertSame(['result1', 'result2'], $project->getResults());
+        $this->assertSame(['group1', 'group2'], $project->getTargetGroups());
+        $this->assertSame('utilization', $project->getUtilization());
+
+        // application data
+        $this->assertSame('contact@zukunftsstadt.de', $project->getContactEmail());
+        $this->assertSame('Projektträger', $project->getContactName());
+        $this->assertSame('01234-12345667', $project->getContactPhone());
+        $this->assertSame('im Hinterhaus', $project->getHolderAddressInfo());
+        $this->assertSame('Waldweg 1', $project->getHolderStreet());
+        $this->assertSame('Dresden', $project->getHolderCity());
+        $this->assertSame('01234', $project->getHolderZipCode());
 
         // timestampable listener works
         $this->assertInstanceOf(\DateTimeImmutable::class,

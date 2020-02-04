@@ -350,6 +350,8 @@ class FundApplicationApiTest extends ApiTestCase
             'concretizations' => [
                 1 => 'more specifics'
             ],
+            'requestedFunding' => 100000,
+            'applicationSelfAssessment' => FundApplication::SELF_ASSESSMENT_25_PERCENT,
         ]]);
 
         self::assertResponseStatusCodeSame(200);
@@ -362,11 +364,13 @@ class FundApplicationApiTest extends ApiTestCase
                 1 => 'more specifics',
             ],
             'concretizationSelfAssessment' => FundApplication::SELF_ASSESSMENT_0_PERCENT,
-            'fund'        => [
+            'requestedFunding'             => 100000,
+            'applicationSelfAssessment'    => FundApplication::SELF_ASSESSMENT_25_PERCENT,
+            'fund' => [
                 '@type' => 'Fund',
                 'id'    => TestFixtures::ACTIVE_FUND['id']
             ],
-            'project'        => [
+            'project' => [
                 '@type' => 'Project',
                 'id'    => TestFixtures::PROJECT['id']
             ],

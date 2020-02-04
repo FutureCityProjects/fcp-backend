@@ -178,6 +178,81 @@ class Project
     }
     //endregion
 
+    //region ContactEmail
+    /**
+     * @var string
+     *
+     * @Assert\Email
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=255, nullable=true)
+     */
+    private ?string $contactEmail = null;
+
+    public function getContactEmail(): ?string
+    {
+        return $this->contactEmail;
+    }
+
+    public function setContactEmail(?string $contactEmail): self
+    {
+        $this->contactEmail = $contactEmail;
+
+        return $this;
+    }
+    //endregion
+    
+    //region ContactName
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=100, nullable=true)
+     */
+    private ?string $contactName = null;
+
+    public function getContactName(): ?string
+    {
+        return $this->contactName;
+    }
+
+    public function setContactName(?string $contactName): self
+    {
+        if (NormalizerHelper::getTextLength($contactName) === 0) {
+            $this->contactName = null;
+        } else {
+            $this->contactName = trim($contactName);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region ContactPhone
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=100, nullable=true)
+     */
+    private ?string $contactPhone = null;
+
+    public function getContactPhone(): ?string
+    {
+        return $this->contactPhone;
+    }
+
+    public function setContactPhone(?string $contactPhone): self
+    {
+        if (NormalizerHelper::getTextLength($contactPhone) === 0) {
+            $this->contactPhone = null;
+        } else {
+            $this->contactPhone = trim($contactPhone);
+        }
+
+        return $this;
+    }
+    //endregion
+
     //region CreatedAt
     /**
      * @var DateTimeImmutable
@@ -310,6 +385,136 @@ class Project
             $this->goal = null;
         } else {
             $this->goal = trim($goal);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region HolderAddressInfo
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=100, nullable=true)
+     */
+    private ?string $holderAddressInfo = null;
+
+    public function getHolderAddressInfo(): ?string
+    {
+        return $this->holderAddressInfo;
+    }
+
+    public function setHolderAddressInfo(?string $holderAddressInfo): self
+    {
+        if (NormalizerHelper::getTextLength($holderAddressInfo) === 0) {
+            $this->holderAddressInfo = null;
+        } else {
+            $this->holderAddressInfo = trim($holderAddressInfo);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region HolderCity
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=100, nullable=true)
+     */
+    private ?string $holderCity = null;
+
+    public function getHolderCity(): ?string
+    {
+        return $this->holderCity;
+    }
+
+    public function setHolderCity(?string $holderCity): self
+    {
+        if (NormalizerHelper::getTextLength($holderCity) === 0) {
+            $this->holderCity = null;
+        } else {
+            $this->holderCity = trim($holderCity);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region HolderName
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=200, nullable=true)
+     */
+    private ?string $holderName = null;
+
+    public function getHolderName(): ?string
+    {
+        return $this->holderName;
+    }
+
+    public function setHolderName(?string $holderName): self
+    {
+        if (NormalizerHelper::getTextLength($holderName) === 0) {
+            $this->holderName = null;
+        } else {
+            $this->holderName = trim($holderName);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region HolderStreet
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=100, nullable=true)
+     */
+    private ?string $holderStreet = null;
+
+    public function getHolderStreet(): ?string
+    {
+        return $this->holderStreet;
+    }
+
+    public function setHolderStreet(?string $holderStreet): self
+    {
+        if (NormalizerHelper::getTextLength($holderStreet) === 0) {
+            $this->holderStreet = null;
+        } else {
+            $this->holderStreet = trim($holderStreet);
+        }
+
+        return $this;
+    }
+    //endregion
+
+    //region HolderZipCode
+    /**
+     * @var string
+     *
+     * @Groups({"elastica", "project:read", "project:write"})
+     * @ORM\Column(type="text", length=10, nullable=true)
+     */
+    private ?string $holderZipCode = null;
+
+    public function getHolderZipCode(): ?string
+    {
+        return $this->holderZipCode;
+    }
+
+    public function setHolderZipCode(?string $holderZipCode): self
+    {
+        if (NormalizerHelper::getTextLength($holderZipCode) === 0) {
+            $this->holderZipCode = null;
+        } else {
+            $this->holderZipCode = trim($holderZipCode);
         }
 
         return $this;

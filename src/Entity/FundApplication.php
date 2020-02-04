@@ -75,6 +75,41 @@ class FundApplication
     const SELF_ASSESSMENT_75_PERCENT  = 75;
     const SELF_ASSESSMENT_100_PERCENT = 100;
 
+    //region ApplicationSelfAssessment
+    /**
+     * @var int
+     *
+     * @Groups({
+     *     "project:read",
+     *     "fundApplication:read",
+     *     "fundApplication:write",
+     * })
+     * @Assert\Choice(
+     *     choices={
+     *         FundApplication::SELF_ASSESSMENT_0_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_25_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_50_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_75_PERCENT,
+     *         FundApplication::SELF_ASSESSMENT_100_PERCENT
+     *     }
+     * )
+     * @ORM\Column(type="smallint", nullable=false, options={"unsigned":true})
+     */
+    private int $applicationSelfAssessment = self::SELF_ASSESSMENT_0_PERCENT;
+
+    public function getApplicationSelfAssessment(): int
+    {
+        return $this->applicationSelfAssessment;
+    }
+
+    public function setApplicationSelfAssessment(int $selfAssessment): self
+    {
+        $this->applicationSelfAssessment = $selfAssessment;
+
+        return $this;
+    }
+    //endregion
+
     //region Concretizations
     /**
      * @var array|null
@@ -173,6 +208,28 @@ class FundApplication
     public function setFund(?Fund $fund): self
     {
         $this->fund = $fund;
+
+        return $this;
+    }
+    //endregion
+
+    //region RequestedFunding
+    /**
+     * @var float|null
+     *
+     * @Groups({"fundApplication:read", "fundApplication:write"})
+     * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
+     */
+    private $requestedFunding;
+
+    public function getRequestedFunding(): ?float
+    {
+        return $this->requestedFunding;
+    }
+
+    public function setRequestedFunding(?float $requestedFunding): self
+    {
+        $this->requestedFunding = $requestedFunding === 0 ? null : $requestedFunding;
 
         return $this;
     }
