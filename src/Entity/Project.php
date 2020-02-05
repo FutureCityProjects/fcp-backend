@@ -8,10 +8,12 @@ use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\ExistsFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+use App\Entity\Helper\ProjectHelper;
 use App\Entity\Traits\AutoincrementId;
 use App\Entity\Traits\CreatedAtFunctions;
 use App\Entity\Traits\DeletedAtFunctions;
 use App\Entity\Traits\NameFunctions;
+use App\Entity\Traits\UpdatedAtFunctions;
 use App\Entity\UploadedFileTypes\ProjectPicture;
 use App\Entity\UploadedFileTypes\ProjectVisualization;
 use App\Validator\Constraints as AppAssert;
@@ -1092,6 +1094,20 @@ class Project
         return $this;
     }
     //endregion
+
+    //region UpdatedAt
+    /**
+     * @var DateTimeImmutable
+     *
+     * @Assert\NotBlank(allowNull=true)
+     * @Groups({"project:read"})
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime_immutable")
+     */
+    protected ?DateTimeImmutable $updatedAt = null;
+
+    use UpdatedAtFunctions;
+    //endregion
     
     //region Utilization
     /**
@@ -1268,4 +1284,35 @@ class Project
         return false;
     }
 
+    public function recalculateProgress()
+    {
+        if ($this->getProgress() === Project::PROGRESS_IDEA) {
+            return;
+        }
+
+        $helper = new ProjectHelper($this);
+
+        if (!$helper->isPlanAvailable()) {
+            $this->setProgress(Project::PROGRESS_CREATING_PROFILE);
+            return;
+        }
+
+        if (!$helper->isApplicationAvailable()) {
+            $this->setProgress(Project::PROGRESS_CREATING_PLAN);
+            return;
+        }
+
+        if (!$helper->isSubmissionAvailable()) {
+            $this->setProgress(Project::PROGRESS_CREATING_APPLICATION);
+            return;
+        }
+
+        // @todo when should the submitted-state reset? when a new fund is selected?
+        if (!$helper->isApplicationSubmitted()) {
+            $this->setProgress(Project::PROGRESS_SUBMITTING_APPLICATION);
+            return;
+        }
+
+        $this->setProgress(Project::PROGRESS_APPLICATION_SUBMITTED);
+    }
 }

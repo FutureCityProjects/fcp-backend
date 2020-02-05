@@ -102,4 +102,45 @@ class FundApplicationTest extends KernelTestCase
         $this->expectException(UniqueConstraintViolationException::class);
         $this->entityManager->flush();
     }
+
+    public function testUpdatingApplicationSetsProjectUpdatedAt(): void
+    {
+        /** @var Project $project */
+        $project = $this->entityManager->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+
+        $oldUpdatedAt = $project->getUpdatedAt();
+        $this->assertTrue($oldUpdatedAt < new \DateTimeImmutable());
+
+        sleep(1);
+        $application = $project->getApplications()[0];
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+
+        $this->entityManager->flush();
+        $this->entityManager->clear();
+
+        /** @var Project $found */
+        $found = $this->entityManager->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $this->assertTrue($oldUpdatedAt < $found->getUpdatedAt());
+    }
+
+    public function testUpdatingApplicationTriggersProjectProgressUpdate(): void
+    {
+        /** @var Project $project */
+        $project = $this->entityManager->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->getApplications()[0]->setConcretizations([1 => 'short text']);
+
+        $this->entityManager->flush();
+        $this->assertSame(Project::PROGRESS_CREATING_PLAN, $project->getProgress());
+
+        $application = $project->getApplications()[0];
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $this->entityManager->flush();
+
+        $this->assertSame(Project::PROGRESS_CREATING_APPLICATION, $project->getProgress());
+    }
 }

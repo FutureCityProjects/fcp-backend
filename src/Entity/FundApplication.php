@@ -54,7 +54,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(
  *     repositoryClass="Gedmo\Sortable\Entity\Repository\SortableRepository"
  * )
- * @ORM\EntityListeners({"App\Entity\Listener\FundApplicationListener"})
  * @ORM\Table(indexes={
  *     @ORM\Index(name="order_idx", columns={"jury_order"}),
  *     @ORM\Index(name="state_idx", columns={"state"})
@@ -217,7 +216,11 @@ class FundApplication
     /**
      * @var float|null
      *
-     * @Groups({"fundApplication:read", "fundApplication:write"})
+     * @Groups({
+     *     "project:read",
+     *     "fundApplication:read",
+     *     "fundApplication:write",
+     * })
      * @ORM\Column(type="float", precision=10, scale=0, nullable=true)
      */
     private $requestedFunding;
@@ -415,5 +418,50 @@ class FundApplication
     public function __construct()
     {
         $this->ratings = new ArrayCollection();
+    }
+
+    public function recalculateState()
+    {
+        if ($this->getState() === FundApplication::STATE_SUBMITTED) {
+            return;
+        }
+
+        $this->setState(FundApplication::STATE_CONCRETIZATION);
+
+        if ($this->getConcretizationSelfAssessment()
+            !== FundApplication::SELF_ASSESSMENT_100_PERCENT
+        ) {
+            return;
+        }
+
+        // the fund has no concretizations -> nothing more to check
+        $fundConcretizations = $this->getFund()->getConcretizations();
+        if ($fundConcretizations->count() === 0) {
+            $this->setState(FundApplication::STATE_DETAILING);
+            return;
+        }
+
+        $concretizations = $this->getConcretizations();
+
+        // no concretizations but the fund has some -> keep STATE_CONCRETIZATION
+        if ($concretizations === null || count($concretizations) === 0) {
+            return;
+        }
+
+        $concretizationIds = array_keys($concretizations);
+        foreach($fundConcretizations as $concretization) {
+            if (!in_array($concretization->getId(), $concretizationIds)) {
+                // not all concretizations have been filled in
+                // -> keep STATE_CONCRETIZATION
+                return;
+            }
+
+            if (empty($concretizations[$concretization->getId()])) {
+                // concretization has no content -> keep STATE_CONCRETIZATION
+                return;
+            }
+        }
+
+        $this->setState(FundApplication::STATE_DETAILING);
     }
 }

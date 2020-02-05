@@ -75,19 +75,35 @@ class ProjectHelper
 
     public function isSubmissionAvailable(): bool
     {
-        if ($this->hasWorkPackages()) {
-            if ($this->hasPackageWithoutTasks() || $this->hasTasksWithoutPackage()) {
-                return false;
-            }
+        if ($this->project->getPlanSelfAssessment()
+            !== Project::SELF_ASSESSMENT_100_PERCENT
+        ){
+            return false;
         }
 
-        // @todo wie im Pflichtenheft unter Einreichen 2.2
-        return false;
+        if ($this->project->getApplications()->count() === 0) {
+            return false;
+        }
+
+        // @todo support multiple applications
+        $application = $this->project->getApplications()[0];
+
+        if ($application->getState() !== FundApplication::STATE_DETAILING) {
+            return false;
+        }
+
+        if ($application->getApplicationSelfAssessment()
+            !== FundApplication::SELF_ASSESSMENT_100_PERCENT
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     public function isApplicationSubmitted(): bool
     {
-        if (count($this->project->getApplications()) === 0) {
+        if ($this->project->getApplications()->count() === 0) {
             return false;
         }
 

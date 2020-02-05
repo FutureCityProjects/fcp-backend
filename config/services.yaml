@@ -45,6 +45,9 @@ services:
         arguments:
             $sender: "%env(MAILER_SENDER)%"
 
+    App\EventSubscriber\DoctrineEventSubscriber:
+        tags: ['doctrine.event_subscriber']
+
     # Entity Listeners are auto-wired
     # DataPersisters are auto-wired
     # DataTransformers are auto-wired
