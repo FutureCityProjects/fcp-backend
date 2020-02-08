@@ -12,7 +12,7 @@ class ProjectTaskInput
      * @var string|null
      *
      * @Assert\NotBlank(allowNull=false)
-     * @Assert\Length(min=6, max=200, allowEmptyString=true)
+     * @Assert\Length(min=5, max=500, allowEmptyString=true)
      * @Groups({"project:write"})
      */
     public ?string $description = null;

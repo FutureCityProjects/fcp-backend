@@ -85,12 +85,20 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
 
+        // prepare project
         $this->removeApplications(); // only one application per project&fund
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
+        $client->request('PUT', $projectIri, ['json' => [
+            'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
+        ]]);
+        self::assertResponseStatusCodeSame(200);
+        self::assertJsonContains([
+            'progress' => Project::PROGRESS_CREATING_PLAN,
+        ]);
 
         $fundIri = $this->findIriBy(Fund::class,
             ['id' => TestFixtures::ACTIVE_FUND['id']]);
-        $projectIri = $this->findIriBy(Project::class,
-            ['id' => TestFixtures::PROJECT['id']]);
         $response = $client->request('POST', '/fund_applications', ['json' => [
             'project' => $projectIri,
             'fund'    => $fundIri,
@@ -235,10 +243,19 @@ class FundApplicationApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_OWNER['email']
         ]);
 
-        $fundIri = $this->findIriBy(Fund::class,
-            ['id' => TestFixtures::ACTIVE_FUND['id']]);
+        // prepare project
         $projectIri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
+        $client->request('PUT', $projectIri, ['json' => [
+            'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
+        ]]);
+        self::assertResponseStatusCodeSame(200);
+        self::assertJsonContains([
+            'progress' => Project::PROGRESS_CREATING_PLAN,
+        ]);
+
+        $fundIri = $this->findIriBy(Fund::class,
+            ['id' => TestFixtures::ACTIVE_FUND['id']]);
         $client->request('POST', '/fund_applications', ['json' => [
             'project' => $projectIri,
             'fund'    => $fundIri,
@@ -357,7 +374,7 @@ class FundApplicationApiTest extends ApiTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertResponseHeaderSame('content-type',
             'application/ld+json; charset=utf-8');
-        self::assertMatchesResourceItemJsonSchema(FundConcretization::class);
+        self::assertMatchesResourceItemJsonSchema(FundApplication::class);
 
         self::assertJsonContains([
             'concretizations' => [
@@ -792,14 +809,298 @@ class FundApplicationApiTest extends ApiTestCase
         ]);
     }
 
+    public function testSubmit()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setSubmissionBegin(new \DateTimeImmutable('yesterday'));
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'   => $applicationIri,
+            'state' => FundApplication::STATE_SUBMITTED
+        ]);
+    }
+
+    public function testSubmitFailsUnauthenticated()
+    {
+        $client = static::createClient();
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setSubmissionBegin(new \DateTimeImmutable('yesterday'));
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseStatusCodeSame(401);
+        self::assertResponseHeaderSame('content-type',
+            'application/json');
+
+        self::assertJsonContains([
+            'code'    => 401,
+            'message' => 'JWT Token not found',
+        ]);
+    }
+
+    public function testSubmitFailsWithoutPrivilege()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_MEMBER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setSubmissionBegin(new \DateTimeImmutable('yesterday'));
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testSubmitFailsWithIncompleteApplication()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setSubmissionBegin(new \DateTimeImmutable('yesterday'));
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_75_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testSubmitFailsWithLockedProject()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setSubmissionBegin(new \DateTimeImmutable('yesterday'));
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setIsLocked(true);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testSubmitFailsWithInactiveFund()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+        $fund = $em->getRepository(Fund::class)
+            ->find(TestFixtures::ACTIVE_FUND['id']);
+        $fund->setSubmissionBegin(new \DateTimeImmutable('yesterday'));
+        $fund->setState(Fund::STATE_INACTIVE);
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
+    public function testSubmitFailsOutsideSubmissionPeriod()
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $em = static::$kernel->getContainer()->get('doctrine')->getManager();
+
+        $application = $em->getRepository(FundApplication::class)
+            ->find(1);
+        $application->setConcretizations([1 => 'more specifics']);
+        $application->setConcretizationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setApplicationSelfAssessment(FundApplication::SELF_ASSESSMENT_100_PERCENT);
+        $application->setRequestedFunding(55555);
+
+        $project = $em->getRepository(Project::class)
+            ->find(TestFixtures::PROJECT['id']);
+        $project->setProfileSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+        $project->setPlanSelfAssessment(Project::SELF_ASSESSMENT_100_PERCENT);
+
+        $em->flush();
+        $em->clear();
+
+        $applicationIri = $this->findIriBy(FundApplication::class,
+            ['id' => 1]);
+        $client->request('POST', $applicationIri.'/submit',
+            ['json' => []]);
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Access Denied.',
+        ]);
+    }
+
     // @todo
     // * create for fund in a different process than the project fails
     // * update concretizations updates state
-    // * submit
-    // * submit unauth
-    // * submit no priv
-    // * submit w/ unfinished data / state
-    // * submit w/ locked project
-    // * submit w/ inactive fund
-    // * submit w/ finished fund
 }

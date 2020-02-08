@@ -17,7 +17,7 @@ class FundApplicationVoter extends Voter
      */
     protected function supports($attribute, $subject)
     {
-        return in_array($attribute, ['CREATE', 'EDIT', 'DELETE'])
+        return in_array($attribute, ['CREATE', 'EDIT', 'DELETE', 'SUBMIT'])
             && $subject instanceof FundApplication;
     }
 
@@ -50,7 +50,11 @@ class FundApplicationVoter extends Voter
                     return false;
                 }
 
-                // @todo only possible when project state allows?
+                if ($subject->getProject()->getProgress()
+                            === Project::PROGRESS_CREATING_PROFILE
+                ) {
+                    return false;
+                }
 
                 return $subject->getProject()->userIsOwner($user);
                 break;
@@ -66,13 +70,12 @@ class FundApplicationVoter extends Voter
                     return false;
                 }
 
-                // @todo Abgleich mit Pflichtenheft
-                if ($subject->getFund()->getState() !== Fund::STATE_ACTIVE) {
+                if ($subject->getState() === FundApplication::STATE_SUBMITTED) {
                     return false;
                 }
 
                 // @todo Abgleich mit Pflichtenheft
-                if ($subject->getState() === FundApplication::STATE_SUBMITTED) {
+                if ($subject->getFund()->getState() !== Fund::STATE_ACTIVE) {
                     return false;
                 }
 
@@ -104,7 +107,31 @@ class FundApplicationVoter extends Voter
                 return $subject->getProject()->userIsOwner($user);
                 break;
 
-            // @todo add privilege "SUBMIT", check application state
+            case 'SUBMIT':
+                if ($subject->getProject()->getProgress()
+                    !== Project::PROGRESS_SUBMITTING_APPLICATION
+                ){
+                    return false;
+                }
+
+                if ($subject->getProject()->isLocked()) {
+                    return false;
+                }
+
+                if ($subject->getFund()->getState() !== Fund::STATE_ACTIVE) {
+                    return false;
+                }
+
+                $now = new \DateTimeImmutable();
+                if ($subject->getFund()->getSubmissionBegin() > $now) {
+                    return false;
+                }
+                if ($subject->getFund()->getSubmissionEnd() < $now) {
+                    return false;
+                }
+
+                return $subject->getProject()->userIsOwner($user);
+                break;
         }
 
         return false;

@@ -5,6 +5,7 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
+use App\Dto\ResourceInput;
 use App\Entity\Process;
 use App\Entity\Project;
 use App\Entity\ProjectMembership;
@@ -1237,6 +1238,50 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
+    public function testSettingResources(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['id' => '123456', 'description' => 'description'],
+            ],
+            'resources' => [
+                [
+                    'cost'        => 5,
+                    'costType'    => ResourceInput::COST_TYPE_INVESTMENT,
+                    'description' => 'short',
+                    'id'          => 'abcdef',
+                    'source'      => 'ich',
+                    'sourceType'  => ResourceInput::SOURCE_TYPE_OWN_FUNDS,
+                    'task'        => '123456'
+                ],
+            ],
+        ]]);
+
+        self::assertResponseIsSuccessful();
+        self::assertJsonContains([
+            '@id'   => $iri,
+            'tasks' => [
+                ['id' => '123456', 'description' => 'description'],
+            ],
+            'resources' => [
+                [
+                    'cost'        => 5,
+                    'costType'    => ResourceInput::COST_TYPE_INVESTMENT,
+                    'description' => 'short',
+                    'id'          => 'abcdef',
+                    'source'      => 'ich',
+                    'sourceType'  => ResourceInput::SOURCE_TYPE_OWN_FUNDS,
+                    'task'        => '123456'
+                ],
+            ],
+        ]);
+    }
+
     public function testSettingNullTaskFails(): void
     {
         $client = static::createAuthenticatedClient([
@@ -1372,7 +1417,7 @@ class ProjectApiTest extends ApiTestCase
         $iri = $this->findIriBy(Project::class, ['id' => 2]);
         $client->request('PUT', $iri, ['json' => [
             'tasks' => [
-                ['description' => 'short', 'id' => '123456'],
+                ['description' => 'abcd', 'id' => '123456'],
                 ['description' => null, 'id' => '123457'],
             ],
         ]]);
@@ -1420,6 +1465,229 @@ class ProjectApiTest extends ApiTestCase
         ]);
     }
 
+    public function testSettingNullResourceFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'resources' => [null],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources[0].description: validate.general.notBlank'
+                ."\nresources[0].id: validate.general.notBlank",
+        ]);
+    }
+
+    public function testSettingEmptyResourceFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'resources' => [[null]],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources[0].description: validate.general.notBlank'
+                ."\nresources[0].id: validate.general.notBlank",
+        ]);
+    }
+
+    public function testSettingResourceWithUnknownTaskIDFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['description' => 'some text1', 'id' => '123456'],
+            ],
+            'resources' => [
+                ['id' => 'abcdef', 'task' => 'notfound', 'description' => 'some text'],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources: validate.project.resourceWithoutTask',
+        ]);
+    }
+
+    public function testSettingDuplicateResourceIdFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['description' => 'some text1', 'id' => '123456'],
+            ],
+            'resources' => [
+                ['id' => 'abcdef', 'task' => '123456', 'description' => 'some text'],
+                ['id' => 'abcdef', 'task' => '123456', 'description' => 'other text'],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources: validate.project.duplicateResourceIDs',
+        ]);
+    }
+
+    public function testSettingEmptyResourceIdFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['description' => 'some text1', 'id' => 'abcdef'],
+            ],
+            'resources' => [
+                ['id' => null, 'task' => 'abcdef', 'description' => 'description'],
+                ['id' => '', 'task' => 'abcdef', 'description' => 'description'],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources[0].id: validate.general.notBlank'
+                ."\nresources[1].id: validate.general.notBlank",
+        ]);
+    }
+
+    public function testSettingResourceWithoutDescriptionFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['id' => 'abcdef', 'description' => 'description']
+            ],
+            'resources' => [
+                ['id' => '223456', 'task' => 'abcdef'],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources[0].description: validate.general.notBlank',
+        ]);
+    }
+
+    public function testSettingInvalidResourceDescriptionFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['description' => 'description', 'id' => '123456'],
+            ],
+            'resources' => [
+                ['description' => 'abcd', 'id' => '223456',
+                    'task' => '123456'],
+                ['description' => '', 'id' => '323456',
+                    'task' => '123456'],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources[0].description: validate.general.tooShort'
+                ."\nresources[1].description: validate.general.notBlank",
+        ]);
+    }
+
+    public function testSettingInvalidResourceCostFails(): void
+    {
+        $client = static::createAuthenticatedClient([
+            'email' => TestFixtures::PROJECT_OWNER['email']
+        ]);
+
+        $iri = $this->findIriBy(Project::class, ['id' => 2]);
+        $client->request('PUT', $iri, ['json' => [
+            'tasks' => [
+                ['id' => 'abcdef', 'description' => 'testweise'],
+            ],
+            'resources' => [
+                ['id' => 'defabc', 'description' => 'testweise',
+                    'task' => 'abcdef', 'cost' => -1],
+            ]
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'resources[0].cost: validate.general.outOfRange',
+        ]);
+    }
 
     public function testSettingNullWorkPackageFails(): void
     {
@@ -1440,8 +1708,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'workPackages[0].description: validate.general.notBlank'
-                ."\nworkPackages[0].id: validate.general.notBlank"
+            'hydra:description' => 'workPackages[0].id: validate.general.notBlank'
                 ."\nworkPackages[0].name: validate.general.notBlank",
         ]);
     }
@@ -1465,8 +1732,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'workPackages[0].description: validate.general.notBlank'
-                ."\nworkPackages[0].id: validate.general.notBlank"
+            'hydra:description' => 'workPackages[0].id: validate.general.notBlank'
                 ."\nworkPackages[0].name: validate.general.notBlank",
         ]);
     }
@@ -1524,34 +1790,6 @@ class ProjectApiTest extends ApiTestCase
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'workPackages[0].name: validate.general.notBlank',
-        ]);
-    }
-
-    public function testSettingWorkPackageWithoutDescriptionFails(): void
-    {
-        $client = static::createAuthenticatedClient([
-            'email' => TestFixtures::PROJECT_OWNER['email']
-        ]);
-
-        $iri = $this->findIriBy(Project::class, ['id' => 2]);
-        $client->request('PUT', $iri, ['json' => [
-            'workPackages' => [
-                [
-                    'id'   => '1234567',
-                    'name' => 'name',
-                ]
-            ],
-        ]]);
-
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
-        self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'workPackages[0].description: validate.general.notBlank',
         ]);
     }
 
@@ -1658,33 +1896,6 @@ class ProjectApiTest extends ApiTestCase
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
             'hydra:description' => 'workPackages: validate.project.duplicatePackageNames',
-        ]);
-    }
-
-    public function testSettingInvalidWorkPackageDescriptionFails(): void
-    {
-        $client = static::createAuthenticatedClient([
-            'email' => TestFixtures::PROJECT_OWNER['email']
-        ]);
-
-        $iri = $this->findIriBy(Project::class, ['id' => 2]);
-        $client->request('PUT', $iri, ['json' => [
-            'workPackages' => [
-                ['name' => 'name1', 'id' => '123456', 'description' => 'd'],
-                ['name' => 'name2', 'id' => '123457', 'description' => null],
-            ],
-        ]]);
-
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
-
-        self::assertJsonContains([
-            '@context'          => '/contexts/ConstraintViolationList',
-            '@type'             => 'ConstraintViolationList',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'workPackages[0].description: validate.general.tooShort'
-                ."\nworkPackages[1].description: validate.general.notBlank",
         ]);
     }
 

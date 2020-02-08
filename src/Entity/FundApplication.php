@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Controller\SubmitFundApplicationAction;
 use App\Validator\NormalizerHelper;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -38,6 +39,13 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         },
  *         "delete"={
  *             "security"="is_granted('DELETE', object)"
+ *         },
+ *         "submit"={
+ *             "controller"=SubmitFundApplicationAction::class,
+ *             "method"="POST",
+ *             "path"="/fund_applications/{id}/submit",
+ *             "security"="is_granted('SUBMIT', object)",
+ *             "validation_groups"={"Default", "fundApplication:submit"}
  *         }
  *     },
  *     normalizationContext={

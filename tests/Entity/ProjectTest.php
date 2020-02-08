@@ -73,7 +73,10 @@ class ProjectTest extends KernelTestCase
             ['id' => '123456', 'description' => 'text']
         ]);
         $project->setWorkPackages([
-            ['id' => '123456', 'description' => 'text', 'name' => 'AP1']
+            ['id' => '223456', 'description' => 'text', 'name' => 'AP1']
+        ]);
+        $project->setResources([
+            ['cost' => 5, 'description' => 'text', 'task' => '123456']
         ]);
         $project->setOutcome(['outcome1', 'outcome2']);
         $project->setImpact(['impact1', 'impact2']);
@@ -116,8 +119,11 @@ class ProjectTest extends KernelTestCase
             ['id' => '123456', 'description' => 'text']
         ], $project->getTasks());
         $this->assertSame([
-            ['id' => '123456', 'description' => 'text', 'name' => 'AP1']
+            ['id' => '223456', 'description' => 'text', 'name' => 'AP1']
         ], $project->getWorkPackages());
+        $this->assertSame([
+            ['cost' => 5, 'description' => 'text', 'task' => '123456']
+        ], $project->getResources());
         $this->assertSame(['outcome1', 'outcome2'], $project->getOutcome());
         $this->assertSame(['impact1', 'impact2'], $project->getImpact());
         $this->assertSame(['result1', 'result2'], $project->getResults());

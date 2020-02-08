@@ -870,6 +870,7 @@ class Project
      *         Project::PROGRESS_CREATING_PROFILE,
      *         Project::PROGRESS_CREATING_PLAN,
      *         Project::PROGRESS_CREATING_APPLICATION,
+     *         Project::PROGRESS_SUBMITTING_APPLICATION,
      *         Project::PROGRESS_APPLICATION_SUBMITTED
      *     }
      * )
@@ -886,6 +887,43 @@ class Project
     public function setProgress(string $progress): self
     {
         $this->progress = $progress;
+
+        return $this;
+    }
+    //endregion
+
+    //region Resources
+    /**
+     * @var array
+     *
+     * @Assert\All({
+     *     @Assert\NotBlank(allowNull=false)
+     * })
+     * @Assert\NotBlank(allowNull=true)
+     * @Assert\Callback(
+     *     callback={"App\Validator\ProjectValidator", "validateResources"}
+     * )
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $resources = null;
+
+    public function getResources(): ?array
+    {
+        return $this->resources;
+    }
+
+    public function setResources(array $resources): self
+    {
+        $this->resources = is_array($resources) && count($resources)
+            ? $resources
+            : null;
 
         return $this;
     }
@@ -940,7 +978,7 @@ class Project
      */
     public function getResultingProjects(): Collection
     {
-        return $this->resultingProjects;
+            return $this->resultingProjects;
     }
     //endregion
 
@@ -1063,7 +1101,7 @@ class Project
      * @var array
      *
      * @Assert\All({
-     *     @Assert\NotBlank(allowNull=false, normalizer="trim")
+     *     @Assert\NotBlank(allowNull=false)
      * })
      * @Assert\NotBlank(allowNull=true)
      * @Assert\Callback(
@@ -1200,7 +1238,7 @@ class Project
      * @var array
      *
      * @Assert\All({
-     *     @Assert\NotBlank(allowNull=false, normalizer="trim")
+     *     @Assert\NotBlank(allowNull=false)
      * })
      * @Assert\NotBlank(allowNull=true)
      * @Assert\Callback(
@@ -1302,17 +1340,17 @@ class Project
             return;
         }
 
+        // @todo when should the submitted-state reset? when a new fund is selected?
+        if ($helper->isApplicationSubmitted()) {
+            $this->setProgress(Project::PROGRESS_APPLICATION_SUBMITTED);
+            return;
+        }
+
         if (!$helper->isSubmissionAvailable()) {
             $this->setProgress(Project::PROGRESS_CREATING_APPLICATION);
             return;
         }
 
-        // @todo when should the submitted-state reset? when a new fund is selected?
-        if (!$helper->isApplicationSubmitted()) {
-            $this->setProgress(Project::PROGRESS_SUBMITTING_APPLICATION);
-            return;
-        }
-
-        $this->setProgress(Project::PROGRESS_APPLICATION_SUBMITTED);
+        $this->setProgress(Project::PROGRESS_SUBMITTING_APPLICATION);
     }
 }

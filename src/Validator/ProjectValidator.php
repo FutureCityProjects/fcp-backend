@@ -111,4 +111,32 @@ class ProjectValidator
             return;
         }
     }
+
+    public static function validateResources($value, ExecutionContextInterface $context, $payload)
+    {
+        /** @var Project $project */
+        $project = $context->getObject();
+
+        if (!$project instanceof Project) {
+            throw new UnexpectedTypeException($project, Project::class);
+        }
+
+        if (empty($value)) {
+            return;
+        }
+
+        $helper = new ProjectHelper($project);
+
+        if ($helper->hasDuplicateResourceIDs()) {
+            $context->buildViolation('validate.project.duplicateResourceIDs')
+                ->addViolation();
+            return;
+        }
+
+        if ($helper->hasResourceWithoutTask()) {
+            $context->buildViolation('validate.project.resourceWithoutTask')
+                ->addViolation();
+            return;
+        }
+    }
 }

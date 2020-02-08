@@ -199,6 +199,13 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $project->setTargetGroups($data->targetGroups);
         }
 
+        if ($data->resources !== null) {
+            $resources = array_map(function ($input) {
+                return (array)$input;
+            }, $data->resources);
+            $project->setResources($resources);
+        }
+
         if ($data->tasks !== null) {
             $tasks = array_map(function ($input) {
                 return (array)$input;

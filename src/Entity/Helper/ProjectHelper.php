@@ -66,9 +66,12 @@ class ProjectHelper
         $application = $this->project->getApplications()[0];
 
         // concretizations have not been filled in
-        if ($application->getState() !== FundApplication::STATE_DETAILING) {
+        if ($application->getState() === FundApplication::STATE_CONCRETIZATION) {
             return false;
         }
+
+        // @todo submission is also not available when the application
+        // is already submitted?
 
         return true;
     }
@@ -243,6 +246,51 @@ class ProjectHelper
         $ids = $this->getWorkPackageIDsFromTaks();
         foreach($wp as $package) {
             if (!in_array($package['id'], $ids)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasResources() : bool
+    {
+        $res = $this->project->getResources();
+        return $res !== null && count($res) > 0;
+    }
+
+    public function getResourceIDs(): array
+    {
+        $res = $this->project->getResources();
+        if ($res === null || count($res) === 0) {
+            return [];
+        }
+
+        return array_map(function ($resource) {
+            return $resource['task'] ?? null;
+        }, $res);
+    }
+
+    public function hasDuplicateResourceIDs()
+    {
+        $ids = $this->getResourceIDs();
+        return count(array_unique($ids)) !== count($ids);
+    }
+
+    public function hasResourceWithoutTask()
+    {
+        $res = $this->project->getResources();
+        if ($res === null || count($res) === 0) {
+            return false;
+        }
+
+        $ids = $this->getTaskIDs();
+        foreach($res as $resource) {
+            if (empty($resource['task'])) {
+                return true;
+            }
+
+            if (!in_array($resource['task'], $ids)) {
                 return true;
             }
         }

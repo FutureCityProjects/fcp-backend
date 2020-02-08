@@ -11,8 +11,7 @@ class WorkPackageInput
     /**
      * @var string|null
      *
-     * @Assert\NotBlank(allowNull=false)
-     * @Assert\Length(min=6, max=200, allowEmptyString=true)
+     * @Assert\Length(max=500, allowEmptyString=true)
      * @Groups({"project:write"})
      */
     public ?string $description = null;
@@ -29,8 +28,7 @@ class WorkPackageInput
     /**
      * @var string|null
      *
-     * @Assert\NotBlank(allowNull=true)
-     * @Assert\Length(min=2, max=200, allowEmptyString=true)
+     * @Assert\Length(max=100, allowEmptyString=true)
      * @Groups({"project:write"})
      */
     public ?string $mainResponsibility = null;
@@ -39,7 +37,7 @@ class WorkPackageInput
      * @var string|null
      *
      * @Assert\NotBlank(allowNull=false)
-     * @Assert\Length(min=4, max=200, allowEmptyString=true)
+     * @Assert\Length(min=2, max=100, allowEmptyString=true)
      * @Groups({"project:write"})
      */
     public ?string $name = null;
@@ -51,5 +49,5 @@ class WorkPackageInput
      * @Assert\Range(min="0", max="1000")
      * @Groups({"project:write"})
      */
-    private $order = 0;
+    public ?int $order = null;
 }
