@@ -80,7 +80,11 @@ class ProjectValidator
         if ($helper->hasDuplicateTaskIDs()) {
             $context->buildViolation('validate.project.duplicateTaskIDs')
                 ->addViolation();
-            return;
+        }
+
+        if ($helper->hasTasksWithUnknownPackage()) {
+            $context->buildViolation('validate.project.tasksWithUnknownPackage')
+                ->addViolation();
         }
     }
 
@@ -102,17 +106,15 @@ class ProjectValidator
         if ($helper->hasDuplicatePackageIDs()) {
             $context->buildViolation('validate.project.duplicatePackageIDs')
                 ->addViolation();
-            return;
         }
 
         if ($helper->hasDuplicatePackageNames()) {
             $context->buildViolation('validate.project.duplicatePackageNames')
                 ->addViolation();
-            return;
         }
     }
 
-    public static function validateResources($value, ExecutionContextInterface $context, $payload)
+    public static function validateResourceRequirements($value, ExecutionContextInterface $context, $payload)
     {
         /** @var Project $project */
         $project = $context->getObject();
@@ -127,16 +129,14 @@ class ProjectValidator
 
         $helper = new ProjectHelper($project);
 
-        if ($helper->hasDuplicateResourceIDs()) {
-            $context->buildViolation('validate.project.duplicateResourceIDs')
+        if ($helper->hasDuplicateResourceRequirementIDs()) {
+            $context->buildViolation('validate.project.duplicateResourceRequirementIDs')
                 ->addViolation();
-            return;
         }
 
-        if ($helper->hasResourceWithoutTask()) {
-            $context->buildViolation('validate.project.resourceWithoutTask')
+        if ($helper->hasResourceRequirementWithoutTask()) {
+            $context->buildViolation('validate.project.resourceRequirementWithoutTask')
                 ->addViolation();
-            return;
         }
     }
 }

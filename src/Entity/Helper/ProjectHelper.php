@@ -162,6 +162,28 @@ class ProjectHelper
         return false;
     }
 
+    public function hasTasksWithUnknownPackage(): bool
+    {
+        $tasks = $this->project->getTasks();
+        if ($tasks === null || count($tasks) === 0) {
+            return false;
+        }
+
+        $ids = $this->getWorkPackageIDs();
+        foreach($this->project->getTasks() as $task) {
+            if (empty($task['workPackage'])) {
+                continue;
+            }
+
+            // a workPackage is set but no longer exists -> fail
+            if (!in_array($task['workPackage'], $ids)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function hasWorkPackages() : bool
     {
         $wp = $this->project->getWorkPackages();
@@ -253,15 +275,15 @@ class ProjectHelper
         return false;
     }
 
-    public function hasResources() : bool
+    public function hasResourceRequirements() : bool
     {
-        $res = $this->project->getResources();
+        $res = $this->project->getResourceRequirements();
         return $res !== null && count($res) > 0;
     }
 
-    public function getResourceIDs(): array
+    public function getResourceRequirementIDs(): array
     {
-        $res = $this->project->getResources();
+        $res = $this->project->getResourceRequirements();
         if ($res === null || count($res) === 0) {
             return [];
         }
@@ -271,15 +293,15 @@ class ProjectHelper
         }, $res);
     }
 
-    public function hasDuplicateResourceIDs()
+    public function hasDuplicateResourceRequirementIDs()
     {
-        $ids = $this->getResourceIDs();
+        $ids = $this->getResourceRequirementIDs();
         return count(array_unique($ids)) !== count($ids);
     }
 
-    public function hasResourceWithoutTask()
+    public function hasResourceRequirementWithoutTask()
     {
-        $res = $this->project->getResources();
+        $res = $this->project->getResourceRequirements();
         if ($res === null || count($res) === 0) {
             return false;
         }

@@ -6,7 +6,7 @@ namespace App\Dto;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class ResourceInput
+class ResourceRequirementInput
 {
     public const COST_TYPE_ADMINISTRATIVE = 'administrative';
     public const COST_TYPE_INVESTMENT = 'investment';
@@ -33,12 +33,12 @@ class ResourceInput
      *
      * @Assert\Choice(
      *     choices={
-     *         ResourceInput::COST_TYPE_ADMINISTRATIVE,
-     *         ResourceInput::COST_TYPE_INVESTMENT,
-     *         ResourceInput::COST_TYPE_MATERIAL,
-     *         ResourceInput::COST_TYPE_PERSONNEL,
-     *         ResourceInput::COST_TYPE_RENT,
-     *         ResourceInput::COST_TYPE_TRAVELING
+     *         ResourceRequirementInput::COST_TYPE_ADMINISTRATIVE,
+     *         ResourceRequirementInput::COST_TYPE_INVESTMENT,
+     *         ResourceRequirementInput::COST_TYPE_MATERIAL,
+     *         ResourceRequirementInput::COST_TYPE_PERSONNEL,
+     *         ResourceRequirementInput::COST_TYPE_RENT,
+     *         ResourceRequirementInput::COST_TYPE_TRAVELING
      *     }
      * )
      * @Groups({"project:write"})
@@ -76,9 +76,9 @@ class ResourceInput
      *
      * @Assert\Choice(
      *     choices={
-     *         ResourceInput::SOURCE_TYPE_FUNDING,
-     *         ResourceInput::SOURCE_TYPE_OWN_FUNDS,
-     *         ResourceInput::SOURCE_TYPE_PROCEEDS,
+     *         ResourceRequirementInput::SOURCE_TYPE_FUNDING,
+     *         ResourceRequirementInput::SOURCE_TYPE_OWN_FUNDS,
+     *         ResourceRequirementInput::SOURCE_TYPE_PROCEEDS,
      *     }
      * )
      * @Groups({"project:write"})

@@ -122,12 +122,12 @@ class ProjectInput
     public ?int $planSelfAssessment = null;
 
     /**
-     * @var ResourceInput[]|null
+     * @var ResourceRequirementInput[]|null
      *
      * @Assert\Valid
      * @Groups({"project:write"})
      */
-    public ?array $resources = null;
+    public ?array $resourceRequirements = null;
 
     /**
      * @Groups({"project:write"})

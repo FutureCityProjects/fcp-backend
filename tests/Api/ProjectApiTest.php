@@ -5,7 +5,7 @@ namespace App\Tests\Api;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\TestFixtures;
-use App\Dto\ResourceInput;
+use App\Dto\ResourceRequirementInput;
 use App\Entity\Process;
 use App\Entity\Project;
 use App\Entity\ProjectMembership;
@@ -1249,14 +1249,14 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['id' => '123456', 'description' => 'description'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 [
                     'cost'        => 5,
-                    'costType'    => ResourceInput::COST_TYPE_INVESTMENT,
+                    'costType'    => ResourceRequirementInput::COST_TYPE_INVESTMENT,
                     'description' => 'short',
                     'id'          => 'abcdef',
                     'source'      => 'ich',
-                    'sourceType'  => ResourceInput::SOURCE_TYPE_OWN_FUNDS,
+                    'sourceType'  => ResourceRequirementInput::SOURCE_TYPE_OWN_FUNDS,
                     'task'        => '123456'
                 ],
             ],
@@ -1268,14 +1268,14 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['id' => '123456', 'description' => 'description'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 [
                     'cost'        => 5,
-                    'costType'    => ResourceInput::COST_TYPE_INVESTMENT,
+                    'costType'    => ResourceRequirementInput::COST_TYPE_INVESTMENT,
                     'description' => 'short',
                     'id'          => 'abcdef',
                     'source'      => 'ich',
-                    'sourceType'  => ResourceInput::SOURCE_TYPE_OWN_FUNDS,
+                    'sourceType'  => ResourceRequirementInput::SOURCE_TYPE_OWN_FUNDS,
                     'task'        => '123456'
                 ],
             ],
@@ -1473,7 +1473,7 @@ class ProjectApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(Project::class, ['id' => 2]);
         $client->request('PUT', $iri, ['json' => [
-            'resources' => [null],
+            'resourceRequirements' => [null],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -1484,8 +1484,8 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources[0].description: validate.general.notBlank'
-                ."\nresources[0].id: validate.general.notBlank",
+            'hydra:description' => 'resourceRequirements[0].description: validate.general.notBlank'
+                ."\nresourceRequirements[0].id: validate.general.notBlank",
         ]);
     }
 
@@ -1497,7 +1497,7 @@ class ProjectApiTest extends ApiTestCase
 
         $iri = $this->findIriBy(Project::class, ['id' => 2]);
         $client->request('PUT', $iri, ['json' => [
-            'resources' => [[null]],
+            'resourceRequirements' => [[null]],
         ]]);
 
         self::assertResponseStatusCodeSame(400);
@@ -1508,8 +1508,8 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources[0].description: validate.general.notBlank'
-                ."\nresources[0].id: validate.general.notBlank",
+            'hydra:description' => 'resourceRequirements[0].description: validate.general.notBlank'
+                ."\nresourceRequirements[0].id: validate.general.notBlank",
         ]);
     }
 
@@ -1524,7 +1524,7 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['description' => 'some text1', 'id' => '123456'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 ['id' => 'abcdef', 'task' => 'notfound', 'description' => 'some text'],
             ],
         ]]);
@@ -1537,7 +1537,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources: validate.project.resourceWithoutTask',
+            'hydra:description' => 'resourceRequirements: validate.project.resourceRequirementWithoutTask',
         ]);
     }
 
@@ -1552,7 +1552,7 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['description' => 'some text1', 'id' => '123456'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 ['id' => 'abcdef', 'task' => '123456', 'description' => 'some text'],
                 ['id' => 'abcdef', 'task' => '123456', 'description' => 'other text'],
             ],
@@ -1566,7 +1566,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources: validate.project.duplicateResourceIDs',
+            'hydra:description' => 'resourceRequirements: validate.project.duplicateResourceRequirementIDs',
         ]);
     }
 
@@ -1581,7 +1581,7 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['description' => 'some text1', 'id' => 'abcdef'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 ['id' => null, 'task' => 'abcdef', 'description' => 'description'],
                 ['id' => '', 'task' => 'abcdef', 'description' => 'description'],
             ],
@@ -1595,8 +1595,8 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources[0].id: validate.general.notBlank'
-                ."\nresources[1].id: validate.general.notBlank",
+            'hydra:description' => 'resourceRequirements[0].id: validate.general.notBlank'
+                ."\nresourceRequirements[1].id: validate.general.notBlank",
         ]);
     }
 
@@ -1611,7 +1611,7 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['id' => 'abcdef', 'description' => 'description']
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 ['id' => '223456', 'task' => 'abcdef'],
             ],
         ]]);
@@ -1624,7 +1624,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources[0].description: validate.general.notBlank',
+            'hydra:description' => 'resourceRequirements[0].description: validate.general.notBlank',
         ]);
     }
 
@@ -1639,7 +1639,7 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['description' => 'description', 'id' => '123456'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 ['description' => 'abcd', 'id' => '223456',
                     'task' => '123456'],
                 ['description' => '', 'id' => '323456',
@@ -1655,8 +1655,8 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources[0].description: validate.general.tooShort'
-                ."\nresources[1].description: validate.general.notBlank",
+            'hydra:description' => 'resourceRequirements[0].description: validate.general.tooShort'
+                ."\nresourceRequirements[1].description: validate.general.notBlank",
         ]);
     }
 
@@ -1671,7 +1671,7 @@ class ProjectApiTest extends ApiTestCase
             'tasks' => [
                 ['id' => 'abcdef', 'description' => 'testweise'],
             ],
-            'resources' => [
+            'resourceRequirements' => [
                 ['id' => 'defabc', 'description' => 'testweise',
                     'task' => 'abcdef', 'cost' => -1],
             ]
@@ -1685,7 +1685,7 @@ class ProjectApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'resources[0].cost: validate.general.outOfRange',
+            'hydra:description' => 'resourceRequirements[0].cost: validate.general.outOfRange',
         ]);
     }
 

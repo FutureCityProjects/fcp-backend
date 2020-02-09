@@ -892,7 +892,7 @@ class Project
     }
     //endregion
 
-    //region Resources
+    //region ResourceRequirements
     /**
      * @var array
      *
@@ -901,7 +901,7 @@ class Project
      * })
      * @Assert\NotBlank(allowNull=true)
      * @Assert\Callback(
-     *     callback={"App\Validator\ProjectValidator", "validateResources"}
+     *     callback={"App\Validator\ProjectValidator", "validateResourceRequirements"}
      * )
      * @Groups({
      *     "project:owner-read",
@@ -912,17 +912,17 @@ class Project
      * })
      * @ORM\Column(type="json", nullable=true)
      */
-    private ?array $resources = null;
+    private ?array $resourceRequirements = null;
 
-    public function getResources(): ?array
+    public function getResourceRequirements(): ?array
     {
-        return $this->resources;
+        return $this->resourceRequirements;
     }
 
-    public function setResources(array $resources): self
+    public function setResourceRequirements(array $resourceRequirements): self
     {
-        $this->resources = is_array($resources) && count($resources)
-            ? $resources
+        $this->resourceRequirements = is_array($resourceRequirements) && count($resourceRequirements)
+            ? $resourceRequirements
             : null;
 
         return $this;
