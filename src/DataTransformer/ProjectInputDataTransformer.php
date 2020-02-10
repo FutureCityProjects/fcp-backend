@@ -175,6 +175,10 @@ class ProjectInputDataTransformer implements DataTransformerInterface
             $project->setImpact($data->impact);
         }
 
+        if ($data->implementationBegin !== null) {
+            $project->setImplementationBegin($data->implementationBegin);
+        }
+
         if ($data->implementationTime !== null) {
             $project->setImplementationTime($data->implementationTime);
         }

@@ -560,6 +560,34 @@ class Project
     }
     //endregion
 
+    //region ImplementationBegin
+    /**
+     * @var DateTimeImmutable|null
+     *
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     */
+    private ?DateTimeImmutable $implementationBegin = null;
+
+    public function getImplementationBegin(): ?DateTimeImmutable
+    {
+        return $this->implementationBegin;
+    }
+
+    public function setImplementationBegin(?DateTimeImmutable $implementationBegin): self
+    {
+        $this->implementationBegin = $implementationBegin;
+
+        return $this;
+    }
+    //endregion
+
     //region ImplementationTime
     /**
      * @var int

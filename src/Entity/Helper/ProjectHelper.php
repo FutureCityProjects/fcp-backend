@@ -289,7 +289,7 @@ class ProjectHelper
         }
 
         return array_map(function ($resource) {
-            return $resource['task'] ?? null;
+            return $resource['id'] ?? null;
         }, $res);
     }
 

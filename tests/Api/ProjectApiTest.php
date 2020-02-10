@@ -914,12 +914,16 @@ class ProjectApiTest extends ApiTestCase
             'email' => TestFixtures::PROJECT_MEMBER['email']
         ]);
 
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+
         $iri = $this->findIriBy(Project::class,
             ['id' => TestFixtures::PROJECT['id']]);
         $client->request('PUT', $iri, ['json' => [
             'challenges'            => 'new challenges',
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
             'impact'                => [],
+            'implementationBegin'   => $now->format(\DateTimeInterface::ATOM),
+            'implementationTime'    => 7,
             'tasks'                 => null,
             'workPackages'          => null,
         ]]);
@@ -929,6 +933,8 @@ class ProjectApiTest extends ApiTestCase
             '@id'                   => $iri,
             'challenges'            => 'new challenges',
             'description'           => TestFixtures::PROJECT['description'],
+            'implementationBegin'   => $now->format(\DateTimeInterface::ATOM),
+            'implementationTime'    => 7,
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
             'goal'                  => TestFixtures::PROJECT['goal'],
             'impact'                => null
