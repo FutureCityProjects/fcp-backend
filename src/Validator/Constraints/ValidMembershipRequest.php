@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraint;
  */
 class ValidMembershipRequest extends Constraint
 {
-    public string $message = "Membership request is not valid.";
+    public string $message = "validate.projectMembership.invalidRequest";
 
     public function getTargets()
     {

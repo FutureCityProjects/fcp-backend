@@ -180,7 +180,7 @@ class ProjectMembershipApiTest extends ApiTestCase
         $userIri = $this->findIriBy(User::class,
             ['id' => TestFixtures::JUROR['id']]);
 
-        $response = $client->request('POST', '/project_memberships', ['json' => [
+        $client->request('POST', '/project_memberships', ['json' => [
             'motivation' => 'juror motivation with 20 characters',
             'project'    => $projectIRI,
             'role'       => ProjectMembership::ROLE_MEMBER,
@@ -467,8 +467,6 @@ class ProjectMembershipApiTest extends ApiTestCase
         $this->assertArrayNotHasKey('createdBy', $data['project']);
         $this->assertArrayNotHasKey('memberships', $data['project']);
         $this->assertArrayNotHasKey('applications', $data['project']);
-        // @todo should not return the projects full details including other
-        // memberships etc
     }
 
     public function testCreateForOtherUserFails()

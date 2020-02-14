@@ -956,6 +956,177 @@ class UserApiTest extends ApiTestCase
         ]);
     }
 
+    public function testRegistrationWithApplication(): void
+    {
+        $client = static::createClient();
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
+
+        $client->request('POST', '/users/register', ['json' => [
+            'username'      => 'Tester',
+            'email'         => 'new@zukunftsstadt.de',
+            'firstName'     => 'Peter',
+            'password'      => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+            'projectMemberships' => [
+                [
+                    'motivation' => 'I wanna do something',
+                    'project'    => $projectIri,
+                    'role'       => ProjectMembership::ROLE_APPLICANT,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(201);
+        self::assertResponseHeaderSame('content-type',
+            'application/ld+json; charset=utf-8');
+        self::assertMatchesResourceItemJsonSchema(User::class);
+
+        self::assertJsonContains([
+            '@context'           => '/contexts/User',
+            '@type'              => 'User',
+            'username'           => 'Tester',
+            'email'              => 'new@zukunftsstadt.de',
+            'firstName'          => 'Peter',
+            'projectMemberships' => [
+                [
+                    '@type'      => 'ProjectMembership',
+                    'motivation' => 'I wanna do something',
+                    'project'    => [
+                        '@id' => $projectIri,
+                    ],
+                    'role'       => ProjectMembership::ROLE_APPLICANT,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]);
+    }
+
+    public function testRegistrationWithApplicationFailsWithForbiddenRole(): void
+    {
+        $client = static::createClient();
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
+
+        $client->request('POST', '/users/register', ['json' => [
+            'username'      => 'Tester',
+            'email'         => 'new@zukunftsstadt.de',
+            'firstName'     => 'Peter',
+            'password'      => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+            'projectMemberships' => [
+                [
+                    'motivation' => 'I wanna do something',
+                    'project'    => $projectIri,
+                    'role'       => ProjectMembership::ROLE_OWNER,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validate.projectMembership.invalidRequest',
+        ]);
+    }
+
+    public function testRegistrationWithApplicationFailsForIdea(): void
+    {
+        $client = static::createClient();
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::IDEA['id']]);
+
+        $client->request('POST', '/users/register', ['json' => [
+            'username'      => 'Tester',
+            'email'         => 'new@zukunftsstadt.de',
+            'firstName'     => 'Peter',
+            'password'      => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+            'projectMemberships' => [
+                [
+                    'motivation' => 'I wanna do something',
+                    'project'    => $projectIri,
+                    'role'       => ProjectMembership::ROLE_APPLICANT,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertJsonContains([
+            '@context'          => '/contexts/ConstraintViolationList',
+            '@type'             => 'ConstraintViolationList',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'validate.projectMembership.invalidRequest',
+        ]);
+    }
+
+    public function testRegistrationWithApplicationFailsForLockedProject(): void
+    {
+        $client = static::createClient();
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::LOCKED_PROJECT['id']]);
+
+        $client->request('POST', '/users/register', ['json' => [
+            'username'      => 'Tester',
+            'email'         => 'new@zukunftsstadt.de',
+            'firstName'     => 'Peter',
+            'password'      => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+            'projectMemberships' => [
+                [
+                    'motivation' => 'I wanna do something',
+                    'project'    => $projectIri,
+                    'role'       => ProjectMembership::ROLE_APPLICANT,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Item not found for "/projects/3".',
+        ]);
+    }
+
+    public function testRegistrationWithApplicationFailsForDeletedProject(): void
+    {
+        $client = static::createClient();
+        $projectIri = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::DELETED_PROJECT['id']]);
+
+        $client->request('POST', '/users/register', ['json' => [
+            'username'      => 'Tester',
+            'email'         => 'new@zukunftsstadt.de',
+            'firstName'     => 'Peter',
+            'password'      => 'irrelevant',
+            'validationUrl' => 'https://vrok.de/?token={{token}}&id={{id}}&type={{type}}',
+            'projectMemberships' => [
+                [
+                    'motivation' => 'I wanna do something',
+                    'project'    => $projectIri,
+                    'role'       => ProjectMembership::ROLE_APPLICANT,
+                    'skills'     => 'I can do it',
+                ],
+            ],
+        ]]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertJsonContains([
+            '@context'          => '/contexts/Error',
+            '@type'             => 'hydra:Error',
+            'hydra:title'       => 'An error occurred',
+            'hydra:description' => 'Item not found for "/projects/4".',
+        ]);
+    }
+
     public function testUpdate(): void
     {
         $client = static::createAuthenticatedClient([

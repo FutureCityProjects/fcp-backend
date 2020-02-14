@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
+use App\Entity\ProjectMembership;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -83,6 +84,17 @@ class UserInput
      * @Groups({"user:register"})
      */
     public array $createdProjects = [];
+
+    /**
+     * @var ProjectMembership[]
+     *
+     * @Assert\All({
+     *     @Assert\NotBlank,
+     *     @Assert\Type(type=ProjectMembership::class)
+     * })
+     * @Groups({"user:register"})
+     */
+    public array $projectMemberships = [];
 
     /**
      * @var string

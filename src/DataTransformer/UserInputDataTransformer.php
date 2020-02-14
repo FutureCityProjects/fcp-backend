@@ -102,6 +102,14 @@ class UserInputDataTransformer implements DataTransformerInterface,
             $user->addCreatedProject($project);
         }
 
+        foreach($data->projectMemberships as $membership) {
+            $user->addProjectMembership($membership);
+
+            // validate only after the user was set, to distinguish from
+            // a project creation with a owner membership
+            $this->validator()->validate($membership, $context);
+        }
+
         return $user;
     }
 

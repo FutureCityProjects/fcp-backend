@@ -8,6 +8,7 @@ use App\Validator\Constraints as AppAssert;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -19,7 +20,10 @@ use Symfony\Component\Validator\Constraints as Assert;
  * should not be used.
  *
  * @ApiResource(
- *     attributes={"security"="is_granted('ROLE_USER')"},
+ *     attributes={
+ *         "security"="is_granted('ROLE_USER')",
+ *         "force_eager"=false,
+ *     },
  *     collectionOperations={
  *         "post"={
  *             "security"="is_granted('ROLE_USER')",
@@ -53,6 +57,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @AppAssert\ValidMembershipRequest(groups={"projectMembership:create"})
  * @AppAssert\ValidMembershipUpdate(groups={"projectMembership:write"})
+ *
+ * @todo auch die einzelnen Validatoren im ProjectMembershipValidator zusammenführen?
+ * @Assert\Callback(
+ *     groups={"user:register"},
+ *     callback={"App\Validator\ProjectMembershipValidator", "validateRegistration"}
+ * )
  * @ORM\Entity
  * @UniqueEntity(fields={"project", "user"}, message="Duplicate membership found.")
  */
@@ -73,7 +83,8 @@ class ProjectMembership
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
-     *     "user:read"
+     *     "user:read",
+     *     "user:register",
      * })
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
@@ -98,8 +109,10 @@ class ProjectMembership
      * @Groups({
      *     "projectMembership:read",
      *     "projectMembership:create",
-     *     "user:read"
+     *     "user:read",
+     *     "user:register",
      * })
+     * @MaxDepth(1)
      * @ORM\Id
      * @ORM\ManyToOne(targetEntity="Project", inversedBy="memberships")
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
@@ -133,7 +146,8 @@ class ProjectMembership
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
-     *     "user:read"
+     *     "user:read",
+     *     "user:register",
      * })
      * @ORM\Column(type="string", length=50, nullable=false)
      */
@@ -162,7 +176,8 @@ class ProjectMembership
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
-     *     "user:read"
+     *     "user:read",
+     *     "user:register",
      * })
      * @ORM\Column(type="text", length=1000, nullable=false)
      */
@@ -190,7 +205,8 @@ class ProjectMembership
      *     "project:read",
      *     "projectMembership:read",
      *     "projectMembership:write",
-     *     "user:read"
+     *     "user:read",
+     *     "user:register",
      * })
      * @ORM\Column(type="text", length=1000, nullable=true)
      */
@@ -223,6 +239,7 @@ class ProjectMembership
      *     "projectMembership:create",
      *     "projectMembership:read"
      * })
+     * @MaxDepth(2)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="NONE")
      * @ORM\ManyToOne(targetEntity="User", inversedBy="projectMemberships")

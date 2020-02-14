@@ -678,7 +678,6 @@ class Project
      *     "project:member-read",
      *     "project:po-read",
      *     "project:admin-read",
-     *     "user:register"
      * })
      * @MaxDepth(2)
      * @ORM\OneToMany(

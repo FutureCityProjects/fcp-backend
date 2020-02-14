@@ -107,7 +107,7 @@ class ProjectInput
     public ?array $impact = null;
 
     /**
-     * @var \DateTimeImmutable
+     * @var \DateTimeImmutable|null
      * @Groups({"project:write"})
      */
     public ?\DateTimeImmutable $implementationBegin = null;
