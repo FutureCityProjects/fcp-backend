@@ -33,6 +33,9 @@ trait UpdatedAtFunctions
      */
     public function getUpdatedAt(): ?DateTimeImmutable
     {
+        if (!$this->updatedAt && !empty($this->createdAt)) {
+            return $this->createdAt;
+        }
         return $this->updatedAt;
     }
 }

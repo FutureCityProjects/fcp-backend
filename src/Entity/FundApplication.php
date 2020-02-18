@@ -420,6 +420,31 @@ class FundApplication
     }
     //endregion
 
+    //region SubmissionData
+    /**
+     * @var array|null
+     *
+     * @Groups({
+     *     "project:read",
+     *     "fundApplication:read",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $submissionData = null;
+
+    public function getSubmissionData(): ?array
+    {
+        return $this->submissionData;
+    }
+
+    public function setSubmissionData(?array $submissionData): self
+    {
+        $this->submissionData = $submissionData;
+
+        return $this;
+    }
+    //endregion
+
     /**
      * Constructor
      */

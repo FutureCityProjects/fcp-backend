@@ -1167,7 +1167,7 @@ class Project
      * @Assert\NotBlank(allowNull=true)
      * @Groups({"project:read"})
      * @Gedmo\Timestampable(on="update")
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime_immutable", nullable=true)
      */
     protected ?DateTimeImmutable $updatedAt = null;
 
