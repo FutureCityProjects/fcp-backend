@@ -1,4 +1,6 @@
 # Anstehend
+* rename process-owner -> process-manager in source + command + role
+* add-user automatisch validiert erstellen
 * testen: budget/min/max werden auf null gesetzt bei 0
 * testen: autotrim?
 * Fund nicht bearbeiten lassen wenn aktiv

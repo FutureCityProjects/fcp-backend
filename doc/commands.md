@@ -1,6 +1,10 @@
 # Installation / Configuration
+* create messenger table
+  `./bin/console messenger:setup-transports`
 * create new (admin) user  
-  `php bin/console app:add-user [email] [password] [--admin]`
+  `./bin/console app:add-user [username] [email] [password] [--admin]`
+* create new process-manager  
+  `./bin/console app:add-user [username] [email] [password] --process-owner`
 * create keys for JWT auth  
   `openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096`
   `openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout`
