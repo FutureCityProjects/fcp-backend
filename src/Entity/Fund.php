@@ -483,7 +483,7 @@ class Fund
      * @var string
      *
      * @Assert\NotBlank(allowNull=false, normalizer="trim")
-     * @Groups({"elastica", "fund:read", "fund:write"})
+     * @Groups({"elastica", "fund:read", "fund:write", "process:read"})
      * @ORM\Column(type="string", length=255, nullable=false)
      */
     private ?string $name = null;
@@ -613,13 +613,13 @@ class Fund
     /**
      * @var string
      *
-     * @Groups({"fund:read", "fund:update"})
      * @Assert\Choice(
      *     choices={
      *         Fund::STATE_ACTIVE,
      *         Fund::STATE_INACTIVE
      *     }
      * )
+     * @Groups({"fund:read", "fund:update", "process:read"})
      * @ORM\Column(type="string", length=50, nullable=false, options={"default":"inactive"})
      */
     private $state = self::STATE_INACTIVE;

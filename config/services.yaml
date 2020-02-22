@@ -6,8 +6,10 @@
 parameters:
     env(MERCURE_PUBLISH_URL): ''
     env(MERCURE_JWT_SECRET): ''
+    env(USER_VALIDATION_REQUIRED): 'true'
     locale: 'de'
     monitor.ping_receiver: "%env(MONITOR_ADDRESS)%"
+    user.validation_required: "%env(bool:USER_VALIDATION_REQUIRED)%"
 
 services:
     # default configuration for services in *this* file

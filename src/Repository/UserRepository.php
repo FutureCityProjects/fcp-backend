@@ -43,8 +43,8 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
 
     /**
      * For the UserLoaderInterface: This allows us to login the user via his
-     * username or email, the method is automatically by Symfony when the key
-     * security.providers.app_user_provider.entity.property is NOT set. This
+     * username or email, the method is automatically called by Symfony when the
+     * key security.providers.app_user_provider.entity.property is NOT set. This
      * replaces the need for a custom GuardAuthenticator. All other checks for
      * the user are done in our own Security\UserChecker.
      *

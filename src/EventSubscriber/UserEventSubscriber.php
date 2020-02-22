@@ -7,23 +7,17 @@ use App\Event\UserRegisteredEvent;
 use App\Message\UserRegisteredMessage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Symfony\Contracts\Service\ServiceSubscriberTrait;
 
 /**
  * Listens to different events regarding users, to push necessary tasks to the
  * message queue for asynchronous execution.
  */
-class UserEventSubscriber implements EventSubscriberInterface
+class UserEventSubscriber
+    implements EventSubscriberInterface, ServiceSubscriberInterface
 {
-    /**
-     * @var MessageBusInterface
-     */
-    private $bus;
-
-    /**
-     * @var Security
-     */
-    private Security $security;
+    use ServiceSubscriberTrait;
 
     /**
      * {@inheritDoc}
@@ -35,12 +29,6 @@ class UserEventSubscriber implements EventSubscriberInterface
                 ['onApiUserCreated', 100],
             ],
         ];
-    }
-
-    public function __construct(MessageBusInterface $bus, Security $security)
-    {
-        $this->bus = $bus;
-        $this->security = $security;
     }
 
     /**
@@ -55,8 +43,13 @@ class UserEventSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $this->bus->dispatch(
+        $this->messageBus()->dispatch(
             new UserRegisteredMessage($event->user->getId(), $event->validationUrl)
         );
+    }
+
+    private function messageBus(): MessageBusInterface
+    {
+        return $this->container->get(__METHOD__);
     }
 }

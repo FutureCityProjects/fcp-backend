@@ -7,6 +7,7 @@ use ApiPlatform\Core\Validator\ValidatorInterface;
 use App\Entity\User;
 use App\Event\UserRegisteredEvent;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -17,11 +18,17 @@ class UserRegistrationAction
         User $data,
         EventDispatcherInterface $dispatcher,
         ManagerRegistry $registry,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        ParameterBagInterface $parameterBag
     ) {
         // we have to manually validate the entity,
         // the DTO was validated by the DataTransformer
         $validator->validate($data, ['groups' => ['Default', 'user:register']]);
+
+        // allow to skip validation via env configuration
+        if (!$parameterBag->get('user.validation_required')) {
+            $data->setIsValidated(true);
+        }
 
         // save the user, we need his ID for the UserRegisteredEvent/-Message
         $entityManager = $registry->getManagerForClass(User::class);
