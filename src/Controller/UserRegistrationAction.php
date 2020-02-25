@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use ApiPlatform\Core\Validator\ValidatorInterface;
+use App\Entity\Project;
 use App\Entity\User;
 use App\Event\UserRegisteredEvent;
 use Doctrine\Persistence\ManagerRegistry;
@@ -28,6 +29,12 @@ class UserRegistrationAction
         // allow to skip validation via env configuration
         if (!$parameterBag->get('user.validation_required')) {
             $data->setIsValidated(true);
+
+            // new projects are per default set to inactive by the
+            // dataTransformer, change now:
+            foreach($data->getCreatedProjects() as $project) {
+                $project->setState(Project::STATE_ACTIVE);
+            }
         }
 
         // save the user, we need his ID for the UserRegisteredEvent/-Message
