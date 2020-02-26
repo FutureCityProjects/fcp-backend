@@ -64,7 +64,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     callback={"App\Validator\ProjectMembershipValidator", "validateRegistration"}
  * )
  * @ORM\Entity
- * @UniqueEntity(fields={"project", "user"}, message="valitdate.projectMembership.duplicateMembership")
+ * @UniqueEntity(fields={"project", "user"}, message="validate.projectMembership.duplicateMembership")
  */
 class ProjectMembership
 {
