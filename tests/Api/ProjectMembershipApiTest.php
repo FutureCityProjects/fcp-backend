@@ -423,7 +423,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'project: Duplicate membership found.',
+            'hydra:description' => 'project: validate.projectMembership.duplicateMembership',
         ]);
     }
 
@@ -496,7 +496,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Membership request is not valid.',
+            'hydra:description' => 'validate.projectMembership.invalidRequest',
         ]);
     }
 
@@ -527,7 +527,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Membership request is not valid.',
+            'hydra:description' => 'validate.projectMembership.invalidRequest',
         ]);
     }
 
@@ -565,7 +565,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Membership request is not valid.',
+            'hydra:description' => 'validate.projectMembership.invalidRequest',
         ]);
     }
 
@@ -660,7 +660,7 @@ class ProjectMembershipApiTest extends ApiTestCase
             '@context'          => '/contexts/ConstraintViolationList',
             '@type'             => 'ConstraintViolationList',
             'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Membership request is not valid.',
+            'hydra:description' => 'validate.projectMembership.invalidRequest',
         ]);
     }
 

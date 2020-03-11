@@ -202,6 +202,9 @@
     "nikic/php-parser": {
         "version": "v4.2.3"
     },
+    "ocramius/package-versions": {
+        "version": "1.7.0"
+    },
     "phar-io/manifest": {
         "version": "1.0.3"
     },
@@ -260,6 +263,9 @@
         "version": "1.0.1"
     },
     "psr/container": {
+        "version": "1.0.0"
+    },
+    "psr/event-dispatcher": {
         "version": "1.0.0"
     },
     "psr/link": {
@@ -349,9 +355,6 @@
     },
     "symfony/css-selector": {
         "version": "v4.3.5"
-    },
-    "symfony/debug": {
-        "version": "v4.3.3"
     },
     "symfony/debug-bundle": {
         "version": "4.1",
