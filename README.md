@@ -2,6 +2,10 @@
 PHP backend providing the REST API for the FCP platform.  
 It uses Symfony / API Platform to provide a JSON-LD/Hydra based API to expose all functionality, usable by any client.
 
+* [Setup](doc/setup.md)
+* [Commands](doc/commands.md)
+* [Dependencies](doc/dependencies.md)
+
 ## Supported by
 The project is a finalist of the [PrototypeFund Round 6](https://prototypefund.de/projects/round-6/ "Prototypefund Website"), see https://prototypefund.de/project/future-city-projects/ for details.
 

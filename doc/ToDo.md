@@ -52,7 +52,6 @@
       not supported / updated anymore?
         * FOSElastica setup: https://hugo-soltys.com/blog/autocomplete-search-with-elasticsearch-and-symfony-4
 * PHP 7.4 preload
-* SF 5.0
 * Token refresh via refresh token stored in httponly samesite cookie 
 
 # Postponed
