@@ -51,7 +51,6 @@
     * use https://github.com/FriendsOfSymfony/FOSElasticaBundle or
       not supported / updated anymore?
         * FOSElastica setup: https://hugo-soltys.com/blog/autocomplete-search-with-elasticsearch-and-symfony-4
-* PHP 7.4 preload
 * Token refresh via refresh token stored in httponly samesite cookie 
 
 # Postponed

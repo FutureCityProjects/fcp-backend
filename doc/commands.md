@@ -52,3 +52,8 @@
   `php bin/console config:dump-reference [framework|debug|...]`
 * Aktuelle eigene Config anzeigen  
   `php bin/console debug:config [framework|debug|...]`
+
+# Deployment
+
+* `bin/console cache:clear`
+* `composer dump-autoload --no-dev --classmap-authoritative`

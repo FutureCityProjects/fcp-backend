@@ -17,6 +17,8 @@
         "symfony/mailer": "5.0.*",
         "symfony/mercure-bundle": "*",
         "symfony/messenger": "5.0.*",
+        "symfony/monolog-bundle": "^3.5",
+        "symfony/stopwatch": "5.0.*",
         "symfony/translation": "5.0.*",
         "symfony/validator": "5.0.*",
         "symfony/yaml": "5.0.*",

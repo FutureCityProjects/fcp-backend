@@ -3,6 +3,9 @@
   slugs, creation date etc for our entities, use instead of
   stof/doctrine-extensions-bundle for Symfony 4+ compatibility
 * lexik/jwt-authentication-bundle - JWT generation & handling for api platform
+* symfony/monolog-bundle and symfony/stopwatch are installed automatically by @todo,
+  but using composer to generate a no-dev classmap excludes the corresponding
+  classes while they are still used -> added to the required packages
 * tuupola/base62 - to generate tokens with [A-Za-z0-9] instead of hex chars to
   reduce URL length
 * twig/extensions - for localizedDate in templates etc.

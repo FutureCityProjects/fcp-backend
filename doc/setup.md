@@ -145,3 +145,17 @@ server {
     }
 }
 ```
+
+## Optimizing php.ini
+```
+; symfony performance guide
+opcache.memory_consumption = 256
+opcache.max_accelerated_files = 20000
+realpath_cache_size = 4096K
+realpath_cache_ttl = 600
+
+; for production
+opcache.validate_timestamps = 0
+opcache.preload = /var/www/html/var/cache/prod/App_KernelProdContainer.preload.php
+opcache.preload_user = www-data
+```
