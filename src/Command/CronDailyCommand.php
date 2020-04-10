@@ -17,12 +17,12 @@ class CronDailyCommand extends Command
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    private LoggerInterface $logger;
 
     /**
      * @var EventDispatcherInterface
      */
-    private $dispatcher;
+    private EventDispatcherInterface $dispatcher;
 
     public function __construct(LoggerInterface $logger, EventDispatcherInterface $dispatcher)
     {
@@ -32,15 +32,17 @@ class CronDailyCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setDescription('Calls all event subscribers listening '
             .'to the "cron.daily" event. To be called via crontab automatically.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->logger->info('Running CronDailyEvent');
         $this->dispatcher->dispatch(new CronDailyEvent());
+
+        return 0;
     }
 }
