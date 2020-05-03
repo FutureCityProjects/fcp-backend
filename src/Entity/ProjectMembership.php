@@ -5,6 +5,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Validator\Constraints as AppAssert;
+use App\Validator\NormalizerHelper;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -49,7 +50,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  *         "swagger_definition_name"="Read"
  *     },
  *     denormalizationContext={
- *         "allow_extra_attributes"=false,
  *         "groups"={"default:write", "projectMembership:write"},
  *         "swagger_definition_name"="Write"
  *     }
@@ -97,7 +97,11 @@ class ProjectMembership
 
     public function setMotivation(?string $motivation): self
     {
-        $this->motivation = trim($motivation);
+        if (NormalizerHelper::getTextLength($motivation) === 0) {
+            $this->motivation = null;
+        } else {
+            $this->motivation = trim($motivation);
+        }
 
         return $this;
     }
@@ -190,7 +194,11 @@ class ProjectMembership
 
     public function setSkills(?string $skills): self
     {
-        $this->skills = trim($skills);
+        if (NormalizerHelper::getTextLength($skills) === 0) {
+            $this->skills = null;
+        } else {
+            $this->skills = trim($skills);
+        }
 
         return $this;
     }
@@ -219,7 +227,11 @@ class ProjectMembership
 
     public function setTasks(?string $tasks): self
     {
-        $this->tasks = trim($tasks);
+        if (NormalizerHelper::getTextLength($tasks) === 0) {
+            $this->tasks = null;
+        } else {
+            $this->tasks = trim($tasks);
+        }
 
         return $this;
     }

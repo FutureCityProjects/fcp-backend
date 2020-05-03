@@ -894,6 +894,8 @@ class ProjectMembershipApiTest extends ApiTestCase
         ]);
 
         $projectIRI = $this->findIriBy(Project::class,
+            ['id' => TestFixtures::PROJECT['id']]);
+        $newProjectIRI = $this->findIriBy(Project::class,
             ['id' => TestFixtures::LOCKED_PROJECT['id']]);
         $membershipIRI = $this->findIriBy(ProjectMembership::class, [
             'project' => TestFixtures::PROJECT['id'],
@@ -902,19 +904,18 @@ class ProjectMembershipApiTest extends ApiTestCase
 
         $client->request('PUT', $membershipIRI, ['json' => [
             'role'       => ProjectMembership::ROLE_MEMBER,
-            'skills'     => 'new skills',
-            'project'    => $projectIRI,
+            'skills'     => 'new skills and project',
+            'project'    => $newProjectIRI,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
+        self::assertResponseIsSuccessful();
 
+        // skills got updated but project didn't
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("project" are unknown).',
+            'skills'     => 'new skills and project',
+            'project'    => [
+                '@id' => $projectIRI
+            ],
         ]);
     }
 
@@ -924,28 +925,29 @@ class ProjectMembershipApiTest extends ApiTestCase
             'email' => TestFixtures::PROCESS_OWNER['email']
         ]);
 
+        $memberIri = $this->findIriBy(User::class,
+            ['id' => TestFixtures::PROJECT_MEMBER['id']]);
         $userIri = $this->findIriBy(User::class,
             ['id' => TestFixtures::JUROR['id']]);
         $membershipIRI = $this->findIriBy(ProjectMembership::class, [
             'project' => TestFixtures::PROJECT['id'],
-            'user' => TestFixtures::PROJECT_MEMBER['id'],
+            'user'    => TestFixtures::PROJECT_MEMBER['id'],
         ]);
 
         $client->request('PUT', $membershipIRI, ['json' => [
             'role'       => ProjectMembership::ROLE_MEMBER,
-            'skills'     => 'new skills',
+            'skills'     => 'new skills and user',
             'user'       => $userIri,
         ]]);
 
-        self::assertResponseStatusCodeSame(400);
-        self::assertResponseHeaderSame('content-type',
-            'application/ld+json; charset=utf-8');
+        self::assertResponseIsSuccessful();
 
+        // skills got updated but user didn't
         self::assertJsonContains([
-            '@context'          => '/contexts/Error',
-            '@type'             => 'hydra:Error',
-            'hydra:title'       => 'An error occurred',
-            'hydra:description' => 'Extra attributes are not allowed ("user" are unknown).',
+            'skills'     => 'new skills and user',
+            'user'       => [
+                '@id' => $memberIri
+            ],
         ]);
     }
 

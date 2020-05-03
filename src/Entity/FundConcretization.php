@@ -97,7 +97,11 @@ class FundConcretization
 
     public function setDescription(?string $description): self
     {
-        $this->description = trim($description);
+        if (NormalizerHelper::getTextLength($description) === 0) {
+            $this->description = null;
+        } else {
+            $this->description = trim($description);
+        }
 
         return $this;
     }
