@@ -9,6 +9,7 @@ use App\Entity\Process;
 use App\Entity\Project;
 use App\Entity\User;
 use App\Entity\Validation;
+use App\Message\UserValidatedMessage;
 use App\PHPUnit\AuthenticatedClientTrait;
 use App\PHPUnit\RefreshDatabaseTrait;
 use DateTimeImmutable;
@@ -201,6 +202,13 @@ class ValidationApiTest extends ApiTestCase
         $this->assertCount(1, $after->getCreatedProjects());
         $this->assertSame(Project::STATE_ACTIVE,
             $after->getCreatedProjects()[0]->getState());
+
+        // a message was pushed to the bus, to notify process owners
+        $messenger = self::$container->get('messenger.default_bus');
+        $messages = $messenger->getDispatchedMessages();
+        $this->assertCount(1, $messages);
+        $this->assertInstanceOf(UserValidatedMessage::class,
+            $messages[0]['message']);
     }
 
     public function testConfirmPasswordReset(): void

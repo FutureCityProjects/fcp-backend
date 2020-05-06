@@ -1,0 +1,16 @@
+{% extends 'layout/mail.html.twig' %}
+{% block mail_subject %}Neues Benutzerkonto bestätigt{% endblock %}
+{% block mail_body %}
+    <h1>Hallo!</h1>
+    <p>
+        Soeben hat ein neuer Benutzer seine Email-Adresse bestätigt:
+    </p>
+    <ul>
+        <li>
+            Benutzername: {{ username }}
+        </li>
+        <li>
+            Email: {{ useremail }}
+        </li>
+    </ul>
+{% endblock %}

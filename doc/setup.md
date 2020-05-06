@@ -92,9 +92,9 @@ Setup in docker-compose.yaml
 * create empty database & db-user 
 * clone the repository to /var/www/your-vhost/application-dir
 * create the .env.local
-** configure the mailer + database connection
+  * configure the mailer + database connection
 * for production: create the JWT keys (see commands.md)
-** set the passphrase used in .env.local
+  * set the passphrase used in .env.local
 * `composer install` (inside or outside of the container)
 * inside the container: `./bin/console doctrine:schema:update --force` to
   create the tables

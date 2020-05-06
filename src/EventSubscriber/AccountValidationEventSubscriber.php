@@ -8,9 +8,11 @@ use App\Entity\User;
 use App\Entity\Validation;
 use App\Event\ValidationConfirmedEvent;
 use App\Event\ValidationExpiredEvent;
+use App\Message\UserValidatedMessage;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
@@ -60,6 +62,12 @@ class AccountValidationEventSubscriber
 
         // set validated flag
         $user->setIsValidated(true);
+
+        // send a message to the queue to trigger additional async actions,
+        // e.g. notifying the process owner
+        $this->messageBus()->dispatch(
+            new UserValidatedMessage($user->getId())
+        );
 
         // no need to flush or remove the validation, this is done by the
         // event trigger.
@@ -147,6 +155,11 @@ class AccountValidationEventSubscriber
     }
 
     private function entityManager(): EntityManagerInterface
+    {
+        return $this->container->get(__METHOD__);
+    }
+
+    private function messageBus(): MessageBusInterface
     {
         return $this->container->get(__METHOD__);
     }
