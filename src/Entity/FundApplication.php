@@ -277,7 +277,7 @@ class FundApplication
      * })
      * @ORM\Column(type="text", length=65535, nullable=true)
      */
-    private $juryComment;
+    private $juryComment = null;
 
     public function getJuryComment(): ?string
     {
@@ -286,7 +286,11 @@ class FundApplication
 
     public function setJuryComment(?string $juryComment): self
     {
-        $this->juryComment = $juryComment;
+        if (NormalizerHelper::getTextLength($juryComment) === 0) {
+            $this->juryComment = null;
+        } else {
+            $this->juryComment = trim($juryComment);
+        }
 
         return $this;
     }
