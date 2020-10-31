@@ -8,9 +8,9 @@ services:
       MYSQL_DATABASE: fcp_test
       MYSQL_USER: fcp_test
       MYSQL_PASSWORD: fcp_test
-  php:
+  php-fccp:
     build: php
-    container_name: php
+    container_name: php-fccp
     links:
       - mysql
     volumes:

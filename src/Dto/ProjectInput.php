@@ -82,6 +82,14 @@ class ProjectInput
      * @Groups({"project:write"})
      */
     public ?string $vision = null;
+
+    /**
+     * @var ClimateImpactInput|null
+     *
+     * @Assert\Valid
+     * @Groups({"project:write"})
+     */
+    public ?ClimateImpactInput $climateImpact = null;
     //endregion
 
     //region Project creation

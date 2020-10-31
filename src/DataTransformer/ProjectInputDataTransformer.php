@@ -167,6 +167,10 @@ class ProjectInputDataTransformer implements DataTransformerInterface
         if ($data->vision !== null) {
             $project->setVision($data->vision);
         }
+
+        if ($data->climateImpact !== null) {
+            $project->setClimateImpact((array)$data->climateImpact);
+        }
     }
 
     protected function setPlanData(ProjectInput $data, Project $project)

@@ -926,6 +926,23 @@ class ProjectApiTest extends ApiTestCase
             'implementationTime'    => 7,
             'tasks'                 => null,
             'workPackages'          => null,
+            'climateImpact'         => [
+                'emissionAvoidance'                 => 'we avoid emissions',
+                'changeAdaption'                    => 'we adapt to climate change',
+                'collaborationImplementation'       => 'we use collaboration',
+                'resourceUsageReduction'            => true,
+                'usingRenewableResources'           => true,
+                'reducingFossilMobility'            => false,
+                'adaptingFoodSources'               => false,
+                'adaptingPostFossilFinances'        => true,
+                'preparingForExtremeWeather'        => true,
+                'adaptingResilientBusinessModels'   => false,
+                'supportingClimateRelevantPolitics' => false,
+                'educatingClimateKnowledge'         => true,
+                'educatingClimateEmpowerment'       => true,
+                'supportingCollaboration'           => false,
+                'otherClimateImpacts'               => false,
+            ],
         ]]);
 
         self::assertResponseIsSuccessful();
@@ -937,7 +954,24 @@ class ProjectApiTest extends ApiTestCase
             'implementationTime'    => 7,
             'profileSelfAssessment' => Project::SELF_ASSESSMENT_100_PERCENT,
             'goal'                  => TestFixtures::PROJECT['goal'],
-            'impact'                => null
+            'impact'                => null,
+            'climateImpact'         => [
+                'emissionAvoidance'                 => 'we avoid emissions',
+                'changeAdaption'                    => 'we adapt to climate change',
+                'collaborationImplementation'       => 'we use collaboration',
+                'resourceUsageReduction'            => true,
+                'usingRenewableResources'           => true,
+                'reducingFossilMobility'            => false,
+                'adaptingFoodSources'               => false,
+                'adaptingPostFossilFinances'        => true,
+                'preparingForExtremeWeather'        => true,
+                'adaptingResilientBusinessModels'   => false,
+                'supportingClimateRelevantPolitics' => false,
+                'educatingClimateKnowledge'         => true,
+                'educatingClimateEmpowerment'       => true,
+                'supportingCollaboration'           => false,
+                'otherClimateImpacts'               => false,
+            ],
         ]);
     }
 

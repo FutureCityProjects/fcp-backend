@@ -180,6 +180,37 @@ class Project
     }
     //endregion
 
+    //region ClimateImpact
+    /**
+     * @var array
+     *
+     * @Assert\NotBlank(allowNull=true)
+     * @Groups({
+     *     "project:owner-read",
+     *     "project:member-read",
+     *     "project:po-read",
+     *     "project:admin-read",
+     *     "project:write",
+     * })
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private ?array $climateImpact = null;
+
+    public function getClimateImpact(): ?array
+    {
+        return $this->climateImpact;
+    }
+
+    public function setClimateImpact(array $climateImpact): self
+    {
+        $this->climateImpact = is_array($climateImpact) && count($climateImpact)
+            ? $climateImpact
+            : null;
+
+        return $this;
+    }
+    //endregion
+
     //region ContactEmail
     /**
      * @var string
